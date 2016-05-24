@@ -1,0 +1,9 @@
+<html>
+<body>
+<ul>
+{% for _, user in ipairs(users) do %}
+    <li>User {{user.name}} is of age {{user.age}}</li>
+{% end %}
+</ul>
+</body>
+</html>
