@@ -1,6 +1,6 @@
 worker_processes  1;
 error_log  logs/error.log  error;
-pid nginx.pid;
+pid logs/nginx.pid;
 
 events {
     worker_connections  1024;
