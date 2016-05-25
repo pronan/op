@@ -1,0 +1,73 @@
+worker_processes  1;
+error_log  logs/error.log  error;
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  "text/html; charset=UTF-8";
+
+    access_log  off;
+    sendfile        on;
+    keepalive_timeout  65;
+    lua_package_path '${prefix}lib/?.lua;;';
+
+    init_by_lua_block{
+        template=require"lib.template"
+        encode=require"cjson".encode
+    }
+
+    server {
+        listen       3000;
+        server_name  127.0.0.1;
+
+        location / {
+            root   html;
+            content_by_lua_block{
+                local template=template
+                local users = {
+                    { name = "项楠", age = 29 },
+                    { name = "pjlx", age = 25 }, 
+                }
+                template.render("app/home.html", {users=users})
+            }
+        }
+
+        location = /json {
+            default_type "application/json";
+            content_by_lua_block{
+                local encode=encode
+                ngx.say(encode{ name = "xxxx", age = 29 })
+            }
+        }
+
+        location = /favicon.ico {
+            alias images/favicon.ico;
+        }
+
+        location /images {
+            alias images;
+        }
+
+        location /js {
+            alias js;
+        }
+
+        location /css {
+            alias css;
+        }
+
+       
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+
+    }
+
+
+ 
+}

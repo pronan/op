@@ -166,3 +166,7 @@ coroutine 0:
 2016/05/25 09:54:11 [notice] 7376#32: signal process started
 2016/05/25 10:00:49 [warn] 10660#11212: "user" is not supported, ignored in ./conf/nginx.conf:1
 2016/05/25 10:00:49 [warn] 7792#9344: "user" is not supported, ignored in ./conf/nginx.conf:1
+2016/05/25 11:03:41 [emerg] 1444#8228: directive "server_name" is not terminated by ";" in ./conf/dev:27
+2016/05/25 11:10:46 [warn] 9956#8872: "user" is not supported, ignored in ./conf/nginx.conf:2
+2016/05/25 11:10:46 [notice] 9956#8872: signal process started
+2016/05/25 11:10:46 [error] 9956#8872: CreateFile() ".//tmp/nginx.pid" failed (3: The system cannot find the path specified)
