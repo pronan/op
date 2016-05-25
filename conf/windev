@@ -14,12 +14,9 @@ http {
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-    lua_package_path '${prefix}lib/?.lua;;';
+    #lua_package_path '${prefix};;';
 
-    init_by_lua_block{
-        template=require"lib.template"
-        encode=require"cjson".encode
-    }
+    init_by_lua_file config/init.lua;
 
     server {
         listen       8000;
@@ -27,21 +24,14 @@ http {
 
         location / {
             root   html;
-            content_by_lua_block{
-                local template=template
-                local users = {
-                    { name = "项楠", age = 29 },
-                    { name = "pjlx", age = 25 }, 
-                }
-                template.render("app/home.html", {users=users})
-            }
+            content_by_lua_file config/start.lua;
         }
 
         location = /json {
-            default_type "application/json";
+            #default_type "application/json";
             content_by_lua_block{
-                local encode=encode
-                ngx.say(encode{ name = "yyyy", age = 29 })
+                ngx.header.content_type = 'application/json';
+                ngx.say(encode({ngx.var.http_cookie}))
             }
         }
 
