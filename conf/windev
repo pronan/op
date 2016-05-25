@@ -1,5 +1,5 @@
 worker_processes  1;
-error_log  logs/error.log  error;
+error_log  logs/error.log;
 pid logs/nginx.pid;
 
 events {
@@ -23,40 +23,30 @@ http {
         server_name  127.0.0.1;
 
         location / {
-            root   html;
+            #root   html;
             content_by_lua_file config/start.lua;
         }
 
-        location = /json {
-            #default_type "application/json";
-            content_by_lua_block{
-                ngx.header.content_type = 'application/json';
-                ngx.say(encode({ngx.var.http_cookie}))
-            }
-        }
-
         location = /favicon.ico {
-            alias images/favicon.ico;
+            alias static/images/favicon.ico;
         }
 
         location /images {
-            alias images;
+            alias /static/images;
         }
-
-        location /js {
-            alias js;
-        }
-
         location /css {
-            alias css;
+            alias /static/css;
         }
-
-       
+        location /js {
+            alias /static/js;
+        }      
         error_page   500 502 503 504  /50x.html;
         location = /50x.html {
             root   html;
         }
-
+        location = /404.html {
+            root   html;
+        }
     }
 
 
