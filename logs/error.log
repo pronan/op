@@ -164,3 +164,5 @@ coroutine 0:
 2016/05/25 08:52:10 [notice] 8024#1240: signal process started
 2016/05/25 09:54:11 [warn] 7376#32: "user" is not supported, ignored in ./conf/nginx.conf:2
 2016/05/25 09:54:11 [notice] 7376#32: signal process started
+2016/05/25 10:00:49 [warn] 10660#11212: "user" is not supported, ignored in ./conf/nginx.conf:1
+2016/05/25 10:00:49 [warn] 7792#9344: "user" is not supported, ignored in ./conf/nginx.conf:1
