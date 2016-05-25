@@ -161,3 +161,4 @@ coroutine 0:
 	content_by_lua(nginx.conf:46): in function <content_by_lua(nginx.conf:46):1>, client: 127.0.0.1, server: localhost, request: "GET /json HTTP/1.1", host: "localhost:3000"
 2016/05/24 23:28:18 [error] 3036#7076: *20281 CreateFile() "./html/50x.html" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /json HTTP/1.1", host: "localhost:3000"
 2016/05/24 23:28:49 [notice] 4624#5244: signal process started
+2016/05/25 08:52:10 [notice] 8024#1240: signal process started
