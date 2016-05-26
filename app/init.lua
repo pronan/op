@@ -5,11 +5,11 @@ redis = require "resty.redis"
 ws_server = require "resty.websocket.server"
 upload = require "resty.upload"
 str = require "resty.string"
-urls = require"config.urls"
 smt = setmetatable
 gmt = getmetatable
 say = ngx.say
 var = ngx.var
 req = ngx.req
-_time = ngx.localtime()
-_now = ngx.now()
+function log( ... )
+    ngx.log(ngx.ERR, ...)
+end
