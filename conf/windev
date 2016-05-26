@@ -34,16 +34,20 @@ http {
         location /images {
             alias /static/images;
         }
+
         location /css {
             alias /static/css;
         }
+
         location /js {
             alias /static/js;
-        }      
+        }    
+
         error_page   500 502 503 504  /50x.html;
         location = /50x.html {
             root   html;
         }
+        
         location = /404.html {
             root   html;
         }

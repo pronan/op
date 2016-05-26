@@ -1,9 +1,11 @@
-local function json(kwargs)
+local m={}
+
+function m.json(kwargs)
     ngx.header.content_type = 'application/json';
     ngx.say(encode{hello=1, world=2, pk=kwargs.pk}) 
 end
 
-local function guide(kwargs)
+function m.guide(kwargs)
     ngx.header.content_type = 'text/html; charset=UTF-8';
     local users = {
         { name = "项楠", age = 29 },
@@ -12,7 +14,4 @@ local function guide(kwargs)
     template.render("app/home.html", {users=users})
 end
 
-return {
-    json=json, 
-    guide=guide, 
-}
+return m
