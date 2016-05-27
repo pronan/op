@@ -55,7 +55,7 @@ end
 
 function m._query(kw)
     ngx.header.content_type = 'text/html; charset=UTF-8';
-    
+    say('yeah,query') 
 end
 
 return m

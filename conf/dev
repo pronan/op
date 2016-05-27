@@ -1,6 +1,6 @@
 worker_processes  1;
-error_log  logs/error.log  error;
-pid /tmp/nginx.pid;
+error_log  logs/error.log;
+pid logs/nginx.pid;
 
 events {
     worker_connections  1024;
@@ -10,63 +10,41 @@ events {
 http {
     include       mime.types;
     default_type  "text/html; charset=UTF-8";
-
+    lua_code_cache off;
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-    lua_package_path '${prefix}lib/?.lua;;';
+    #lua_package_path '${prefix};;';
 
-    init_by_lua_block{
-        template=require"lib.template"
-        encode=require"cjson".encode
-    }
+    init_by_lua_file app/init.lua;
 
     server {
         listen       8000;
         server_name  127.0.0.1;
+        root html;
+        autoindex on;
 
         location / {
-            root   html;
-            content_by_lua_block{
-                local template=template
-                local users = {
-                    { name = "项楠", age = 29 },
-                    { name = "pjlx", age = 25 }, 
-                }
-                template.render("app/home.html", {users=users})
-            }
+            try_files $uri $uri/ @lua;
         }
 
-        location = /json {
-            default_type "application/json";
-            content_by_lua_block{
-                local encode=encode
-                ngx.say(encode{ name = "xiangnan!!!", age = 29 })
-            }
+        location @lua {
+            content_by_lua_file app/main.lua;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+
+        location = / {
+            index home.html;
         }
 
         location = /favicon.ico {
-            alias images/favicon.ico;
+            root html/static/images;
         }
 
-        location /images {
-            alias images;
+        location ~ ^/(?:css|js|images) {
+            root html/static;
         }
-
-        location /js {
-            alias js;
-        }
-
-        location /css {
-            alias css;
-        }
-
-       
-        error_page   500 502 503 504  /50x.html;
-        location = /50x.html {
-            root   html;
-        }
-
     }
 
 
