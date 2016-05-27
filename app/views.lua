@@ -20,29 +20,42 @@ local function getfield(f)
     end
     return v
 end
-local function sorted(t, f)
-    local a = {}
-    for n in pairs(t) do a[#a + 1] = n end
-    table.sort(a, f)
-    local i = 0 -- iterator variable
-    return function () -- iterator function
-            i = i + 1
-            return a[i], t[a[i]]
-        end
+local function sorted( t ,callback)
+    local keys = {}
+    for k,v in pairs(t) do
+        keys[#keys+1] = k
+    end
+    table.sort(keys)
+    for i,v in ipairs(keys) do
+        callback(v,t[v])
+    end
+end
+local function sprint_table(t)
+    say('<table>')
+    sorted(t, function(k,v )
+        say(string.format('<tr><td>%s</td><td>%s</td></tr>',k,tostring(v)))
+    end)
+    say('</table>')
 end
 local function print_table(t)
     say('<table>')
-    for k, v in pairs(t) do
+    for k,v in pairs(t) do
         say(string.format('<tr><td>%s</td><td>%s</td></tr>',k,tostring(v)))
     end
     say('</table>')
 end
-
-function m.nginx(kw)
+function m.inspect(kw)
     ngx.header.content_type = 'text/html; charset=UTF-8';
-    print_table(_G[kw.name])
+    sprint_table(_G[kw.name])
+end
+function m.global(kw)
+    ngx.header.content_type = 'text/html; charset=UTF-8';
+    sprint_table(gmt(_G).__index)
 end
 
-
+function m._query(kw)
+    ngx.header.content_type = 'text/html; charset=UTF-8';
+    
+end
 
 return m

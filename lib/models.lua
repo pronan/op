@@ -1,14 +1,12 @@
-function pairsb (t, f)
-local a = {}
-for n in pairs(t) do a[#a + 1] = n end
-table.sort(a, f)
-local i = 0 -- iterator variable
-return function () -- iterator function
-i = i + 1
-return a[i], t[a[i]]
+function sorted( t ,callback)
+    local keys = {}
+    for k,v in pairs(t) do
+        keys[#keys+1] = k
+    end
+    table.sort(keys)
+    for i,v in ipairs(keys) do
+        callback(v,t[v])
+    end
 end
-end
-t = {a = 1, b = 2, c = 3}
-for k in pairs(t) do
-    print(k,v)
-end
+
+sorted{a = 1,b = 2,c = 3}
