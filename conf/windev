@@ -22,6 +22,7 @@ http {
         listen       8000;
         server_name  127.0.0.1;
         root html;
+        autoindex on;
 
         location / {
             try_files $uri $uri/ @lua;
@@ -37,7 +38,13 @@ http {
             index home.html;
         }
 
+        location = /favicon.ico {
+            root html/static/images;
+        }
 
+        location ~ /(?:css|js|images) {
+            root html/static;
+        }
     }
 
 

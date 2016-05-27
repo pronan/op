@@ -1,4 +1,4 @@
-template = require"lib.template"
+template = require"app.lib.template"
 encode = require"cjson".encode
 mysql = require "resty.mysql"
 redis = require "resty.redis"
