@@ -1,9 +1,9 @@
-local re = ngx.re
+local match = ngx.re.match
 local uri = ngx.var.uri
 local urls = require"app.urls"
 
 for regex, func in pairs(urls) do
-    local m, err = re.match(uri, regex)
+    local m, err = match(uri, regex)
     if m then
         return func(m)
     end

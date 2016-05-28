@@ -14,7 +14,6 @@ http {
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-    #lua_package_path '${prefix};;';
 
     init_by_lua_file app/init.lua;
 
@@ -22,13 +21,8 @@ http {
         listen       8000;
         server_name  127.0.0.1;
         root html;
-        autoindex on;
 
         location / {
-            try_files $uri $uri/ @lua;
-        }
-
-        location @lua {
             content_by_lua_file app/main.lua;
         }
 
