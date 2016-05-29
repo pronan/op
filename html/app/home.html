@@ -1,9 +1,12 @@
-<html>
-<body>
-<ul>
-{% for _, user in ipairs(users) do %}
-    <li>User {{user.name}} is of age {{user.age}}</li>
-{% end %}
-</ul>
-</body>
+<html lang='zh'>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <ul>
+        {% for _, user in ipairs(users) do %}
+            <li>User {{user.name}} is of age {{user.age}}</li>
+        {% end %}
+        </ul>
+    </body>
 </html>
