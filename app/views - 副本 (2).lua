@@ -8,8 +8,7 @@ function m.json(kwargs)
 end
 
 function m.guide(kwargs)
-    local u = require"app.models"
-    local users = u:where{name = 'yao'}.exec()
+    local users = query('select name, age from users')
     template.render("app/home.html", {users=users})
 end
 local function getfield(f)

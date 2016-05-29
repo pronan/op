@@ -7,7 +7,7 @@ function m.query(sql_string)
         --say('try to set db..')
         db, err = mysql:new()
         if not db then
-            ngx.exit(ngx.ERROR)
+            return ngx.exit(ngx.ERROR)
         end
         db:set_timeout(database.timeout) 
         --say('try to connect db..')
@@ -19,14 +19,14 @@ function m.query(sql_string)
             password = database.password,
         }
         if not res then
-            ngx.exit(ngx.ERROR) 
+            return ngx.exit(ngx.ERROR) 
         end
         ngx.ctx._db = db
         --say('db set to ngx.ctx._db..')
     end
     res, err, errno, sqlstate = db:query(sql_string)
     if not res then
-        ngx.exit(ngx.ERROR) 
+        return ngx.exit(ngx.ERROR) 
     end
     return res
 end

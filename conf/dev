@@ -29,7 +29,7 @@ http {
         error_page   500 502 503 504  /50x.html;
 
         location = / {
-            index home.html;
+            root html;
         }
 
         location = /favicon.ico {

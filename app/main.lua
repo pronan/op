@@ -4,17 +4,12 @@ local uri = ngx.var.uri
 local database = settings.database
 
 for regex, func in pairs(urls) do
-    local m, err = match(uri, regex)
-    if m then
-        local response = func(m)
+    local capture, err = match(uri, regex)
+    if capture then
+        local response = func(capture)
         local db = ngx.ctx._db
         if db then
-            local ok, err = db:set_keepalive(database.max_age, database.pool_size)
-            if not ok then
-                ngx.exit(ngx.ERROR)
-            else
-                say('okkkk!')
-            end
+            db:set_keepalive(database.max_age, database.pool_size)
         end
         return response
     end

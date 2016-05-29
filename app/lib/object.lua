@@ -1,10 +1,10 @@
 local object={}
 
-function object.new(self, init_table)
-    local instance = init_table or {}
-    setmetatable(instance, self)
+function object.new(self, ins)
+    ins = ins or {}
+    setmetatable(ins, self)
     self.__index=self
-    return instance
+    return ins
 end
 
 return object
