@@ -48,6 +48,10 @@ function m.copy(ori_tab)
 end
 local f = function(e)return e*2 end
 for i,v in ipairs(m.map(f, {1, 2, 3})) do
-    print(i,v)
+    --print(i,v)
 end
+local function test(...)
+    print('args:', #arg)
+end
+test(1, 2, 3, 5)
 return m
