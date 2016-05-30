@@ -19,7 +19,7 @@ function m.map(func, ...)
     local res = {}
     for i = 1, #arg[0] do
         local argss = {}
-        for seq in pairs{...} do
+        for i, seq in ipairs{...} do
             argss[#argss+1] = seq[i]
         end
         local e = func(unpack(argss))
@@ -46,7 +46,8 @@ function m.copy(ori_tab)
     end
     return new_tab;
 end
-for i,v in ipairs(m.map(function(e)return e*2 end, {1, 2, 3})) do
+local f = function(e)return e*2 end
+for i,v in ipairs(m.map(f, {1, 2, 3})) do
     print(i,v)
 end
 return m
