@@ -1,3 +1,4 @@
-local models = require"lib.models"
-local User = models:new{table_name='user'}
-return User
+local models = require"app.lib.models"
+local m = {}
+m.User = models:new{table_name='user'}
+return m

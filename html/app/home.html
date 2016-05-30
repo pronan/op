@@ -3,10 +3,15 @@
         <meta charset="utf-8">
     </head>
     <body>
-        <ul>
+        {{sql}}
+        <table>
         {% for _, user in ipairs(users) do %}
-            <li>User {{user.name}} is of age {{user.age}}</li>
+            <tr>
+            {% for key, value in pairs(user) do %}
+            <td>{{key}}</td><td>{{value}}</td>
+            {% end %}
+            </tr>
         {% end %}
-        </ul>
+        </table>
     </body>
 </html>

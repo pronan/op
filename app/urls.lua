@@ -1,12 +1,13 @@
 local views = require"app.views"
 local views_auto = require"app.views_auto"
+local sub = string.sub
 
 local urlpatterns = {}
 local function url(regex,  func)
-    if regex[1] ~= '^' then
+    if sub(regex, 1, 1) ~= '^' then
         regex = '^'..regex
     end
-    if regex[-1] ~= '$' then
+    if sub(regex, -1) ~= '$' then
         regex = regex..'$'
     end
     urlpatterns[regex] = func
@@ -18,9 +19,8 @@ end
 
 
 url('^/users/(?<pk>\\d+?)$', views.json)
---url('^/guide$', views.guide)
+url('^/guide$', views.guide)
 url('^/inspect/(?<name>.+?)$', views.inspect)
 url('^/global$', views.global)
 url('/init', views.init)
-
 return urlpatterns

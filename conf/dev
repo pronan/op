@@ -36,7 +36,7 @@ http {
             root html/static/images;
         }
 
-        location ~ ^/(?:css|js|images) {
+        location ~ ^/(?:css|js|images)/ {
             root html/static;
         }
     }

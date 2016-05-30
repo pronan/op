@@ -2,15 +2,11 @@ local query = require"app.lib.mysql".query
 
 local m={}
 
-function m.json(kwargs)
-    ngx.header.content_type = 'application/json';
-    say(encode{hello=1, world=2, pk=kwargs.pk}) 
-end
-
 function m.guide(kwargs)
-    local u = require"app.models"
-    local users = u:where{name = 'yao'}.exec()
-    template.render("app/home.html", {users=users})
+    local u = require"app.models".User
+    local sql = u:select{'sex', 'sum(age) as c'}:group_by{'sex'}:order_by{'-c'}:to_sql()
+    local users = u:exec()
+    template.render("app/home.html", {users=users, sql=sql})
 end
 local function getfield(f)
     local v = _G -- start with the table of globals
@@ -52,14 +48,17 @@ function m.global(kw)
 end
 
 function m.init( kw )
-    query("drop table if exists users")
-    query("create table users "
+    query("drop table if exists user")
+    query("create table user "
          .. "(id serial primary key, "
-         .. "name varchar(5), "
+         .. "name varchar(10), "
+         .. "sex integer, "
          .. "age integer"
          ..")"
          )
-    query([[insert into users(name, age) values ('yao', 25), ('gates', 50), ('monster', 600)]])
+    query([[insert into user(name, sex, age) values 
+        ('yao', 0, 25), ('gates', 0, 50), ('monster', 1, 600), ('has', 1, 50)
+        , ('mas', 1, 50)]])
     ngx.say('table is created')
 end
 

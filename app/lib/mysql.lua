@@ -7,6 +7,7 @@ function m.query(sql_string)
         --say('try to set db..')
         db, err = mysql:new()
         if not db then
+            ngx.log(ngx.ERR, err)
             return ngx.exit(ngx.ERROR)
         end
         db:set_timeout(database.timeout) 

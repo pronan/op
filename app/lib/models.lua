@@ -1,6 +1,8 @@
 local query = require"app.lib.mysql".query
 local m = {}
-
+local function parse_filter_args(name)
+    -- body
+end
 function m.new( self, ins )
     ins = ins or {}
     setmetatable(ins, self)
@@ -12,7 +14,12 @@ function m.init(self )
     self._select = {}
     self._where = {}
     self._group_by = {}
+    self._having = {}
     self._order_by = {}
+end
+function m.select(self, fields)
+    self._select = tcopy(fields)
+    return self
 end
 function m.where(self, kw )
     for k,v in pairs(kw) do
@@ -20,21 +27,21 @@ function m.where(self, kw )
     end
     return self
 end
-function m.select(self, ... )
-    local o = self._select
-    for _, name in ipairs(...) do
-        o[#o+1] = name
-    end
+function m.group_by(self, fields)
+    self._group_by = tcopy(fields)
     return self
 end
-function m.order_by(self, ... )
+function m.order_by(self, fields)
     local o = self._order_by
-    for _, name in ipairs(...) do
+    for _, name in ipairs(fields) do
+        if string.sub(name, 1, 1)  == '-' then
+            name = string.sub(name, 2, -1)..' DESC'
+        end
         o[#o+1] = name
     end
     return self
 end
-function m.exec(self )
+function m.to_sql(self )
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     local res = ''
     --SELECT
@@ -58,13 +65,20 @@ function m.exec(self )
             res = string.sub(res, 1, -2) 
         end
     end
+    --GROUP BY
+    if next(self._group_by)~=nil  then
+        res = res..' GROUP BY '..table.concat( self._group_by, ", ")
+    end   
     --ORDER BY
     if next(self._order_by)~=nil  then
         res = res..' ORDER BY '..table.concat( self._order_by, ", ")
     end    
-   return query(res)
+   return res
 end
-
+function m.exec(self )
+    return query(self:to_sql())
+end
+-- select sex, count(*), sum(age) from user group by sex;
 -- x = m:new{table_name = 'user'}
 -- x:select{'name', 'age'}:where{a ='ja', b = 2, c = 3}:order_by{'age', 'name'}
 -- print(x:exec())
