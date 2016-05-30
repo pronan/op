@@ -4,10 +4,13 @@ local m={}
 
 function m.guide(kwargs)
     local u = require"app.models".User
-    local sql = u:select{'sex', 'avg(age) as sa', 'count(*) as c'}:where{age__lte=1100}:having{c__gt=0}:order_by{'-c'}:group_by{'sex'}:to_sql()
+    local sql = u:select{'sex', 'name'}:where{age__lte=1100}:to_sql()
     --local sql = u:select{'name', 'age', 'sex', 'count(*) as c'}:where{age__lte=600}:group_by{'sex'}:having{c_gt=0}:order_by{'name'}:to_sql()
-    local users = u:exec()
-    template.render("app/home.html", {users=users, sql=sql})
+    local users, err = u:exec()
+    if users == nil then
+        say('aaaaaaaaa')
+    end
+    template.render("app/home.html", {users=users or {}, sql=sql, err=err})
 end
 local function getfield(f)
     local v = _G -- start with the table of globals

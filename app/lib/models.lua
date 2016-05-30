@@ -1,8 +1,17 @@
 local query = require"app.lib.mysql".query
+local repr_list = helper.repr_list
+local list = helper.list
+local copy = helper.copy
+local update = helper.update
+
 local m = {}
 local relation_op = {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
-local function parse_filter_args(t)
+local function parse_filter_args(t, _not)
     local conditions = {}
+    local prefix = ''
+    if _not then
+        prefix = 'NOT '
+    end
     for key,value in pairs(t) do
         local key, op = unpack(list(key:gmatch('%w+')))
         if op == nil then
@@ -12,8 +21,10 @@ local function parse_filter_args(t)
         end
         if type(value) == 'string' then
             value = string.format([['%s']], value)
+        elseif type(value) == 'table' then
+            value = repr_list(value)
         end
-        conditions[#conditions+1] = string.format('%s%s%s', key, op, value)
+        conditions[#conditions+1] = string.format('(%s%s %s %s)', prefix, key, op, value)
     end
     return conditions
 end
@@ -28,22 +39,25 @@ end
 function m.init(self )
     self._select = {}
     self._where = {}
+    self._where_not = {}
     self._group_by = {}
     self._having = {}
     self._order_by = {}
 end
 function m.select(self, fields)
-    self._select = tcopy(fields)
+    self._select = copy(fields)
     return self
 end
-function m.where(self, kw )
-    for k,v in pairs(kw) do
-        self._where[k] = v
-    end
+function m.where(self, kwargs )
+    update(self._where, kwargs)
+    return self
+end
+function m.where_not(self, kwargs)
+    update(self._where_not, kwargs)
     return self
 end
 function m.group_by(self, fields)
-    self._group_by = tcopy(fields)
+    self._group_by = copy(fields)
     return self
 end
 function m.having(self, kw )
@@ -74,6 +88,7 @@ function m.to_sql(self )
     --FROM
     res = res..' FROM '..self.table_name
     --WHERE
+    local conditions;
     if next(self._where)~=nil then 
         res = res..' WHERE '
         local conditions = parse_filter_args(self._where)
