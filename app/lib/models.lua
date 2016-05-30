@@ -1,8 +1,23 @@
 local query = require"app.lib.mysql".query
 local m = {}
-local function parse_filter_args(name)
-    -- body
+local relation_op = {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
+local function parse_filter_args(t)
+    local conditions = {}
+    for key,value in pairs(t) do
+        local key, op = unpack(list(key:gmatch('%w+')))
+        if op == nil then
+            op = '='
+        else
+            op = relation_op[op] or '='
+        end
+        if type(value) == 'string' then
+            value = string.format([['%s']], value)
+        end
+        conditions[#conditions+1] = string.format('%s%s%s', key, op, value)
+    end
+    return conditions
 end
+
 function m.new( self, ins )
     ins = ins or {}
     setmetatable(ins, self)
@@ -31,6 +46,12 @@ function m.group_by(self, fields)
     self._group_by = tcopy(fields)
     return self
 end
+function m.having(self, kw )
+    for k,v in pairs(kw) do
+        self._having[k] = v
+    end
+    return self
+end
 function m.order_by(self, fields)
     local o = self._order_by
     for _, name in ipairs(fields) do
@@ -55,20 +76,19 @@ function m.to_sql(self )
     --WHERE
     if next(self._where)~=nil then 
         res = res..' WHERE '
-        for k,v in pairs(self._where) do
-            if type(v) == 'string' then
-                v = string.format([['%s']], v)
-            end
-            res = res..string.format('%s=%s,', k, v)
-        end
-        if string.sub(res, -1) == ',' then
-            res = string.sub(res, 1, -2) 
-        end
+        local conditions = parse_filter_args(self._where)
+        res = res..table.concat(conditions, " AND ")
     end
     --GROUP BY
     if next(self._group_by)~=nil  then
         res = res..' GROUP BY '..table.concat( self._group_by, ", ")
-    end   
+    end  
+    --HAVING
+    if next(self._having)~=nil then 
+        res = res..' HAVING '
+        local conditions = parse_filter_args(self._having)
+        res = res..table.concat(conditions, " AND ")
+    end 
     --ORDER BY
     if next(self._order_by)~=nil  then
         res = res..' ORDER BY '..table.concat( self._order_by, ", ")
@@ -78,8 +98,5 @@ end
 function m.exec(self )
     return query(self:to_sql())
 end
--- select sex, count(*), sum(age) from user group by sex;
--- x = m:new{table_name = 'user'}
--- x:select{'name', 'age'}:where{a ='ja', b = 2, c = 3}:order_by{'age', 'name'}
--- print(x:exec())
+
 return m

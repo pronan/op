@@ -4,7 +4,8 @@ local m={}
 
 function m.guide(kwargs)
     local u = require"app.models".User
-    local sql = u:select{'sex', 'sum(age) as c'}:group_by{'sex'}:order_by{'-c'}:to_sql()
+    local sql = u:select{'sex', 'avg(age) as sa', 'count(*) as c'}:where{age__lte=1100}:having{c__gt=0}:order_by{'-c'}:group_by{'sex'}:to_sql()
+    --local sql = u:select{'name', 'age', 'sex', 'count(*) as c'}:where{age__lte=600}:group_by{'sex'}:having{c_gt=0}:order_by{'name'}:to_sql()
     local users = u:exec()
     template.render("app/home.html", {users=users, sql=sql})
 end
