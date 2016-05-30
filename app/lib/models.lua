@@ -1,8 +1,9 @@
 local query = require"app.lib.mysql".query
-local repr_list = helper.repr_list
-local list = helper.list
-local copy = helper.copy
-local update = helper.update
+-- local repr_list = helper.repr_list
+-- local list = helper.list
+-- local copy = helper.copy
+-- local update = helper.update
+-- local extend = helper.extend
 
 local m = {}
 local relation_op = {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
@@ -88,11 +89,15 @@ function m.to_sql(self )
     --FROM
     res = res..' FROM '..self.table_name
     --WHERE
-    local conditions;
+    local conditions = {};
     if next(self._where)~=nil then 
-        res = res..' WHERE '
-        local conditions = parse_filter_args(self._where)
-        res = res..table.concat(conditions, " AND ")
+        extend(conditions, parse_filter_args(self._where))
+    end
+    if next(self._where_not)~=nil then 
+        extend(conditions, parse_filter_args(self._where_not, true))
+    end
+    if next(conditions)~=nil then 
+        res = res..' WHERE '..table.concat(conditions, " AND ")
     end
     --GROUP BY
     if next(self._group_by)~=nil  then

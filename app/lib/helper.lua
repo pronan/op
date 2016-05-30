@@ -66,6 +66,17 @@ function m.update(self, other)
         end
     end
 end
+function m.extend(self, other)
+    local i = #self+1
+    local j = 1
+    local e = other[j]
+    while e ~= nil do
+        self[i] = e
+        j = j+1
+        i = i+1
+        e = other[j]
+    end
+end
 function m.repr(obj)
     local label = type(obj)
     if label == 'string' then
@@ -118,8 +129,10 @@ local function test()
     end
     xx()
     print(table.concat( m.mapkv(function(k, v) return string.format([['%s'='%s']], k, v) end, {1, 1, 2}),  ", " ))
+    local yy = {4, 5}
+    m.extend(yy, {1, 2, 3})
+    print(m.repr(yy))
 end
-
 function m.log( ... )
     ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "")))
 end
