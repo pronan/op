@@ -107,7 +107,6 @@ function m.extend(self, other)
         j = j+1
         i = i+1
         e = other[j]
-        print('aaaaaaaaaaaaaaaaa')
     end
     -- for i,v in ipairs(other) do
     --     if v~=nil then
@@ -175,5 +174,4 @@ function m.log( ... )
     ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "")))
 end
 
-test()
 return m

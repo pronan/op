@@ -2,6 +2,7 @@ worker_processes  1;
 error_log  logs/error.log;
 pid logs/nginx.pid;
 daemon off;
+master_process off;
 
 events {
     worker_connections  1024;

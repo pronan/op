@@ -4,7 +4,6 @@ local uri = ngx.var.uri
 local database = settings.database
 
 for regex, func in pairs(urls) do
-    print('yeah, baby..come on')
     local capture, err = match(uri, regex)
     if capture then
         local response = func(capture)

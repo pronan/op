@@ -1,6 +1,7 @@
 worker_processes  1;
 error_log  logs/error.log;
 pid logs/nginx.pid;
+daemon off;
 
 events {
     worker_connections  1024;
@@ -14,35 +15,32 @@ http {
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-    #lua_package_path '${prefix};;';
+
 
     init_by_lua_file app/init.lua;
 
     server {
-        listen       8000;
-        server_name  127.0.0.1;
+        listen       80;
+        server_name  www.wdksw.com wdksw.com;
         root html;
-        autoindex on;
+        
 
         location / {
-            try_files $uri $uri/ @lua;
-        }
 
-        location @lua {
             content_by_lua_file app/main.lua;
         }
 
         error_page   500 502 503 504  /50x.html;
 
         location = / {
-            index home.html;
+            root html;
         }
 
         location = /favicon.ico {
             root html/static/images;
         }
 
-        location ~ /(?:css|js|images) {
+        location ~ ^/(?:css|js|images)/ {
             root html/static;
         }
     }
