@@ -6,6 +6,7 @@ local query = require"app.lib.mysql".query
 -- local extend = helper.extend
 
 local m = {}
+
 local relation_op = {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(t, _not)
     local conditions = {}
@@ -30,45 +31,44 @@ local function parse_filter_args(t, _not)
     return conditions
 end
 
-function m.new( self, ins )
-    ins = ins or {}
-    setmetatable(ins, self)
-    self.__index=self
-    ins:init()
-    return ins
+local QueryManager = {}
+function QueryManager.new(self, ini)
+    ini = ini or {}
+    setmetatable(ini, self)
+    self.__index = self
+    return ini
 end
-function m.init(self )
+function QueryManager.init(self)
     self._select = {}
     self._where = {}
-    self._where_not = {}
-    self._group_by = {}
+    self._wherenot = {}
+    self._group = {}
     self._having = {}
-    self._order_by = {}
+    self._order = {}
+    return self
 end
-function m.select(self, fields)
+function QueryManager.select(self, fields)
     self._select = copy(fields)
     return self
 end
-function m.where(self, kwargs )
+function QueryManager.where(self, kwargs)
     update(self._where, kwargs)
     return self
 end
-function m.where_not(self, kwargs)
-    update(self._where_not, kwargs)
+function QueryManager.wherenot(self, kwargs)
+    update(self._wherenot, kwargs)
     return self
 end
-function m.group_by(self, fields)
-    self._group_by = copy(fields)
+function QueryManager.group(self, fields)
+    self._group = copy(fields)
     return self
 end
-function m.having(self, kw )
-    for k,v in pairs(kw) do
-        self._having[k] = v
-    end
+function QueryManager.having(self, kwargs)
+    update(self._having, kwargs)
     return self
 end
-function m.order_by(self, fields)
-    local o = self._order_by
+function QueryManager.order(self, fields)
+    local o = self._order
     for _, name in ipairs(fields) do
         if string.sub(name, 1, 1)  == '-' then
             name = string.sub(name, 2, -1)..' DESC'
@@ -77,7 +77,7 @@ function m.order_by(self, fields)
     end
     return self
 end
-function m.to_sql(self )
+function QueryManager.to_sql(self)
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     local res = ''
     --SELECT
@@ -93,15 +93,15 @@ function m.to_sql(self )
     if next(self._where)~=nil then 
         extend(conditions, parse_filter_args(self._where))
     end
-    if next(self._where_not)~=nil then 
-        extend(conditions, parse_filter_args(self._where_not, true))
+    if next(self._wherenot)~=nil then 
+        extend(conditions, parse_filter_args(self._wherenot, true))
     end
     if next(conditions)~=nil then 
         res = res..' WHERE '..table.concat(conditions, " AND ")
     end
     --GROUP BY
-    if next(self._group_by)~=nil  then
-        res = res..' GROUP BY '..table.concat( self._group_by, ", ")
+    if next(self._group)~=nil  then
+        res = res..' GROUP BY '..table.concat( self._group, ", ")
     end  
     --HAVING
     if next(self._having)~=nil then 
@@ -110,13 +110,34 @@ function m.to_sql(self )
         res = res..table.concat(conditions, " AND ")
     end 
     --ORDER BY
-    if next(self._order_by)~=nil  then
-        res = res..' ORDER BY '..table.concat( self._order_by, ", ")
+    if next(self._order)~=nil  then
+        res = res..' ORDER BY '..table.concat( self._order, ", ")
     end    
    return res
 end
-function m.exec(self )
+function QueryManager.exec(self)
     return query(self:to_sql())
 end
+
+local proxy_methods_for_sql = Set:new{'select', 'where', 'wherenot', 'group', 'having', 'order'}
+local function model_lookup(self)
+    local function _model_lookup(t, k)
+        if proxy_methods_for_sql:has(k) then
+            local query_handler =  QueryManager:new{table_name=self.table_name}:init()
+            return query_handler[k]
+        else
+            return self[k]
+        end
+    end
+    return _model_lookup
+end
+function m.new(self, ins)
+    ins = ins or {}
+    setmetatable(ins, self)
+    self.__index = model_lookup(self)
+    return ins
+end
+
+
 
 return m
