@@ -2,15 +2,15 @@ local query = require"app.lib.mysql".query
 
 local m={}
 
+local function log( ... )
+    ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "")))
+end
+
 function m.guide(kwargs)
     local u = require"app.models".User
-    --local sql = u:select{'sex', 'name', 'age'}:to_sql()
-    local qm = u:select{'name', 'age', 'sex', 'count(*) as c'}:where{age__lte=600}:group{'sex'}:having{c_gt=0}:order{'name'}
+    local qm = u:select"sex, count(*) as c":group"sex":having{c__gte = 1}
     local sql = qm:to_sql()
     local users, err = qm:exec()
-    if users == nil then
-        say('aaaaaaaaa')
-    end
     template.render("app/home.html", {users=users or {}, sql=sql, err=err})
 end
 local function getfield(f)

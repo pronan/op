@@ -99,20 +99,9 @@ function m.update(self, other)
     end
 end
 function m.extend(self, other)
-    local i = #self+1
-    local j = 1
-    local e = other[j]
-    while e ~= nil do
-        self[i] = e
-        j = j+1
-        i = i+1
-        e = other[j]
+    for i,v in ipairs(other) do
+        self[#self+1] = v
     end
-    -- for i,v in ipairs(other) do
-    --     if v~=nil then
-    --         self[#self+i] = v
-    --     end
-    -- end
 end
 function m.repr(obj)
     local label = type(obj)
@@ -132,7 +121,6 @@ function m.repr(obj)
         return tostring(obj)
     end
 end
-
 function m.repr_list(array)
     local res = {}
     for _,v in ipairs(array) do
@@ -170,8 +158,6 @@ local function test()
     m.extend(yy, {1, 2, 3})
     print(m.repr(yy))
 end
-function m.log( ... )
-    ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "")))
-end
+
 
 return m
