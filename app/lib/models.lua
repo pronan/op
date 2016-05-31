@@ -5,7 +5,7 @@ local query = require"app.lib.mysql".query
 -- local update = helper.update
 -- local extend = helper.extend
 
-local m = {}
+local Model = {}
 
 local relation_op = {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(t, _not)
@@ -36,7 +36,7 @@ function QueryManager.new(self, ini)
     ini = ini or {}
     setmetatable(ini, self)
     self.__index = self
-    return ini
+    return ini:init()
 end
 function QueryManager.init(self)
     self._select = {}
@@ -47,29 +47,29 @@ function QueryManager.init(self)
     self._order = {}
     return self
 end
-function QueryManager.select(self, fields)
-    self._select = copy(fields)
+function QueryManager.select(self, params)
+    extend(self._select, params)
     return self
 end
-function QueryManager.where(self, kwargs)
-    update(self._where, kwargs)
+function QueryManager.where(self, params)
+    update(self._where, params)
     return self
 end
-function QueryManager.wherenot(self, kwargs)
-    update(self._wherenot, kwargs)
+function QueryManager.wherenot(self, params)
+    update(self._wherenot, params)
     return self
 end
-function QueryManager.group(self, fields)
-    self._group = copy(fields)
+function QueryManager.group(self, params)
+    extend(self._group, params)
     return self
 end
-function QueryManager.having(self, kwargs)
-    update(self._having, kwargs)
+function QueryManager.having(self, params)
+    update(self._having, params)
     return self
 end
-function QueryManager.order(self, fields)
+function QueryManager.order(self, params)
     local o = self._order
-    for _, name in ipairs(fields) do
+    for _, name in ipairs(params) do
         if string.sub(name, 1, 1)  == '-' then
             name = string.sub(name, 2, -1)..' DESC'
         end
@@ -119,25 +119,35 @@ function QueryManager.exec(self)
     return query(self:to_sql())
 end
 
-local proxy_methods_for_sql = Set:new{'select', 'where', 'wherenot', 'group', 'having', 'order'}
-local function model_lookup(self)
-    local function _model_lookup(t, k)
-        if proxy_methods_for_sql:has(k) then
-            local query_handler =  QueryManager:new{table_name=self.table_name}:init()
-            return query_handler[k]
-        else
-            return self[k]
-        end
-    end
-    return _model_lookup
-end
-function m.new(self, ins)
+
+function Model.new(self, ins)
     ins = ins or {}
     setmetatable(ins, self)
-    self.__index = model_lookup(self)
+    self.__index = self
     return ins
+end
+function Model._proxy_sql(self, method, params)
+    local query_handler = QueryManager:new{table_name=self.table_name}
+    return query_handler[method](query_handler, params)
+end
+function Model.select(self, params)
+    return self:_proxy_sql('select', params)
+end
+function Model.where(self, params)
+    return self:_proxy_sql('where', params)
+end
+function Model.wherenot(self, params)
+    return self:_proxy_sql('wherenot', params)
+end
+function Model.group(self, params)
+    return self:_proxy_sql('group', params)
+end
+function Model.having(self, params)
+    return self:_proxy_sql('having', params)
+end
+function Model.order(self, params)
+    return self:_proxy_sql('order', params)
 end
 
 
-
-return m
+return Model

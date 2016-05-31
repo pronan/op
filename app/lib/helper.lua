@@ -107,7 +107,13 @@ function m.extend(self, other)
         j = j+1
         i = i+1
         e = other[j]
+        print('aaaaaaaaaaaaaaaaa')
     end
+    -- for i,v in ipairs(other) do
+    --     if v~=nil then
+    --         self[#self+i] = v
+    --     end
+    -- end
 end
 function m.repr(obj)
     local label = type(obj)

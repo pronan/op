@@ -5,8 +5,9 @@ local m={}
 function m.guide(kwargs)
     local u = require"app.models".User
     --local sql = u:select{'sex', 'name', 'age'}:to_sql()
-    local sql = u:select{'name', 'age', 'sex', 'count(*) as c'}:where{age__lte=600}:group{'sex'}:having{c_gt=0}:order{'name'}:to_sql()
-    local users, err = u:exec()
+    local qm = u:select{'name', 'age', 'sex', 'count(*) as c'}:where{age__lte=600}:group{'sex'}:having{c_gt=0}:order{'name'}
+    local sql = qm:to_sql()
+    local users, err = qm:exec()
     if users == nil then
         say('aaaaaaaaa')
     end
