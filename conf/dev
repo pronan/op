@@ -10,7 +10,7 @@ events {
 http {
     include       mime.types;
     default_type  "text/html; charset=UTF-8";
-    #lua_code_cache off;
+    lua_code_cache off;
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
@@ -35,6 +35,13 @@ http {
 
         location = /favicon.ico {
             root html/static/images;
+        }
+
+        location = /gitpush {
+            content_by_lua_block{
+                os.execute('start browser')
+                os.execute('nginx -p /root/op -c /root/op/conf/devu -s reload')
+            }
         }
 
         location /css { 
