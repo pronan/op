@@ -28,9 +28,6 @@ http {
         }
         
         location / {
-            access_by_lua_block{
-                xnn='ahahha'
-            }
             content_by_lua_file app/main.lua;
         }
 

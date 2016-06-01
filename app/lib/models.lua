@@ -24,7 +24,7 @@ local function parse_filter_args(t)
         elseif type(value) == 'table' then
             value = repr_list(value)
         end
-        conditions[#conditions+1] = string.format('(%s %s %s)', field, op, value)
+        conditions[#conditions+1] = string.format(' %s %s %s ', field, op, value)
     end
     return conditions
 end
@@ -74,6 +74,22 @@ function QueryManager.to_sql_update(self)
     local where_args = self:get_where_args()
     return string.format(statement, self.table_name, update_args, where_args)
 end
+function QueryManager.to_sql_create(self)
+    --UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
+    local statement = 'INSERT INTO %s (%s) VALUES (%s);'
+    local create_columns, create_values = self:get_create_args()
+    return string.format(statement, self.table_name, create_columns, create_values)
+end
+function QueryManager.get_create_args(self)
+    local cols = {}
+    local vals = {}
+    for k,v in pairs(self._create) do
+        cols[#cols+1] = k
+        vals[#vals+1] = repr(v)
+    end
+    return table.concat( cols, ", "), table.concat( vals, ", ")
+end
+
 function QueryManager.get_update_args(self)
     if next(self._update)~=nil then 
         return table.concat(parse_filter_args(self._update), ", ")

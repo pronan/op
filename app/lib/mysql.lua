@@ -1,3 +1,4 @@
+local mysql = require "resty.mysql"
 local m = {}
 local database = settings.database
 local connect_table = {
@@ -25,7 +26,7 @@ function m.query(sql_statements)
         ngx.ctx._db = db
         --say('establish db..', repr(db))
     else
-        say('reuse db..', repr(db))
+        --say('reuse db..', repr(db))
     end
     res, err, errno, sqlstate =  db:query(sql_statements)
 --{['_max_packet_size']=1048576, ['_server_status']=2, 

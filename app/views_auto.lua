@@ -11,13 +11,11 @@ local function log( ... )
     ))
 end
 function m.sql(kwargs)
-    say(xnn)
     local u = require"app.models".User
     local statements = {
-        u:update{age = 113}:where{id=1}, 
-        u:order'id desc', 
-        u:order'id desc', 
-        u:order'id desc', 
+        u:update{age = 113, sex=3}:where{id=1}, 
+        u:order'id', 
+        u:create{age=5, name='yaoming', sex=1}, 
     }
     local tables = {}
     local sqls = {}
@@ -27,7 +25,6 @@ function m.sql(kwargs)
         res, err, errno, sqlstate = v:exec()
         tables[#tables+1] = res
         errors[#errors+1] = err 
-        log('xxxxxxxxxxxxx', res, err, errno, sqlstate)
     end
     for i=1,#statements do
         --log(sqls[i], tables[i], errors[i])
