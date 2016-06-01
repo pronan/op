@@ -1,6 +1,7 @@
 worker_processes  1;
 error_log  logs/error.log;
 pid logs/nginx.pid;
+user root;
 
 events {
     worker_connections  1024;
@@ -38,8 +39,8 @@ http {
 
         location = /gitpush {
             content_by_lua_block{
-                os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
-                os.execute('nginx -p /root/op -c /root/op/conf/devu -s reload')
+                ngx.say(tostring(os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')))
+                ngx.say(tostring(os.execute('nginx -p /root/op -c /root/op/conf/devu -s reload')))
             }
         }
 
