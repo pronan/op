@@ -15,7 +15,7 @@ function m.sql(kwargs)
     local statements = {
         --u:where{name='yao'}, 
         --u:update{age=888}:where{name='has'}, 
-        u:order'name', 
+        u:order'id', 
         --u:create{age=5, name='yaoming', sex=1}, 
         --u:select"name, count(*) as cnt":group"name"
     }
