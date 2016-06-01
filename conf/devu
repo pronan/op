@@ -10,7 +10,6 @@ events {
 http {
     include       mime.types;
     default_type  "text/html; charset=UTF-8";
-    lua_code_cache off;
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
