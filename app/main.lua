@@ -14,4 +14,4 @@ for regex, func in pairs(urls) do
         return response
     end
 end
-say("404 not found")
+say("404 not found", var.uri)

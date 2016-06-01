@@ -1,8 +1,6 @@
 worker_processes  1;
 error_log  logs/error.log;
 pid logs/nginx.pid;
-daemon off;
-master_process off;
 
 events {
     worker_connections  1024;
@@ -16,7 +14,7 @@ http {
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-
+    #autoindex on;
 
     init_by_lua_file app/init.lua;
 
@@ -24,26 +22,31 @@ http {
         listen       8000;
         server_name  127.0.0.1;
         root html;
+
+        location = / {
+            try_files /base.html =404;
+        }
         
-
         location / {
-
             content_by_lua_file app/main.lua;
         }
 
         error_page   500 502 503 504  /50x.html;
 
-        location = / {
-            root html;
-        }
-
         location = /favicon.ico {
             root html/static/images;
         }
 
-        location ~ ^/(?:css|js|images)/ {
+        location /css { 
             root html/static;
         }
+        location /js { 
+            root html/static;
+        }
+        location /images { 
+            root html/static;
+        }
+
     }
 
 

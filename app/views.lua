@@ -8,7 +8,7 @@ end
 
 function m.guide(kwargs)
     local u = require"app.models".User
-    local qm = u:select"sex, count(*) as c":group"sex":having{c__gte = 1}
+    local qm = u:where[[age>10 or name like '%s%']]:order{'id desc', 'age'}
     local sql = qm:to_sql()
     local users, err = qm:exec()
     template.render("app/home.html", {users=users or {}, sql=sql, err=err})
