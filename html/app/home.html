@@ -3,16 +3,21 @@
         <meta charset="utf-8">
     </head>
     <body>
-        {{sql}}
-        <table>
-        {% for _, user in ipairs(users) do %}
-            <tr>
-            {% for key, value in pairs(user) do %}
-            <td>{{key}}</td><td>{{value}}</td>
+    {% for i=1, len do %}
+        <br/>{{sqls[i]}}
+        {% if errors[i] == nil and type(tables[i])=='table' then %}
+            <table>
+            {% for _, user in ipairs(tables[i]) do %}
+                <tr>
+                {% for key, value in pairs(user) do %}
+                <td>{{key}}</td><td>{{value}}</td>
+                {% end %}
+                </tr>
             {% end %}
-            </tr>
+            </table>
+        {% else %}
+            <br/>ERRORS: {{errors[i]}}
         {% end %}
-        </table>
-        {{err}}
+    {% end %}
     </body>
 </html>

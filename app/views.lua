@@ -6,9 +6,11 @@ local function log( ... )
     ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "")))
 end
 
-function m.guide(kwargs)
+function m.sql(kwargs)
     local u = require"app.models".User
+    local x;
     local qm = u:where[[age>10 or name like '%s%']]:order{'id desc', 'age'}
+    local qmx = u:update[[age=3]]:where{id=1}
     local sql = qm:to_sql()
     local users, err = qm:exec()
     template.render("app/home.html", {users=users or {}, sql=sql, err=err})

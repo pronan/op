@@ -6,15 +6,12 @@ events {
     worker_connections  1024;
 }
 
-
 http {
     include       mime.types;
     default_type  "text/html; charset=UTF-8";
     lua_code_cache off;
-    access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-
 
     init_by_lua_file app/init.lua;
 
@@ -22,7 +19,6 @@ http {
         listen       80;
         server_name  www.wdksw.com wdksw.com;
         root html;
-        
 
         location / {
             content_by_lua_file app/main.lua;
@@ -43,6 +39,4 @@ http {
         }
     }
 
-
- 
 }

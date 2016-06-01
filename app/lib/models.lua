@@ -57,11 +57,11 @@ end
 
 function QueryManager.to_sql(self)
     --SELECT
-    if next(self._update)~=nil then
+    if next(self._update)~=nil or self._update_string~=nil then
         return self:to_sql_update()
-    elseif next(self._create)~=nil then
+    elseif next(self._create)~=nil or self._create_string~=nil then
         return self:to_sql_create()     
-    elseif next(self._delete)~=nil then
+    elseif next(self._delete)~=nil or self._delete_string~=nil then
         return self:to_sql_delete()
     else
         return self:to_sql_select() 
@@ -70,9 +70,18 @@ end
 function QueryManager.to_sql_update(self)
     --UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
     local statement = 'UPDATE %s SET %s%s;'
-    local attribute_args = self:get_attribute_args()
+    local update_args = self:get_update_args()
     local where_args = self:get_where_args()
-    return string.format(statement, self.table_name, attribute_args, where_args)
+    return string.format(statement, self.table_name, update_args, where_args)
+end
+function QueryManager.get_update_args(self)
+    if next(self._update)~=nil then 
+        return table.concat(parse_filter_args(self._update), ", ")
+    elseif self._update_string ~= nil then
+        return self._update_string
+    else
+        return ''
+    end
 end
 function QueryManager.get_where_args(self)
     if next(self._where)~=nil then 
