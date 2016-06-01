@@ -17,7 +17,7 @@ function m.sql(kwargs)
         --u:update{age=888}:where{name='has'}, 
         --u:order'id', 
         --u:create{age=5, name='yaoming', sex=1}, 
-        u:select"name, count(*) as cnt":group"name"
+        --u:select"name, count(*) as cnt":group"name"
     }
     local tables = {}
     local sqls = {}
