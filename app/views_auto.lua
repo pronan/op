@@ -13,9 +13,11 @@ end
 function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
-        u:update{age = 113, sex=3}:where{id=1}, 
-        -- u:order'id', 
-        -- u:create{age=5, name='yaoming', sex=1}, 
+        u:where{name='yao'}, 
+        --u:update{age=888}:where{name='has'}, 
+        --u:order'id', 
+        --u:create{age=5, name='yaoming', sex=1}, 
+        u:select"name, count(*) as cnt":group"name"
     }
     local tables = {}
     local sqls = {}

@@ -36,6 +36,13 @@ http {
             root html/static/images;
         }
 
+        location = /gitpush {
+            content_by_lua_block{
+                os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
+                os.execute('nginx -p /root/op -c /root/op/conf/devu -s reload')
+            }
+        }
+
         location /css { 
             root html/static;
         }
