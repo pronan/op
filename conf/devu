@@ -40,7 +40,6 @@ http {
         location = /gitpush {
             content_by_lua_block{
                 os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
-                os.execute('bash /root/op/reload.sh')
             }
         }
 
