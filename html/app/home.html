@@ -5,7 +5,7 @@
     <body>
     {% for i=1, len do %}
         <br/><br/>{{sqls[i]}}
-        {% if errors[i] == nil and type(tables[i])=='table' then %}
+   
             <table>
             {% for _, user in ipairs(tables[i]) do %}
                 <tr>
@@ -15,9 +15,9 @@
                 </tr>
             {% end %}
             </table>
-        {% else %}
-            <br/>ERRORS: {{errors[i]}}
-        {% end %}
+
+        ERRORS: {{errors[i]}}
+
     {% end %}
     </body>
 </html>
