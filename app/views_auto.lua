@@ -15,15 +15,15 @@ function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
         --u:where{id=1}, 
-        u:where{name='Vgbe'}, 
-        u:where{name='Abcd'}, 
-        u:where{id=4}, 
+        --u:where{name='Vgbe'}, 
+        u:where{name='Rfpd'}, 
+        --u:where{id=4}, 
         -- u:where{id2=5}, 
         -- u:select{}, 
         --u:update{age=888}:where{name='has'}, 
         --u:order'name':select'name, count(*) as cnt':group'name desc', 
         --u:create{age=5, name='yaoming', sex=1}, 
-        u:select"sex, count(*) as cnt":group"sex"
+        --u:select"sex, count(*) as cnt":group"sex"
     }
     local tables = {}
     local sqls = {}
@@ -35,6 +35,7 @@ function m.sql(kwargs)
         errors[#errors+1] = err or ''
     end
     return render"app/home.html"{tables=tables, sqls=sqls, errors=errors, len=#statements}
+    --return nil
 end
 function m.json(kwargs)
     ngx.header.content_type = 'application/json';

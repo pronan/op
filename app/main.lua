@@ -26,4 +26,3 @@ for regex, func in pairs(urls) do
     end
 end
 ngx.print("404 or 500")
-return ngx.exit(500)
