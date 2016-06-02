@@ -10,13 +10,15 @@
             {% for _, user in ipairs(tables[i]) do %}
                 <tr>
                 {% for key, value in pairs(user) do %}
-                <td>{{key}}</td><td>{{value}}</td>
+                    <td>{{key}}</td><td>{{value}}</td>
                 {% end %}
                 </tr>
             {% end %}
             </table>
 
-        ERRORS: {{errors[i]}}
+        {% if errors[i] ~= '' then %}
+            ERRORS: {{errors[i]}}
+        {% end %}
 
     {% end %}
     </body>

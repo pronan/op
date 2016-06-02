@@ -9,12 +9,11 @@ local function query(sql_statements)
     end
     db:set_timeout(1000) 
     res, err, errno, sqlstate = db:connect{
-        host = "127.0.0.1",
-        port = 3306,
+        host     = "127.0.0.1",
+        port     = 3306,
         database = "test",
-        user = "root",
-        password = "",
-        max_packet_size = 1024 * 1024 }
+        user     = "root",
+        password = ""}
     if not res then
         return res, err, errno, sqlstate
     end
