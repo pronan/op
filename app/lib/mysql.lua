@@ -35,4 +35,23 @@ function m.query(sql_statements)
     db._query_err = err
     return res, err, errno, sqlstate
 end
+
+function m.query2(sql_statements)
+    local res, err, errno, sqlstate;
+    db, err = mysql:new()
+    if not db then
+        return db, err
+    end
+    db:set_timeout(database.timeout) 
+    res, err, errno, sqlstate = db:connect(connect_table)
+    if not res then
+        return res, err, errno, sqlstate
+    end
+    res, err, errno, sqlstate =  db:query(sql_statements)
+    if res ~= nil then
+        db:set_keepalive(10000, 100)
+    end
+    return res, err, errno, sqlstate
+end
+
 return m

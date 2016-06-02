@@ -13,7 +13,10 @@ end
 function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
-        --u:where{name='yao'}, 
+        u:where{id=1}, 
+        u:where{id=20}, 
+        u:where{id=300}, 
+        u:select{}, 
         --u:update{age=888}:where{name='has'}, 
         u:order'name':select'name, count(*) as cnt':group'name desc', 
         --u:create{age=5, name='yaoming', sex=1}, 
@@ -23,10 +26,10 @@ function m.sql(kwargs)
     local sqls = {}
     local errors = {}
     for i,v in ipairs(statements) do
-        sqls[#sqls+1] = v:to_sql()
         res, err, errno, sqlstate = v:exec()
-        tables[#tables+1] = res
-        errors[#errors+1] = err 
+        sqls[#sqls+1] = v:to_sql() or ''
+        tables[#tables+1] = res or {}
+        errors[#errors+1] = err or 'None'
     end
     for i=1,#statements do
         --log(sqls[i], tables[i], errors[i])
