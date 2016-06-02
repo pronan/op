@@ -10,11 +10,12 @@ events {
 http {
     include       mime.types;
     default_type  "text/html; charset=UTF-8";
-    lua_code_cache off;
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
+
     #autoindex on;
+    #lua_code_cache off;
 
     init_by_lua_file app/init.lua;
 
@@ -39,13 +40,6 @@ http {
 
         location = /test {
             content_by_lua_file app/test.lua;
-        }
-
-        location = /gitpush {
-            content_by_lua_block{
-                os.execute('start browser')
-                os.execute('nginx -p /root/op -c /root/op/conf/devu -s reload')
-            }
         }
 
         location /css { 

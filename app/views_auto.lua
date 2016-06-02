@@ -1,5 +1,6 @@
 local query = require"app.lib.mysql".query
 local database = settings.database
+local render = require"app.lib.template".compile
 
 local m={}
 local function log( ... )
@@ -14,10 +15,10 @@ function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
         u:where{id=1}, 
-        u:where{id=2}, 
-        u:where{id2=3}, 
-        u:where{id=4}, 
-        u:where{id2=5}, 
+        --u:where{id=2}, 
+        --u:where{id2=3}, 
+        -- u:where{id=4}, 
+        -- u:where{id2=5}, 
         -- u:select{}, 
         --u:update{age=888}:where{name='has'}, 
         --u:order'name':select'name, count(*) as cnt':group'name desc', 
@@ -33,10 +34,7 @@ function m.sql(kwargs)
         tables[#tables+1] = res or {}
         errors[#errors+1] = err or ''
     end
-    for i=1,#statements do
-        --log(sqls[i], tables[i], errors[i])
-    end
-    template.render("app/home.html",{tables=tables, sqls=sqls, errors=errors, len=#statements})
+    return render"app/home.html"{tables=tables, sqls=sqls, errors=errors, len=#statements}
 end
 function m.json(kwargs)
     ngx.header.content_type = 'application/json';

@@ -4,7 +4,6 @@ redis = require "resty.redis"
 ws_server = require "resty.websocket.server"
 upload = require "resty.upload"
 str = require "resty.string"
-template = require"app.lib.template"
 helper = require"app.lib.helper"
 settings = require"app.settings"
 smt = setmetatable
