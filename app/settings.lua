@@ -1,3 +1,4 @@
+local MIDDLEWARES = require"app.middlewares"
 local m = {}
 
 m.database = {
@@ -7,20 +8,20 @@ m.database = {
     user = 'root', 
     password = '', 
     timeout = 1000, 
-    pool_size = 500, 
-    max_age = 1000, 
+    pool_size = 800, 
+    max_age = 10000, 
 }
 
-local middlewares = {
+local middlewares_pre = {
+    --MIDDLEWARES.auto_keepalive, 
+}
+local middlewares_post = {
     
 }
-local middlewares_reversed = {
-    
-}
-for i,v in ipairs(middlewares) do
-    middlewares_reversed[#middlewares-i+1] = v
+for i,v in ipairs(middlewares_pre) do
+    middlewares_post[#middlewares_pre-i+1] = v
 end
-m.middlewares = middlewares
-m.middlewares_reversed = middlewares_reversed
+m.middlewares_pre = middlewares_pre
+m.middlewares_post = middlewares_post
 
 return m

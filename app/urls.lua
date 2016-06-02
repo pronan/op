@@ -22,5 +22,4 @@ url('^/users/(?<pk>\\d+?)$', views.json)
 url('^/guide$', views.guide)
 url('^/inspect/(?<name>.+?)$', views.inspect)
 url('^/global$', views.global)
-url('/init', views.init)
 return urlpatterns

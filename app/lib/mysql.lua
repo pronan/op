@@ -25,6 +25,9 @@ function m.query(statement)
     return res, err, errno, sqlstate
 end
 
+local function _set_keepalive()
+    ngx.ctx._db:set_keepalive(database.max_age, database.pool_size)
+end
 function m.query2(statement)
     local db = ngx.ctx._db
     local res, err, errno, sqlstate;
@@ -41,9 +44,7 @@ function m.query2(statement)
         ngx.ctx._db = db
     end
     res, err, errno, sqlstate =  db:query(statement)
-    if res ~= nil then
-        db.
-    else
+    if res == nil then
         ngx.ctx._db = nil
     end
     return res, err, errno, sqlstate

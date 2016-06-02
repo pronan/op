@@ -14,16 +14,16 @@ end
 function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
-        u:where{id=1}, 
-        --u:where{id=2}, 
-        --u:where{id2=3}, 
-        -- u:where{id=4}, 
+        --u:where{id=1}, 
+        u:where{name='Vgbe'}, 
+        u:where{name='Abcd'}, 
+        u:where{id=4}, 
         -- u:where{id2=5}, 
         -- u:select{}, 
         --u:update{age=888}:where{name='has'}, 
         --u:order'name':select'name, count(*) as cnt':group'name desc', 
         --u:create{age=5, name='yaoming', sex=1}, 
-        --u:select"name, count(*) as cnt":group"name"
+        u:select"sex, count(*) as cnt":group"sex"
     }
     local tables = {}
     local sqls = {}
@@ -41,5 +41,32 @@ function m.json(kwargs)
     local u = require"app.models".User
     local users = u:where{name='yao'}:to_sql()
     say(encode{res=users}) 
+end
+local function ran(step)
+    step = step or 10
+    int, _ = math.modf(math.random()*step, step)
+    return int
+end
+function m.init( kw )
+    query("drop table if exists user")
+    query("create table user "
+         .. "(id serial primary key, "
+         .. "name varchar(10), "
+         .. "sex integer, "
+         .. "age integer"
+         ..")"
+         )
+    for i = 1, 1000 do
+        local name = table.concat({
+            string.char(math.random(65, 90)), 
+            string.char(math.random(97, 122)), 
+            string.char(math.random(97, 122)),
+            string.char(math.random(97, 122)),
+            }, "")
+        query(
+            string.format([[insert into user(name, sex, age) values ('%s', %s, %s);]], name, ran(4), ran(120) )
+        )
+    end
+    ngx.say('table is created')
 end
 return m
