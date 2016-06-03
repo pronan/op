@@ -1,4 +1,11 @@
 local Models = require"app.lib.models"
-local m = {}
-m.User = Models:new{table_name='user'}
-return m
+local _M = {}
+_M.User = Models:new{table_name='user', 
+    fields = {
+        {name = 'id'}, 
+        {name = 'name'}, 
+        {name = 'age'}, 
+        {name = 'sex'}, 
+    }, 
+}
+return _M

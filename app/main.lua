@@ -12,13 +12,14 @@ for regex, func in pairs(urls) do
                 ware.pre_request(capture)
             end
         end
-        local response = func(capture)
+        local response, err = func(capture)
         for i, ware in ipairs(middlewares_reversed) do
             if ware.post_request then
                 ware.post_request(capture)
             end
         end
         if not response then
+            ngx.log(ngx.ERR, tostring(err))
             return ngx.exit(500)
         else
             return ngx.print(response)

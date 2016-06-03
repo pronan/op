@@ -14,11 +14,11 @@ end
 function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
-        u:where{id=1}, 
-        u:where{name='Xihn'}, 
-        u:select{'id', 'name', 'age'}:where{id__in={1, 2, 6}, age__gte=18}, 
-        u:select{}:where'id <10 and (sex=1 or age>50)', 
-        u:select{'sex','count(*) as cnt'}:group'sex':order'cnt desc'
+        u:where'id = 333', 
+        -- u:where{name='Xihn'}, 
+        -- u:select{'id', 'name', 'age'}:where{id__in={1, 2, 6}, age__gte=18}, 
+        -- u:select{}:where'id <10 and (sex=1 or age>50)', 
+        -- u:select{'sex','count(*) as cnt'}:group'sex':order'cnt desc'
         --u:update{age=888}:where{name='has'}, 
 
         --u:order'name':select'name, count(*) as cnt':group'name desc', 
@@ -33,6 +33,26 @@ function m.sql(kwargs)
         sqls[#sqls+1] = v:to_sql() or ''
         tables[#tables+1] = res or {}
         errors[#errors+1] = err or ''
+    end
+    -- for i,user in ipairs(u:select{'id', 'name', 'age'}:where{id__in={1, 2, 6}, age__gte=18}:exec()) do
+    --     user.name = 'Emacs'
+    --     user:save()
+    -- end
+    -- insert_id   0   number
+    -- server_status   2   number
+    -- warning_count   0   number
+    -- affected_rows   1   number
+    -- message   (Rows matched: 1  Changed: 0  Warnings: 0   string
+    --local res, err = u:update{age=25, name='ppaoloe', sex=2}:where{id = 33}:exec()
+    -- local new_user, err = u:create{age = 100, name = 'mmmm', sex = 1}:exec()
+    -- new_user.age = 1011
+    -- new_user.name = 'xmxmxmxm'
+    -- new_user:save()
+    local res, err = u:get{id = 333}
+    res.name = 'pjl'
+    res:save()
+    for i,v in pairs(res) do
+        say(string.format('%s   %s   %s', i,v, type(v)))
     end
     return render"app/home.html"{tables=tables, sqls=sqls, errors=errors, len=#statements}
     --return nil

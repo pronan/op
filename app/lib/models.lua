@@ -72,14 +72,25 @@ local function parse_filter_args(kwargs)
     return conditions
 end
 local Row = {}
-function Row.new(self, attrs)
+function Row.new(self, attrs, _meta, _query)
     attrs = attrs or {}
     setmetatable(attrs, self)
     self.__index = self
-    return attrs:init()
+    attrs._meta = _meta
+    attrs._query  =  _query
+    return attrs
 end
 function Row.save(self)
-    
+    local fields = self._meta.fields
+    local table_name = self._meta.table_name
+    local valid_attrs = {}
+    for i,field in ipairs(fields) do
+        local value = self[field.name]
+        if value ~= nil then
+            valid_attrs[field.name] = value
+        end
+    end
+    local res, err = self._query:new{table_name=table_name}:update(valid_attrs):where{id=self.id}:exec()
     return self
 end
 local QueryManager = {}
@@ -103,13 +114,15 @@ local function update(self, other)
             self[i] = v;
         end
     end
+    return self
 end
 local function extend(self, other)
     for i,v in ipairs(other) do
         self[#self+1] = v
     end
+    return self
 end
-local sql_method_names = {select=extend, group=extend, order=extend, 
+local sql_method_names = {select=extend, group=extend, order=extend,
     create=update, update=update, where=update, having=update, delete=update,}
 
 -- add methods by a loop    
@@ -143,22 +156,20 @@ function QueryManager.to_sql(self)
         return self:to_sql_create()     
     elseif next(self._delete)~=nil or self._delete_string~=nil then
         return self:to_sql_delete()
-    else
+    else -- q:select or q:get
         return self:to_sql_select() 
     end
 end
 function QueryManager.to_sql_update(self)
     --UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
-    local statement = 'UPDATE %s SET %s%s;'
-    local update_args = self:get_update_args()
-    local where_args = self:get_where_args()
-    return string.format(statement, self.table_name, update_args, where_args)
+    return string.format('UPDATE %s SET %s%s;', self.table_name, 
+        self:get_update_args(), self:get_where_args())
 end
 function QueryManager.to_sql_create(self)
     --UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
-    local statement = 'INSERT INTO %s (%s) VALUES (%s);'
     local create_columns, create_values = self:get_create_args()
-    return string.format(statement, self.table_name, create_columns, create_values)
+    return string.format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, 
+        create_columns, create_values)
 end
 function QueryManager.get_create_args(self)
     local cols = {}
@@ -240,8 +251,62 @@ function QueryManager.to_sql_select(self)
     return string.format(statement, select_args, self.table_name, where_args, 
         group_args, having_args, order_args)
 end
-function QueryManager.exec(self)
+function QueryManager.get(self, params)
+    -- special process for get
+    if type(params) == 'table' then
+        update(self._where, params)
+    else
+        self['_where_string'] = params
+    end 
+    local where_args = self:get_where_args()
+    if where_args == '' then
+        return nil, 'filter arguments must be provied'
+    end  
+    local statement = string.format('SELECT * FROM %s%s;', self.table_name, where_args)
+    local res, err = RawQuery(statement)
+    if not res then
+        return res, err
+    end
+    if #res ~= 1 then
+        return nil, 'result count must equal 1'
+    end
+    return Row:new(res[1], {table_name=self.table_name, fields=self.fields}, QueryManager)
+end
+function QueryManager.exec_raw(self)
     return RawQuery(self:to_sql())
+end
+    -- insert_id   0   number --0代表是update
+    -- server_status   2   number
+    -- warning_count   0   number
+    -- affected_rows   1   number
+    -- message   (Rows matched: 1  Changed: 0  Warnings: 0   string
+
+    -- insert_id   1006   number --大于0代表成功的insert
+    -- server_status   2   number
+    -- warning_count   0   number
+    -- affected_rows   1   number
+function QueryManager.exec(self)
+    local res, err = RawQuery(self:to_sql())
+    if not res then
+        return res, err
+    end
+    local altered = res.insert_id
+    if altered ~= nil then
+        -- update or insert 
+        if altered > 0 then --insert
+            return Row:new(extend({id = altered}, self._create), 
+                {table_name=self.table_name, fields=self.fields}, QueryManager)
+        else
+            return res
+        end
+    else
+        local wrapped_res = {} 
+        local _meta = {table_name=self.table_name, fields=self.fields}
+        for i, attrs in ipairs(res) do
+            wrapped_res[i] = Row:new(attrs, _meta, QueryManager)--vs: Row:new(attrs, _meta, self)
+        end
+        return wrapped_res
+    end
 end
 
 local Model = {}
@@ -251,8 +316,12 @@ function Model.new(self, ins)
     self.__index = self
     return ins
 end
+function Model.get(self, params)
+    -- special process for get
+    return self:_proxy_sql('get', params)
+end
 function Model._proxy_sql(self, method, params)
-    local handler = QueryManager:new{table_name=self.table_name}
+    local handler = QueryManager:new{table_name=self.table_name, fields=self.fields}
     return handler[method](handler, params)
 end
 for method_name, func in pairs(sql_method_names) do
