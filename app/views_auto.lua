@@ -14,16 +14,15 @@ end
 function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
-        --u:where{id=1}, 
-        --u:where{name='Vgbe'}, 
-        u:where{name='Rfpd'}, 
-        --u:where{id=4}, 
-        -- u:where{id2=5}, 
-        -- u:select{}, 
-        u:update{age=888}:where{name='has'}, 
+        u:where{id=1}, 
+        u:where{name='Xihn'}, 
+        u:select{'id', 'name', 'age'}:where{id__in={1, 2, 6}, age__gte=18}, 
+        u:select{}:where'id <10 and (sex=1 or age>50)', 
+        u:select{'sex','count(*) as cnt'}:group'sex':order'cnt desc'
+        --u:update{age=888}:where{name='has'}, 
 
         --u:order'name':select'name, count(*) as cnt':group'name desc', 
-        u:create{age=5, name='yaoming', sex=1}, 
+        --u:create{age=5, name='yaoming', sex=1}, 
         --u:select"sex, count(*) as cnt":group"sex"
     }
     local tables = {}

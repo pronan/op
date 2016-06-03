@@ -20,14 +20,15 @@ function m.query(statement)
     end
     res, err, errno, sqlstate =  db:query(statement)
     if res ~= nil then
-        db:set_keepalive(database.max_age, database.pool_size)
+        local ok, err = db:set_keepalive(database.max_age, database.pool_size)
+        if not ok then
+            ngx.log(ngx.ERR, 'fail to set_keepalive')
+        end
     end
     return res, err, errno, sqlstate
 end
 
-local function _set_keepalive()
-    ngx.ctx._db:set_keepalive(database.max_age, database.pool_size)
-end
+
 function m.query2(statement)
     local db = ngx.ctx._db
     local res, err, errno, sqlstate;

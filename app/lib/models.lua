@@ -1,37 +1,119 @@
-local query = require"app.lib.mysql".query
--- local repr_list = helper.repr_list
--- local list = helper.list
--- local copy = helper.copy
--- local update = helper.update
--- local extend = helper.extend
+local mysql = require "resty.mysql"
+
+local CONNECT_TABLE = { host = "127.0.0.1",  port = 3306, 
+    database = "test",  user = 'root',  password = '', 
+    --path = '/var/run/mysqld/mysqld.sock', 
+    --max_packet_size  = 1024*1024, 
+    --compact_arrays = false, 
+}
+
+local TIMEOUT = 1000 
+local MAX_IDLE_TIMEOUT = 10000
+local POOL_SIZE = 800
+
+local function RawQuery(statement)
+    -- it's the caller's duty to handle error.
+    local res, err, errno, sqlstate;
+    db, err = mysql:new()
+    if not db then
+        return db, err
+    end
+    db:set_timeout(TIMEOUT) 
+    res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
+    if not res then
+        return res, err, errno, sqlstate
+    end
+    res, err, errno, sqlstate =  db:query(statement)
+    if res ~= nil then
+        local ok, err = db:set_keepalive(MAX_IDLE_TIMEOUT, POOL_SIZE)
+        if not ok then
+            ngx.log(ngx.ERR, 'fail to set_keepalive')
+        end
+    end
+    return res, err, errno, sqlstate
+end
 
 local function log( ... )
     ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "~~")))
 end
 
-local relation_op = {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
-local function parse_filter_args(t)
+local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
+local function parse_filter_args(kwargs)
+    -- turn a hash table such as {age=23, id__in={1, 2, 3}} to a string array
+    -- {'age = 23', 'id IN (1, 2, 3)'}
     local conditions = {}
-    for key, value in pairs(t) do
-        local field, op = unpack(list(key:gmatch('%w+')))
-        if op == nil then
-            op = '='
+    for key, value in pairs(kwargs) do
+        -- split string like 'age__lt' to 'age' and 'lt'
+        local capture = string.gmatch(key, '%w+')
+        local field, operator = capture(), capture()
+        if operator == nil then
+            operator = '='
         else
-            op = relation_op[op] or '='
+            operator = RELATIONS[operator] or '='
         end
         if type(value) == 'string' then
             value = string.format([['%s']], value)
-        elseif type(value) == 'table' then
-            value = repr_list(value)
+        elseif type(value) == 'table' then 
+            -- such as: SELECT * FROM user WHERE name in ('a', 'b', 'c');
+            local res = {}
+            for i,v in ipairs(value) do
+                if type(v) == 'string' then
+                    res[i] = string.format([['%s']], v)
+                else
+                    res[i] = tostring(v)
+                end
+            end
+            value = '('..table.concat( res, ", ")..')'
+        else
+            value = tostring(value)
         end
-        conditions[#conditions+1] = string.format(' %s %s %s ', field, op, value)
+        conditions[#conditions+1] = string.format(' %s %s %s ', field, operator, value)
     end
     return conditions
 end
 
 local QueryManager = {}
-local sql_method_names = {create=update, update=update, delete=update, 
-    select=extend, where=update, group=extend, having=update, order=extend}
+
+local function copy(old)
+    local res = {};
+    for i,v in pairs(old) do
+        if type(v) == "table" then
+            res[i] = copy(v);
+        else
+            res[i] = v;
+        end
+    end
+    return res;
+end
+local function update(self, other)
+    for i,v in pairs(other) do
+        if type(v) == "table" then
+            self[i] = copy(v);
+        else
+            self[i] = v;
+        end
+    end
+end
+local function extend(self, other)
+    for i,v in ipairs(other) do
+        self[#self+1] = v
+    end
+end
+local sql_method_names = {select=extend, group=extend, order=extend, 
+    create=update, update=update, where=update, having=update, delete=update,}
+
+-- add methods by a loop    
+for method_name, table_processor in pairs(sql_method_names) do
+    QueryManager[method_name] = function(self, params)
+        if type(params) == 'table' then
+            table_processor(self['_'..method_name], params)
+        else
+            self['_'..method_name..'_string'] = params
+        end 
+        return self
+    end
+end
+
 function QueryManager.new(self, handler)
     handler = handler or {}
     setmetatable(handler, self)
@@ -44,19 +126,7 @@ function QueryManager.init(self)
     end
     return self
 end
-for method_name, func in pairs(sql_method_names) do
-    QueryManager[method_name] = function(self, params)
-        if type(params) == 'table' then
-            func(self['_'..method_name], params)
-        else
-            self['_'..method_name..'_string'] = params
-        end 
-        return self
-    end
-end
-
 function QueryManager.to_sql(self)
-    --SELECT
     if next(self._update)~=nil or self._update_string~=nil then
         return self:to_sql_update()
     elseif next(self._create)~=nil or self._create_string~=nil then
@@ -85,7 +155,12 @@ function QueryManager.get_create_args(self)
     local vals = {}
     for k,v in pairs(self._create) do
         cols[#cols+1] = k
-        vals[#vals+1] = repr(v)
+        if type(v) == 'string' then
+            v = string.format([['%s']], v)
+        else
+            v = tostring(v)
+        end
+        vals[#vals+1] = v
     end
     return table.concat( cols, ", "), table.concat( vals, ", ")
 end
@@ -156,7 +231,7 @@ function QueryManager.to_sql_select(self)
         group_args, having_args, order_args)
 end
 function QueryManager.exec(self)
-    return query(self:to_sql())
+    return RawQuery(self:to_sql())
 end
 
 local Model = {}
