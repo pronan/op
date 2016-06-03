@@ -20,9 +20,10 @@ function m.sql(kwargs)
         --u:where{id=4}, 
         -- u:where{id2=5}, 
         -- u:select{}, 
-        --u:update{age=888}:where{name='has'}, 
+        u:update{age=888}:where{name='has'}, 
+
         --u:order'name':select'name, count(*) as cnt':group'name desc', 
-        --u:create{age=5, name='yaoming', sex=1}, 
+        u:create{age=5, name='yaoming', sex=1}, 
         --u:select"sex, count(*) as cnt":group"sex"
     }
     local tables = {}
