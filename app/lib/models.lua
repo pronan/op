@@ -71,7 +71,17 @@ local function parse_filter_args(kwargs)
     end
     return conditions
 end
-
+local Row = {}
+function Row.new(self, attrs)
+    attrs = attrs or {}
+    setmetatable(attrs, self)
+    self.__index = self
+    return attrs:init()
+end
+function Row.save(self)
+    
+    return self
+end
 local QueryManager = {}
 
 local function copy(old)
