@@ -93,6 +93,11 @@ function Row.save(self)
     local res, err = self._query:new{table_name=table_name}:update(valid_attrs):where{id=self.id}:exec()
     return self
 end
+function Row.delete(self)
+    local res, err = self._query:new{table_name=self._meta.table_name}:delete{id=self.id}:exec()
+    return res, err
+end
+
 local QueryManager = {}
 
 local function copy(old)
@@ -141,6 +146,7 @@ function QueryManager.new(self, handler)
     handler = handler or {}
     setmetatable(handler, self)
     self.__index = self
+    self.__unm = function (t) return t:exec() end
     return handler:init()
 end
 function QueryManager.init(self)
@@ -166,10 +172,17 @@ function QueryManager.to_sql_update(self)
         self:get_update_args(), self:get_where_args())
 end
 function QueryManager.to_sql_create(self)
-    --UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
     local create_columns, create_values = self:get_create_args()
     return string.format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, 
         create_columns, create_values)
+end
+function QueryManager.to_sql_delete(self)
+    --UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
+    local where_args = self:get_delete_args()
+    if where_args == '' then
+        return nil, 'where clause must be provided for delete statement'
+    end
+    return string.format('DELETE FROM %s%s;', self.table_name, where_args)
 end
 function QueryManager.get_create_args(self)
     local cols = {}
@@ -200,6 +213,15 @@ function QueryManager.get_where_args(self)
         return ' WHERE '..table.concat(parse_filter_args(self._where), " AND ")
     elseif self._where_string ~= nil then
         return ' WHERE '..self._where_string
+    else
+        return ''
+    end
+end
+function QueryManager.get_delete_args(self)
+    if next(self._delete)~=nil then 
+        return ' WHERE '..table.concat(parse_filter_args(self._delete), " AND ")
+    elseif self._delete_string ~= nil then
+        return ' WHERE '..self._delete_string
     else
         return ''
     end
@@ -273,9 +295,13 @@ function QueryManager.get(self, params)
     return Row:new(res[1], {table_name=self.table_name, fields=self.fields}, QueryManager)
 end
 function QueryManager.exec_raw(self)
-    return RawQuery(self:to_sql())
+    local statement, err = self:to_sql()
+    if not statement then
+        return nil, err
+    end
+    return RawQuery(statement)
 end
-    -- insert_id   0   number --0代表是update
+    -- insert_id   0   number --0代表是update 或 delete
     -- server_status   2   number
     -- warning_count   0   number
     -- affected_rows   1   number
@@ -286,26 +312,35 @@ end
     -- warning_count   0   number
     -- affected_rows   1   number
 function QueryManager.exec(self)
-    local res, err = RawQuery(self:to_sql())
+    local statement, err = self:to_sql()
+    if not statement then
+        return nil, err
+    end
+    local res, err = RawQuery(statement)
     if not res then
         return res, err
     end
     local altered = res.insert_id
     if altered ~= nil then
-        -- update or insert 
+        -- update or insert or delete
         if altered > 0 then --insert
             return Row:new(extend({id = altered}, self._create), 
                 {table_name=self.table_name, fields=self.fields}, QueryManager)
         else
             return res
         end
-    else
+    elseif (next(self._group) == nil and self._group_string == nil and
+            next(self._having) == nil and self._having_string == nil ) then
+        -- wrapp the result only for non-aggregation query.
         local wrapped_res = {} 
         local _meta = {table_name=self.table_name, fields=self.fields}
         for i, attrs in ipairs(res) do
             wrapped_res[i] = Row:new(attrs, _meta, QueryManager)--vs: Row:new(attrs, _meta, self)
         end
         return wrapped_res
+    else
+        say('select...')
+        return res
     end
 end
 

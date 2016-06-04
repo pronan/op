@@ -1,9 +1,9 @@
 encode = require"cjson".encode
 --mysql = require "resty.mysql"
-redis = require "resty.redis"
-ws_server = require "resty.websocket.server"
-upload = require "resty.upload"
-str = require "resty.string"
+-- redis = require "resty.redis"
+-- ws_server = require "resty.websocket.server"
+-- upload = require "resty.upload"
+-- str = require "resty.string"
 helper = require"app.lib.helper"
 settings = require"app.settings"
 smt = setmetatable

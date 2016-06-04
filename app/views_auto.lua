@@ -11,6 +11,13 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
+function m.test(  )
+    --ngx.say('can')
+
+    ngx.say('fall back to main test...')
+
+    return 'ahaha', '*************12344'
+end
 function m.sql(kwargs)
     local u = require"app.models".User
     local statements = {
@@ -48,12 +55,18 @@ function m.sql(kwargs)
     -- new_user.age = 1011
     -- new_user.name = 'xmxmxmxm'
     -- new_user:save()
-    local res, err = u:get{id = 333}
-    res.name = 'pjl'
-    res:save()
-    for i,v in pairs(res) do
-        say(string.format('%s   %s   %s', i,v, type(v)))
+    -- local res, err = u:get{id = 333}
+    -- res.name = 'pjlxx'
+    -- res:save()
+    for i,v in ipairs(-u:where{id__gte=1012}:order"age") do
+        say(v.id, ' ', v.name, ' ', v.age, tostring(v._meta), '<br/>')
+        v:delete()
     end
+    local res, err = query('delete from user where id=333')
+    say(repr(res), err)
+    -- for i,v in pairs(res) do
+    --     say(string.format('%s   %s   %s', i,v, type(v)))
+    -- end
     return render"app/home.html"{tables=tables, sqls=sqls, errors=errors, len=#statements}
     --return nil
 end
