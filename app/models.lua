@@ -1,8 +1,8 @@
-local Models = require"app.lib.models"
+local Model = require"app.lib.models".Model
 local _M = {}
-_M.User = Models:new{table_name='user', 
+_M.User = Model:new{table_name='users', 
     fields = {
-        {name = 'id'}, 
+        {name = 'id' }, 
         {name = 'name'}, 
         {name = 'age'}, 
         {name = 'sex'}, 

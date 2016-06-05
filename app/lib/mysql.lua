@@ -1,26 +1,24 @@
-local mysql = require "resty.mysql"
-
+local databases = require"app.settings".databases
 local m = {}
-local database = settings.database
-local connect_table = {database = database.name,
-    host = database.host, port = database.port,
-    user = database.user, password = database.password,
-}
 
-function m.query(statement)
+function m.query(statement, using)
     local res, err, errno, sqlstate;
-    db, err = mysql:new()
+    local database = databases[using or 'default']
+    local db, err = require(database.engine):new()
     if not db then
         return db, err
     end
     db:set_timeout(database.timeout) 
-    res, err, errno, sqlstate = db:connect(connect_table)
+    res, err, errno, sqlstate = db:connect{database = database.database,
+        host = database.host, port = database.port,
+        user = database.user, password = database.password,
+    }
     if not res then
         return res, err, errno, sqlstate
     end
     res, err, errno, sqlstate =  db:query(statement)
     if res ~= nil then
-        local ok, err = db:set_keepalive(database.max_age, database.pool_size)
+        local ok, err = db:set_keepalive(database.max_idle_timeout, database.pool_size)
         if not ok then
             ngx.log(ngx.ERR, 'fail to set_keepalive')
         end

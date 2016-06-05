@@ -1,45 +1,62 @@
-local mysql = require "resty.mysql"
-
-local CONNECT_TABLE = { host = "127.0.0.1",  port = 3306, 
-    database = "test",  user = 'root',  password = '', 
-    --path = '/var/run/mysqld/mysqld.sock', 
-    --max_packet_size  = 1024*1024, 
-    --compact_arrays = false, 
+local DATABASES ={
+    default = {
+        engine = "resty.mysql", 
+        host = "127.0.0.1", 
+        port = 3306, 
+        database = "test", 
+        user = 'root', 
+        password = '', 
+        timeout = 1000, 
+        pool_size = 800, 
+        max_idle_timeout = 10000, 
+    }, 
+    postgresql = {
+        engine = "resty.postgres", 
+        host = "127.0.0.1", 
+        port = 5432, 
+        database = "postgres", 
+        user = 'postgres', 
+        password = '123', 
+        timeout = 1000, 
+        pool_size = 800, 
+        max_idle_timeout = 10000, 
+    }
 }
 
-local TIMEOUT = 1000 
-local MAX_IDLE_TIMEOUT = 10000
-local POOL_SIZE = 800
-
-local function RawQuery(statement)
-    -- it's the caller's duty to handle error.
-    local res, err, errno, sqlstate;
-    db, err = mysql:new()
-    if not db then
-        return db, err
-    end
-    db:set_timeout(TIMEOUT) 
-    res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
-    if not res then
-        return res, err, errno, sqlstate
-    end
-    res, err, errno, sqlstate =  db:query(statement)
-    if res ~= nil then
-        local ok, err = db:set_keepalive(MAX_IDLE_TIMEOUT, POOL_SIZE)
-        if not ok then
-            ngx.log(ngx.ERR, 'fail to set_keepalive')
+--helper functions
+local function copy(old)
+    local res = {};
+    for i,v in pairs(old) do
+        if type(v) == "table" and v ~= old then
+            res[i] = copy(v)
+        else
+            res[i] = v;
         end
     end
-    return res, err, errno, sqlstate
+    return res;
 end
-
+local function update(self, other)
+    for i,v in pairs(other) do
+        if type(v) == "table" then
+            self[i] = copy(v);
+        else
+            self[i] = v;
+        end
+    end
+    return self
+end
+local function extend(self, other)
+    for i,v in ipairs(other) do
+        self[#self+1] = v
+    end
+    return self
+end
 local function log( ... )
     ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "~~")))
 end
-
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(kwargs)
-    -- turn a hash table such as {age=23, id__in={1, 2, 3}} to a string array
+    -- turn a hash table such as {age=23, id__in={1, 2, 3}} to a string array:
     -- {'age = 23', 'id IN (1, 2, 3)'}
     local conditions = {}
     for key, value in pairs(kwargs) do
@@ -71,83 +88,79 @@ local function parse_filter_args(kwargs)
     end
     return conditions
 end
+
+local function RawQuery(statement, using)
+    local res, err, errno, sqlstate;
+    local database = DATABASES[using or 'default']
+    local db, err = require(database.engine):new()
+    if not db then
+        return db, err
+    end
+    db:set_timeout(database.timeout) 
+    res, err, errno, sqlstate = db:connect{database = database.database,
+        host = database.host, port = database.port,
+        user = database.user, password = database.password,
+    }
+    if not res then
+        return res, err, errno, sqlstate
+    end
+    res, err, errno, sqlstate =  db:query(statement)
+    if res ~= nil then
+        local ok, err = db:set_keepalive(database.max_idle_timeout, database.pool_size)
+        if not ok then
+            ngx.log(ngx.ERR, 'fail to set_keepalive')
+        end
+    end
+    return res, err, errno, sqlstate
+end
+
 local Row = {}
-function Row.new(self, attrs, _meta, _query)
+function Row.new(self, attrs)
+    -- requires a attribute called `QueryManager` that's derived from QueryManager
     attrs = attrs or {}
     setmetatable(attrs, self)
     self.__index = self
-    attrs._meta = _meta
-    attrs._query  =  _query
     return attrs
 end
 function Row.save(self)
-    local fields = self._meta.fields
-    local table_name = self._meta.table_name
     local valid_attrs = {}
-    for i,field in ipairs(fields) do
+    for i,field in ipairs(self.QueryManager.fields) do
         local value = self[field.name]
         if value ~= nil then
             valid_attrs[field.name] = value
         end
     end
-    local res, err = self._query:new{table_name=table_name}:update(valid_attrs):where{id=self.id}:exec()
+    local res, err = self.QueryManager:new{}:update(valid_attrs):where{id=self.id}:exec()
+    self._res, self._err = res, err
     return self
 end
 function Row.delete(self)
-    local res, err = self._query:new{table_name=self._meta.table_name}:delete{id=self.id}:exec()
+    local res, err = self.QueryManager:new{}:delete{id=self.id}:exec()
     return res, err
 end
 
 local QueryManager = {}
-
-local function copy(old)
-    local res = {};
-    for i,v in pairs(old) do
-        if type(v) == "table" then
-            res[i] = copy(v);
-        else
-            res[i] = v;
-        end
-    end
-    return res;
-end
-local function update(self, other)
-    for i,v in pairs(other) do
-        if type(v) == "table" then
-            self[i] = copy(v);
-        else
-            self[i] = v;
-        end
-    end
-    return self
-end
-local function extend(self, other)
-    for i,v in ipairs(other) do
-        self[#self+1] = v
-    end
-    return self
-end
 local sql_method_names = {select=extend, group=extend, order=extend,
     create=update, update=update, where=update, having=update, delete=update,}
-
 -- add methods by a loop    
-for method_name, table_processor in pairs(sql_method_names) do
+for method_name, processor in pairs(sql_method_names) do
     QueryManager[method_name] = function(self, params)
         if type(params) == 'table' then
-            table_processor(self['_'..method_name], params)
+            processor(self['_'..method_name], params)
         else
             self['_'..method_name..'_string'] = params
         end 
         return self
     end
 end
-
-function QueryManager.new(self, handler)
-    handler = handler or {}
-    setmetatable(handler, self)
+function QueryManager.new(self, subclass)
+    subclass = subclass or {}
+    setmetatable(subclass, self)
     self.__index = self
+    -- a shortcut for execute the statement
     self.__unm = function (t) return t:exec() end
-    return handler:init()
+    subclass.Row = Row:new{QueryManager = subclass}
+    return subclass:init()
 end
 function QueryManager.init(self)
     for method_name, _ in pairs(sql_method_names) do
@@ -292,7 +305,7 @@ function QueryManager.get(self, params)
     if #res ~= 1 then
         return nil, 'result count must equal 1'
     end
-    return Row:new(res[1], {table_name=self.table_name, fields=self.fields}, QueryManager)
+    return self.Row:new(res[1])
 end
 function QueryManager.exec_raw(self)
     local statement, err = self:to_sql()
@@ -322,11 +335,10 @@ function QueryManager.exec(self)
     end
     local altered = res.insert_id
     if altered ~= nil then
-        -- update or insert or delete
+        -- update or delete or insert
         if altered > 0 then --insert
-            return Row:new(extend({id = altered}, self._create), 
-                {table_name=self.table_name, fields=self.fields}, QueryManager)
-        else
+            return self.Row:new(extend({id = altered}, self._create))
+        else --update or delete
             return res
         end
     elseif (next(self._group) == nil and self._group_string == nil and
@@ -335,34 +347,35 @@ function QueryManager.exec(self)
         local wrapped_res = {} 
         local _meta = {table_name=self.table_name, fields=self.fields}
         for i, attrs in ipairs(res) do
-            wrapped_res[i] = Row:new(attrs, _meta, QueryManager)--vs: Row:new(attrs, _meta, self)
+            wrapped_res[i] = self.Row:new(attrs)
         end
         return wrapped_res
     else
-        say('select...')
         return res
     end
 end
 
 local Model = {}
-function Model.new(self, ins)
-    ins = ins or {}
-    setmetatable(ins, self)
+function Model.new(self, subclass)
+    subclass = subclass or {}
+    setmetatable(subclass, self)
     self.__index = self
-    return ins
-end
-function Model.get(self, params)
-    -- special process for get
-    return self:_proxy_sql('get', params)
+    subclass.QueryManager = QueryManager:new{table_name=subclass.table_name, 
+        fields=subclass.fields}
+    return subclass
 end
 function Model._proxy_sql(self, method, params)
-    local handler = QueryManager:new{table_name=self.table_name, fields=self.fields}
-    return handler[method](handler, params)
+    local subclass = self.QueryManager:new{}
+    return subclass[method](subclass, params)
 end
 for method_name, func in pairs(sql_method_names) do
     Model[method_name] = function(self, params)
         return self:_proxy_sql(method_name, params)
     end
 end
+function Model.get(self, params)
+    -- special process for get
+    return self:_proxy_sql('get', params)
+end
 
-return Model
+return {Model = Model, RawQuery = RawQuery, QueryManager = QueryManager}

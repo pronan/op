@@ -81,7 +81,7 @@ end
 function m.copy(old)
     local res = {};
     for i,v in pairs(old) do
-        if type(v) == "table" then
+        if type(v) == "table" and v ~= old then
             res[i] = m.copy(v);
         else
             res[i] = v;
@@ -112,6 +112,8 @@ function m.repr(obj)
         for k,v in pairs(obj) do
             if type(k) == 'number' then
                 res[#res+1] = m.repr(v)
+            elseif obj == v then
+                res[#res+1] = string.format([[[%s]=*self*]], m.repr(k))
             else
                 res[#res+1] = string.format([[[%s]=%s]], m.repr(k), m.repr(v))
             end

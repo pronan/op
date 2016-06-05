@@ -1,4 +1,4 @@
-local query = require"app.lib.mysql".query
+local query = require"app.lib.models".RawQuery
 local database = settings.database
 local render = require"app.lib.template".compile
 
@@ -20,8 +20,12 @@ function m.test(  )
 end
 function m.sql(kwargs)
     local u = require"app.models".User
+    -- for i,v in ipairs(-u:where{id=1}) do
+    --     v.name = 'wwwwwwwwwwwww'
+    --     v:save()
+    -- end
     local statements = {
-        u:where'id = 333', 
+        u:where{id = 1}, 
         -- u:where{name='Xihn'}, 
         -- u:select{'id', 'name', 'age'}:where{id__in={1, 2, 6}, age__gte=18}, 
         -- u:select{}:where'id <10 and (sex=1 or age>50)', 
@@ -58,12 +62,10 @@ function m.sql(kwargs)
     -- local res, err = u:get{id = 333}
     -- res.name = 'pjlxx'
     -- res:save()
-    for i,v in ipairs(-u:where{id__gte=1012}:order"age") do
-        say(v.id, ' ', v.name, ' ', v.age, tostring(v._meta), '<br/>')
-        v:delete()
+    for i,v in ipairs(-u:where{id__gte=30}:order"age desc") do
+        say(repr(v), '<br>')
     end
-    local res, err = query('delete from user where id=333')
-    say(repr(res), err)
+    --local res, err = query('delete from user where id=333')
     -- for i,v in pairs(res) do
     --     say(string.format('%s   %s   %s', i,v, type(v)))
     -- end
@@ -82,15 +84,24 @@ local function ran(step)
     return int
 end
 function m.init( kw )
-    query("drop table if exists user")
-    query("create table user "
-         .. "(id serial primary key, "
-         .. "name varchar(10), "
-         .. "sex integer, "
-         .. "age integer"
-         ..")"
-         )
-    for i = 1, 1000 do
+    local res, err = query("drop table if exists users")
+    -- say(repr(res), err)
+    -- query("create table user "
+    --      .. "(id serial primary key, "
+    --      .. "name varchar(10), "
+    --      .. "sex integer, "
+    --      .. "age integer"
+    --      ..")"
+    -- )
+    local res, err = query(
+[[create table users(
+    id serial primary key,
+    name varchar(10), 
+    sex integer, 
+    age integer);]]
+)
+    say(repr(res), err)
+    for i = 1, 50 do
         local name = table.concat({
             string.char(math.random(65, 90)), 
             string.char(math.random(97, 122)), 
@@ -98,9 +109,13 @@ function m.init( kw )
             string.char(math.random(97, 122)),
             }, "")
         query(
-            string.format([[insert into user(name, sex, age) values ('%s', %s, %s);]], name, ran(4), ran(120) )
+            string.format([[insert into users(name, sex, age) values ('%s', %s, %s);]], name, ran(4), ran(120) )
         )
     end
-    ngx.say('table is created')
+    if not res then
+        ngx.say('fail to create')
+    else
+        ngx.say('table is created')
+    end
 end
 return m

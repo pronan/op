@@ -1,49 +1,26 @@
--- local encode = require"cjson".encode
+local Model = require"app.lib.models".Model
+local User = Model:new{table_name='users', 
+    fields = {
+        {name = 'id' }, 
+        {name = 'name'}, 
+        {name = 'age'}, 
+        {name = 'sex'}, 
+    }, 
+}
 
--- local function query(sql_statements)
---     local mysql = require "resty.mysql"
---     local res, err, errno, sqlstate;
---     db, err = mysql:new()
---     if not db then
---         return db, err
---     end
---     db:set_timeout(1000) 
---     res, err, errno, sqlstate = db:connect{
---         host     = "127.0.0.1",
---         port     = 3306,
---         database = "test",
---         user     = "root",
---         password = ""}
---     if not res then
---         return res, err, errno, sqlstate
---     end
---     res, err, errno, sqlstate =  db:query(sql_statements)
---     if res ~= nil then
---         db:set_keepalive(10000, 100)
---     end
---     return res, err, errno, sqlstate
--- end
+local statements = {
+    User:where'id < 33', 
+    -- u:where{name='Xihn'}, 
+    -- u:select{'id', 'name', 'age'}:where{id__in={1, 2, 6}, age__gte=18}, 
+    -- u:select{}:where'id <10 and (sex=1 or age>50)', 
+    -- u:select{'sex','count(*) as cnt'}:group'sex':order'cnt desc'
+    --u:update{age=888}:where{name='has'}, 
 
--- local statements = {
---     'select * from user where id = 2;', 
---     'select ** from user where id = 3;', 
---     'select * from user where id = 4;', 
--- }
-
--- for i,v in ipairs(statements) do
---     ngx.say(string.format('<br>query %s starts:<br>',  i))
---     res, err, errno, sqlstate = query(v)
---     ngx.say('sql statement :', v , '<br>')
---     ngx.say('sql results   :',encode(res or {}), '<br>')
---     ngx.say('sql error     :',err, '<br>')
--- end
-local urls = {}
-function urls.func( ... )
-    local x = 1
-    ngx.exit(500)
-    ngx.say('wahaha in direct block')
+    --u:order'name':select'name, count(*) as cnt':group'name desc', 
+    --u:create{age=5, name='yaoming', sex=1}, 
+    --u:select"sex, count(*) as cnt":group"sex"
+}
+for i,v in ipairs(statements) do
+    res, err, errno, sqlstate = v:exec()
+    ngx.say(encode(res), '<br>')
 end
-for k,v in pairs(urls) do
-    v()
-end
-ngx.say('should not')
