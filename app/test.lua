@@ -59,8 +59,10 @@ end
 local statements = {
     {Sale:where{}, 
         function(res)return has_error(#res==#data, 'total amount should equal'..#data)end}, 
+    
     {Sale:select{'name', 'id'}:where'id=1', 
         function(res)return has_error(tonumber(res[1].id)==1, 'id should equal 1')end}, 
+    
     {Sale:where{id__lte=5}, 
         function(res)return has_error(#res==5, 'the count of rows should be 5')end}, 
     
@@ -138,4 +140,11 @@ for i,v in ipairs(statements) do
     end
     ngx.say('<br/>')
 end
+local statement=Sale:where'id<3'
+for i,v in ipairs(statement:exec()) do
+    v.price=10+i
+    v:save()
+end
+print_line(statement:to_sql())
+print_results(statement:exec())
 ngx.say('</body></html>')
