@@ -66,6 +66,8 @@ local statements = {
         function(res)return has_error(tonumber(res[1].id)==3, 'id should equal 3')end}, 
     {Sale:where{name='apple'}:where{time__gt='2016-03-11 23:59:00'}, 
         function(res)return has_error(#res==1, 'should be only one row')end}, 
+    {Sale:where'catagory="fruit" and (weight>10 or price=8)':order'time', 
+        function(res)return has_error(#res==1, 'should be only one row')end},    
     {Sale:where{name='apple'}:order'price desc', 
         function(res)return has_error(#res==3, 'the count of apple rows should be 3')end}, 
     {Sale:select'name, count(*) as cnt':group'name':order'cnt desc', 
