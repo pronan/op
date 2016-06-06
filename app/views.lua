@@ -1,4 +1,4 @@
-local query = require"app.lib.mysql".query
+local query = require"resty.model".RawQuery
 
 local m={}
 

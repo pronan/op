@@ -1,6 +1,5 @@
-local query = require"app.lib.models".RawQuery
-local database = settings.database
-local render = require"app.lib.template".compile
+local query = require"resty.model".RawQuery
+local render = require"resty.template".compile
 
 local m={}
 local function log( ... )
@@ -62,9 +61,9 @@ function m.sql(kwargs)
     -- local res, err = u:get{id = 333}
     -- res.name = 'pjlxx'
     -- res:save()
-    for i,v in ipairs(-u:where{id__gte=30}:order"age desc") do
-        say(repr(v), '<br>')
-    end
+    -- for i,v in ipairs(-u:where{id__gte=30}:order"age desc") do
+    --     say(repr(v), '<br>')
+    -- end
     --local res, err = query('delete from user where id=333')
     -- for i,v in pairs(res) do
     --     say(string.format('%s   %s   %s', i,v, type(v)))
@@ -97,9 +96,12 @@ function m.init( kw )
 [[create table users(
     id serial primary key,
     name varchar(10), 
-    sex integer, 
-    age integer);]]
+    price integer,  
+    count integer, 
+    time datetime);]]
 )
+
+    
     say(repr(res), err)
     for i = 1, 50 do
         local name = table.concat({
