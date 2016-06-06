@@ -48,6 +48,7 @@ local data = {
 --         return ngx.say(err)
 --     end
 -- end
+
 local function has_error(codi, err)
     if not codi then
         return err
@@ -62,20 +63,28 @@ local statements = {
         function(res)return has_error(tonumber(res[1].id)==1, 'id should equal 1')end}, 
     {Sale:where{id__lte=5}, 
         function(res)return has_error(#res==5, 'the count of rows should be 5')end}, 
+    
     {Sale:where{id=3}, 
         function(res)return has_error(tonumber(res[1].id)==3, 'id should equal 3')end}, 
+    
     {Sale:where{name='apple'}:where{time__gt='2016-03-11 23:59:00'}, 
         function(res)return has_error(#res==1, 'should be only one row')end}, 
+    
     {Sale:where'catagory="fruit" and (weight>10 or price=8)':order'time', 
-        function(res)return has_error(#res==1, 'should be only one row')end},    
+        function(res)return has_error(#res==6, 'should return 6 rows')end},    
+    
     {Sale:where{name='apple'}:order'price desc', 
         function(res)return has_error(#res==3, 'the count of apple rows should be 3')end}, 
+    
     {Sale:select'name, count(*) as cnt':group'name':order'cnt desc', 
         function(res)return has_error(res[1].name=='apple', 'the amount of apple should be the most')end}, 
+    
     {Sale:select'name, price*weight as value':order'value', 
         function(res)return has_error(res[1].name=='carrot', 'the value of carrot should be the least')end}, 
+    
     {Sale:select'catagory, sum(weight) as total_weight':group'catagory':order'total_weight desc', 
         function(res)return has_error(res[1].catagory=='vegetable', 'the weight of vegetable should be the most')end}, 
+    
     {Sale:select{'name', 'sum(weight*price) as value'}:group{'name'}:having{value__gte=200}:order'value desc', 
         function(res)return has_error(#res==2, 'there should only be two names that have revenue greater than 200')end}, 
 }
