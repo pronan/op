@@ -26,28 +26,28 @@ local data = {
     {'grape',  'fruit',     5, 20, '2016/3/14 23:00'}, 
     {'tomato', 'vegetable', 8, 200,'2016/3/24 23:12'}, 
 }
--- local res, err = Query("drop table if exists sales")
--- res, err = Query([[create table sales(
---     id       serial primary key,
---     name     varchar(10), 
---     catagory varchar(15), 
---     price    integer,  
---     weight   float, 
---     time     datetime);]]
--- )
--- if not res then
---     return ngx.say(err)
--- end
--- for i,v in ipairs(data) do
---     local name, catagory, price, weight, time  = unpack(v)
---     res, err = Query(string.format(
---         [[insert into sales(name, catagory, price, weight, time) values ('%s','%s', %s, %s, '%s');]],
---         unpack(v)
---     ))
---     if not res then
---         return ngx.say(err)
---     end
--- end
+local res, err = Query("drop table if exists sales")
+res, err = Query([[create table sales(
+    id       serial primary key,
+    name     varchar(10), 
+    catagory varchar(15), 
+    price    integer,  
+    weight   float, 
+    time     datetime);]]
+)
+if not res then
+    return ngx.say(err)
+end
+for i,v in ipairs(data) do
+    local name, catagory, price, weight, time  = unpack(v)
+    res, err = Query(string.format(
+        [[insert into sales(name, catagory, price, weight, time) values ('%s','%s', %s, %s, '%s');]],
+        unpack(v)
+    ))
+    if not res then
+        return ngx.say(err)
+    end
+end
 
 local function has_error(codi, err)
     if not codi then
