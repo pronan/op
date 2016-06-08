@@ -286,27 +286,27 @@ function QueryManager.to_sql_select(self)
     return string.format(statement, select_args, self.table_name, where_args, 
         group_args, having_args, order_args)
 end
-function QueryManager.get(self, params)
-    -- special process for get
-    if type(params) == 'table' then
-        update(self._where, params)
-    else
-        self['_where_string'] = params
-    end 
-    local where_args = self:get_where_args()
-    if where_args == '' then
-        return nil, 'filter arguments must be provied'
-    end  
-    local statement = string.format('SELECT * FROM %s%s;', self.table_name, where_args)
-    local res, err = RawQuery(statement)
-    if not res then
-        return res, err
-    end
-    if #res ~= 1 then
-        return nil, 'result count must equal 1'
-    end
-    return self.Row:new(res[1])
-end
+-- function QueryManager.get(self, params)
+--     -- special process for get
+--     if type(params) == 'table' then
+--         update(self._where, params)
+--     else
+--         self['_where_string'] = params
+--     end 
+--     local where_args = self:get_where_args()
+--     if where_args == '' then
+--         return nil, 'filter arguments must be provied'
+--     end  
+--     local statement = string.format('SELECT * FROM %s%s;', self.table_name, where_args)
+--     local res, err = RawQuery(statement)
+--     if not res then
+--         return res, err
+--     end
+--     if #res ~= 1 then
+--         return nil, 'result count must equal 1'
+--     end
+--     return self.Row:new(res[1])
+-- end
 function QueryManager.exec_raw(self)
     local statement, err = self:to_sql()
     if not statement then
@@ -337,7 +337,7 @@ function QueryManager.exec(self)
     if altered ~= nil then
         -- update or delete or insert
         if altered > 0 then --insert
-            return self.Row:new(extend({id = altered}, self._create))
+            return self.Row:new(update({id = altered}, self._create))
         else --update or delete
             return res
         end
@@ -368,14 +368,29 @@ function Model._proxy_sql(self, method, params)
     local subclass = self.QueryManager:new{}
     return subclass[method](subclass, params)
 end
+-- define methods by a loop, `create` will be override
 for method_name, func in pairs(sql_method_names) do
     Model[method_name] = function(self, params)
         return self:_proxy_sql(method_name, params)
     end
 end
 function Model.get(self, params)
-    -- special process for get
-    return self:_proxy_sql('get', params)
+    -- special process for `get`
+    local res, err = self:_proxy_sql('where', params):exec()
+    if not res then
+        return nil, err
+    end
+    if #res ~= 1 then
+        return nil, '`get` method should return only one row'
+    end
+    return res[1]
 end
-
+function Model.all(self)
+    -- special process for `all`
+    return self:_proxy_sql('where', {}):exec()
+end
+function Model.create(self, params)
+    -- special process for `create`
+    return self:_proxy_sql('create', params):exec()
+end
 return {Model = Model, RawQuery = RawQuery, QueryManager = QueryManager}

@@ -140,11 +140,28 @@ for i,v in ipairs(statements) do
     end
     ngx.say('<br/>')
 end
+--update test
 local statement=Sale:where'id<3'
 for i,v in ipairs(statement:exec()) do
+    v.blablabla = 123 --attribute that is not in fields
     v.price=10+i
     v:save()
 end
+for i,v in ipairs(statement:exec()) do
+    assert(v.price==10+i, 'price update should take effect')
+end
 print_line(statement:to_sql())
 print_results(statement:exec())
+
+--create test
+v = Sale:create{name='newcomer', catagory='fruit', time='2016-03-29 23:12:00', price=12, weight=15}
+local res = Sale:all()
+assert(res[#res].name==v.name, 'the name of the last element should be newcomer')
+
+--delete test
+local v = Sale:get'id = 1'
+v:delete()
+assert(#Sale:where"id=1":exec()==0, 'id=1 item should not exists')
+
+ngx.say('<h1>all test passed!</h1>')
 ngx.say('</body></html>')
