@@ -10,12 +10,8 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
-function m.test(  )
-    --ngx.say('can')
-
-    ngx.say('fall back to main test...')
-
-    return 'ahaha', '*************12344'
+function m.table(  )
+    return render"app/form.html"{}
 end
 function m.sql(kwargs)
     local u = require"app.models".User
