@@ -11,7 +11,7 @@ end
 for regex, func in pairs(urls) do
     local capture, err = match(uri, regex)
     if capture then
-        local response, err = func(capture)
+        local response, err = func(ngx.req, capture)
         if not response then
             --ngx.log(ngx.ERR, tostring(err))
             return ngx.exit(500)

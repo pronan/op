@@ -9,8 +9,8 @@ settings = require"app.settings"
 smt = setmetatable
 gmt = getmetatable
 say = ngx.say
-var = ngx.var
-req = ngx.req
+-- var = ngx.var
+-- req = ngx.req
 
 for k,v in pairs(helper) do
     _G[k] = v

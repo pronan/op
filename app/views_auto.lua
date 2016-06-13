@@ -10,8 +10,22 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
-function m.content(  )
-    return render("content.html"){}
+function m.content(request, kwargs)
+    request.read_body()
+    local args, err = request.get_post_args()
+    local content = args.email
+    -- for k,v in pairs(args) do
+    --     content = content..string.format('%s : %s<br/>', tostring(k), tostring(v)) 
+    -- end
+    return render("content.html"){content=content}
+end
+function m.form(request, kwargs)
+    request.read_body()
+    local args, err = request.get_post_args()
+    for k,v in pairs(args) do
+        say(k, ':::', v)
+    end
+    return render("app/form.html"){}
 end
 function m.sql(kwargs)
     local u = require"app.models".User
