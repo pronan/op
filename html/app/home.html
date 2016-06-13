@@ -1,25 +1,29 @@
+<!DOCTYPE html>
 <html lang='zh'>
     <head>
-        <meta charset="utf-8">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
     </head>
     <body>
-    {% for i=1, len do %}
-        <br/><br/>{{sqls[i]}}
-   
-            <table>
-            {% for _, user in ipairs(tables[i]) do %}
-                <tr>
-                {% for key, value in pairs(user) do %}
-                    <td>{{key}}</td><td>{{value}}</td>
-                {% end %}
-                </tr>
-            {% end %}
-            </table>
 
-        {% if errors[i] ~= '' then %}
-            ERRORS: {{errors[i]}}
-        {% end %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-10">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-8">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10">
+            </div>
+        </div>
+    </div>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 
-    {% end %}
     </body>
 </html>

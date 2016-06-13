@@ -10,8 +10,8 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
-function m.table(  )
-    return render"app/form.html"{}
+function m.content(  )
+    return render("content.html"){}
 end
 function m.sql(kwargs)
     local u = require"app.models".User

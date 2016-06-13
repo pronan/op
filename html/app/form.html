@@ -1,51 +1,28 @@
 <html lang='zh'>
     <head>
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    {% block css %} {% endblock %}
+
     </head>
     <body>
-    {% block main %} {% endblock %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+            </div>
+            <div class="col-md-6">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+            </div>
+        </div>
+    </div>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    {% block js %} {% endblock %}
+
     </body>
 </html>
-I'm looking for something similar to the directive `{% extends "base.html" %}` in Jinja2 template engine. e.g.:
-Lemplate: Is there any thing like {% extends "base.html" %}?
-{% extends "base.html" %}
-
-{% block css %} 
-    <link href="css/layout1.css" rel="stylesheet">
-{% endblock %}
-
-{% block main %}
-    {% block nav %} {% endblock %}
-    {% block content %} {% endblock %}
-{% endblock %}
-
-{% block js %} 
-    <script src="js/layout1.js"></script>
-{% endblock %}
-
-{% extends "base.html" %}
-
-{% block css %} 
-    <link href="css/layout1.css" rel="stylesheet">
-{% endblock %}
-
-{% block main %}
-    {% block nav %} {% endblock %}
-    {% block nav1 %} {% endblock %}
-    {% block nav2 %} {% endblock %}
-    {% block content %} {% endblock %}
-{% endblock %}
-
-{% block js %} 
-    <script src="js/layout1.js"></script>
-{% endblock %}
-
-
-{% extends "layout1.html" %}
-
-{% block nav %}
-{% endblock %}
