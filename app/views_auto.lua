@@ -20,11 +20,9 @@ function m.content(request, kwargs)
     return render("content.html"){content=content}
 end
 function m.form(request, kwargs)
-    request.read_body()
-    local args, err = request.get_post_args()
-    for k,v in pairs(args) do
-        say(k, ':::', v)
-    end
+    local getargs = require"resty.reqargs"
+    local get, post, files = getargs{dir='C:\\projects\\op'}
+    say(repr(get), '<br/>', repr(post), '<br/>', repr(files))
     return render("app/form.html"){}
 end
 function m.sql(kwargs)
