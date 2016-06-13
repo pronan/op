@@ -31,6 +31,7 @@ http {
             content_by_lua_block{
                 local render = require"resty.template".render
                 local req=ngx.req
+                ngx.say(ngx.req.raw_header())
                 req.read_body()
                 local args, err = req.get_post_args()
                 for k,v in pairs(args) do
