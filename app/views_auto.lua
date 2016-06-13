@@ -21,8 +21,9 @@ function m.content(request, kwargs)
 end
 function m.form(request, kwargs)
     local getargs = require"resty.reqargs"
-    local get, post, files = getargs{dir='C:\\projects\\op'}
-    say(repr(get), '<br/>', repr(post), '<br/>', repr(files))
+    local post = require 'resty.post':new{no_tmp = true}
+    local m = post:read()
+    say(repr(m))
     return render("app/form.html"){}
 end
 function m.sql(kwargs)
