@@ -21,7 +21,8 @@ function m.content(request, kwargs)
 end
 function m.form(request, kwargs)
     local getargs = require"resty.reqargs"
-    local post = require 'resty.post':new{no_tmp = true}
+    local post = require 'resty.post':new{no_tmp = true, 
+    path = ngx.config.prefix()..'html/', }
     local m = post:read()
     say(repr(m))
     return render("app/form.html"){}
