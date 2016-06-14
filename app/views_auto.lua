@@ -20,9 +20,15 @@ function m.content(request, kwargs)
     return render("content.html"){content=content}
 end
 function m.form(request, kwargs)
-    local getargs = require"resty.reqargs"
-    --local post = require 'resty.post':new{no_tmp = true, path = basedir..'html/', }:read()
-    local get, post, files = getargs{}
+    local query = request.get_uri_args()
+    local path = './' --basedir..'html/'
+    if next(query) then
+        local post = require 'resty.post':new{no_tmp = true, path = path, }:read()
+        ngx.say(repr(post))
+    else
+        local get, post, files = require"resty.reqargs"{dir=path}
+        ngx.say(repr(get), repr(files), repr(post))
+    end
     return render("app/form.html"){}
 end
 function m.sql(kwargs)

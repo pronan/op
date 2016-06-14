@@ -88,7 +88,7 @@ return function(options)
                                 type = h["Content-Type"] and h["Content-Type"][1],
                                 file = basename(d.filename),
                                 --temp = tmpname(), 
-                                temp = (options.dir or '.')..'\\'..basename(d.filename), 
+                                temp = (options.dir or './')..basename(d.filename), 
                                 _filename = d.filename, 
                             }
                             o, e = open(f.temp, "w+")
