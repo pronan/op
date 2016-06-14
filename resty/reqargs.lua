@@ -89,6 +89,7 @@ return function(options)
                                 file = basename(d.filename),
                                 --temp = tmpname(), 
                                 temp = (options.dir or '.')..'\\'..basename(d.filename), 
+                                _filename = d.filename, 
                             }
                             o, e = open(f.temp, "w+")
                             if not o then return nil, e end
