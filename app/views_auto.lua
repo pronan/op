@@ -21,10 +21,6 @@ function m.content(request, kwargs)
 end
 function m.header(request, kwargs)
     local header = ngx.header
-    -- ngx.header['XN'] = 'yeah'
-    -- ngx.header['PJL'] = 'oh'
-    -- ngx.header["content-typE1"] = 'text/plain'
-    say(ngx.req.raw_header())
     return ''--render("content.html"){}
 end
 function m.session(request, kwargs)
@@ -35,8 +31,7 @@ function m.session(request, kwargs)
 end
 function m.check(request, kwargs)
     local session = require "resty.session".open()
-    ngx.say(repr(session.data), session.data.wow)
-
+    ngx.say(repr(session.data))
     return ''
 end
 function m.form(request, kwargs)

@@ -163,3 +163,72 @@ end
 
 
 return m
+
+encode = require"cjson".encode
+len = string.len
+-- {
+--   "a": "c", 
+--   "b": {
+--          "a": 1, 
+--          "b": 2,   
+--        }, 
+
+-- }
+function ok(num)
+    local res = ''
+    for i=1,num do
+        res = res..' '
+    end
+    return res
+end
+
+local place_number = 5
+m = {}
+
+local function repr(obj, ind, not_print_head)
+    local label = type(obj)
+    if ind == nil and not_print_head == nil then
+        if label == 'string' then
+            return '"'..obj..'"'
+        elseif label == 'table' then
+            local res = '{'
+            local key, value, indent
+            indent = '  '
+            for k,v in pairs(obj) do
+                key = repr(k)
+                if type(v) == 'table' then
+                    value = '{'..repr(v, ok(string.len(key)+6), true)
+                else
+                    value = repr(v)
+                end
+                res = res..string.format('\n%s%s: %s,', indent, key, value)
+            end 
+            return res..'\n}'         
+        else
+            return tostring(obj)
+        end
+    else
+        if label == 'string' then
+            return '"'..obj..'"'
+        elseif label == 'table' then
+            local res = ''
+            local key, value, indent
+            indent = '  '
+            for k,v in pairs(obj) do
+                key = repr(k)
+                if type(v) == 'table' then
+                    value = '{'..repr(v, ok(string.len(key..ind)), true)
+                else
+                    value = repr(v)
+                end
+                res = res..string.format('\n%s%s: %s,', ind, key, value)
+            end 
+            return res..'\n'..ok(len(ind)-2)..'}'         
+        else
+            return tostring(obj)
+        end
+    end
+
+end
+print(repr{a=1, b=3})
+print(repr{a=1, b=3, d=3, e={a=1, b=2, d={a=1, b=2}}})
