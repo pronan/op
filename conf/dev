@@ -20,47 +20,43 @@ http {
         root html;
         include mime.types;
 
-
+        location = / {
+            try_files /base.html =404;
+        }
+        
         location / {
-            content_by_lua '
-                ngx.say("<html><body><a href=/start>Start the test</a>!</body></html>")
-            ';
+            content_by_lua_file app/main.lua;
         }
-        location /start {
-            content_by_lua '
-                local session = require "resty.session".start()
-                session.data.name = "OpenResty Fan"
-                session:save()
-                ngx.say("<html><body>Session started. ",
-                        "<a href=/test>Check if it is working</a>!</body></html>")
-            ';
+        location = /form1 {
+            content_by_lua_block{
+                local render = require"resty.template".render
+                local req=ngx.req
+                ngx.say(ngx.req.raw_header())
+                req.read_body()
+                local args, err = req.get_post_args()
+                for k,v in pairs(args) do
+                    ngx.say(k, ':::', v)
+                end
+                render("app/form.html")
+            }
         }
-        location /test {
-            content_by_lua '
-                local session = require "resty.session".open()
-                ngx.say("<html><body>Session was started by <strong>",
-                        session.data.name or "Anonymous",
-                        "</strong>! <a href=/destroy>Destroy the session</a>.</body></html>")
-            ';
+        location = /test {
+            content_by_lua_file app/test.lua;
         }
-        location /destroy {
-            content_by_lua '
-                local session = require "resty.session".start()
-                session:destroy()
-                ngx.say("<html><body>Session was destroyed. ",
-                        "<a href=/check>Is it really so</a>?</body></html>")
-            ';
+
+        location = /favicon.ico {
+            root html/static/images;
         }
-        location /check {
-            content_by_lua '
-                local session = require "resty.session".open()
-                ngx.say("<html><body>Session was really destroyed, you are known as ",
-                        "<strong>",
-                        session.data.name or "Anonymous",
-                        "</strong>! <a href=/>Start again</a>.</body></html>")
-            ';
+
+        location /css { 
+            root html/static;
         }
-    
+        location /js { 
+            root html/static;
+        }
+        location /images { 
+            root html/static;
+        }
 
     }
 

@@ -24,44 +24,34 @@ http {
         server_name  www.wdksw.com wdksw.com;
         root html;
 
-       location / {
-            content_by_lua '
-                ngx.say("<html><body><a href=/start>Start the test</a>!</body></html>")
-            ';
+        location = / {
+            try_files /base.html =404;
         }
-        location /start {
-            content_by_lua '
-                local session = require "resty.session".start()
-                session.data.name = "OpenResty Fan"
-                session:save()
-                ngx.say("<html><body>Session started. ",
-                        "<a href=/test>Check if it is working</a>!</body></html>")
-            ';
+        
+        location / {
+            content_by_lua_file app/main.lua;
         }
-        location /test {
-            content_by_lua '
-                local session = require "resty.session".open()
-                ngx.say("<html><body>Session was started by <strong>",
-                        session.data.name or "Anonymous",
-                        "</strong>! <a href=/destroy>Destroy the session</a>.</body></html>")
-            ';
+
+        error_page   500 502 503 504  /50x.html;
+
+        location = /favicon.ico {
+            root html/static/images;
         }
-        location /destroy {
-            content_by_lua '
-                local session = require "resty.session".start()
-                session:destroy()
-                ngx.say("<html><body>Session was destroyed. ",
-                        "<a href=/check>Is it really so</a>?</body></html>")
-            ';
+
+        location = /gitpush {
+            content_by_lua_block{
+                os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
+            }
         }
-        location /check {
-            content_by_lua '
-                local session = require "resty.session".open()
-                ngx.say("<html><body>Session was really destroyed, you are known as ",
-                        "<strong>",
-                        session.data.name or "Anonymous",
-                        "</strong>! <a href=/>Start again</a>.</body></html>")
-            ';
+
+        location /css { 
+            root html/static;
+        }
+        location /js { 
+            root html/static;
+        }
+        location /images { 
+            root html/static;
         }
 
     }

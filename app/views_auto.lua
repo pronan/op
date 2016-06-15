@@ -19,6 +19,20 @@ function m.content(request, kwargs)
     -- end
     return render("content.html"){content=content}
 end
+function m.session(request, kwargs)
+    local session = require "resty.session".start()
+    for k,v in pairs({a='www', b='ccc', agbdd='csfs'}) do
+        session.data[k] = v
+    end
+    session:save()
+    ngx.say('ok')
+    return render("content.html"){content=content}
+end
+function m.check(request, kwargs)
+    local session = require "resty.session".open()
+    ngx.say(repr(session.data))
+    return render("content.html"){}
+end
 function m.form(request, kwargs)
     local query = request.get_uri_args()
     local path = './' --basedir..'html/'
