@@ -19,7 +19,8 @@ http {
         server_name  127.0.0.1;
         root html;
         include mime.types;
-
+        set $session_secret 623q4hR325t36VsCD3g567922IC0073T;
+        
         location = / {
             try_files /base.html =404;
         }

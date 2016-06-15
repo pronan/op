@@ -19,19 +19,25 @@ function m.content(request, kwargs)
     -- end
     return render("content.html"){content=content}
 end
+function m.header(request, kwargs)
+    local header = ngx.header
+    -- ngx.header['XN'] = 'yeah'
+    -- ngx.header['PJL'] = 'oh'
+    -- ngx.header["content-typE1"] = 'text/plain'
+    say(ngx.req.raw_header())
+    return ''--render("content.html"){}
+end
 function m.session(request, kwargs)
     local session = require "resty.session".start()
-    for k,v in pairs({a='www', b='ccc', agbdd='csfs'}) do
-        session.data[k] = v
-    end
+    session.data.wow = 'yesdfssdfffffffffffffffffffsfsadfsadfsdfsfsdfsdfsdfdsddddddddddddddddddddddddddddddd'
     session:save()
-    ngx.say('ok')
-    return render("content.html"){content=content}
+    return render("content.html"){}
 end
 function m.check(request, kwargs)
     local session = require "resty.session".open()
-    ngx.say(repr(session.data))
-    return render("content.html"){}
+    ngx.say(repr(session.data), session.data.wow)
+
+    return ''
 end
 function m.form(request, kwargs)
     local query = request.get_uri_args()
