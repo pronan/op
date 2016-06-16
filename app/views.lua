@@ -43,7 +43,9 @@ function m.inspect(kw)
     sprint_table(ngx.ctx)
 end
 function m.global(kw)
-    sprint_table(gmt(_G).__index)
+    ngx.header.content_type = 'text/plain'
+    local x = {a=1, bddddd={a=1, b=2}}
+    return repr(gmt(_G))
 end
 
 return m

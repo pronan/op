@@ -103,24 +103,67 @@ function m.extend(self, other)
         self[#self+1] = v
     end
 end
-function m.repr(obj)
-    local label = type(obj)
-    if label == 'string' then
-        return string.format([['%s']], obj)
-    elseif label == 'table' then
-        local res = {}
-        for k,v in pairs(obj) do
-            if type(k) == 'number' then
-                res[#res+1] = m.repr(v)
-            elseif obj == v then
-                res[#res+1] = string.format([[[%s]=*self*]], m.repr(k))
-            else
-                res[#res+1] = string.format([[[%s]=%s]], m.repr(k), m.repr(v))
-            end
-        end
-        return '{'..table.concat( res, ", ")..'}'
+local function ok(num)
+    local res = ''
+    for i=1,num do
+        res = res..' '
+    end
+    return res
+end
+local function simple(k)
+    if type(k) == 'string' then 
+        return  '"'..k..'"'
     else
-        return tostring(obj)
+        return tostring(k)
+    end
+end   
+local function _repr(obj, ind, not_print_head, deep, already)
+    if deep == 10 then
+        return '****}'
+    end
+    local label = type(obj)
+    if label == 'table' then
+        local key = tostring(obj)
+        if already[key] then
+            return '{*cycle*}'
+        else
+            already[key] = true
+        end
+        local indent, res
+        if not_print_head then
+            res = ''
+        else
+            res = '{'
+        end
+        if next(obj) == nil then
+            return res..'}'
+        end
+        indent = '  '..ind
+        for k,v in pairs(obj) do
+            k = simple(k)
+            if type(v) == 'table' then
+                if v~=obj then
+                    v = '{'.._repr(v, indent..ok(string.len(k)+2), true, deep+1, already)
+                else
+                    v = '{...}'
+                end
+            else
+                v = simple(v)
+            end
+            res = res..string.format('\n%s%s: %s,', indent, k, v)
+        end 
+        return res..'\n'..ok(string.len(indent)-2)..'}'         
+    else
+        return simple(obj)
+    end
+end
+function m.repr(obj)
+    local table_set = {}
+    return _repr(obj, '', false, 1, table_set)
+end
+function m.rs(...) 
+    for i,v in ipairs(...) do
+        ngx.say(m.repr(v))
     end
 end
 function m.repr_list(array)
@@ -128,7 +171,7 @@ function m.repr_list(array)
     for _,v in ipairs(array) do
         local label = type(v)
         if label == 'string' then
-            res[#res+1] = string.format([['%s']], v)
+            res[#res+1] = "'"..v.."'"
         else
             res[#res+1] = tostring(v)
         end
@@ -159,76 +202,10 @@ local function test()
     local yy = {4, 5}
     m.extend(yy, {1, 2, 3})
     print(m.repr(yy))
+    local tt = {a=1, bc={c=3, e=4}}
+    tt.x = tt
+    print(m.repr(tt))
 end
 
-
+--test()
 return m
-
-encode = require"cjson".encode
-len = string.len
--- {
---   "a": "c", 
---   "b": {
---          "a": 1, 
---          "b": 2,   
---        }, 
-
--- }
-function ok(num)
-    local res = ''
-    for i=1,num do
-        res = res..' '
-    end
-    return res
-end
-
-local place_number = 5
-m = {}
-
-local function repr(obj, ind, not_print_head)
-    local label = type(obj)
-    if ind == nil and not_print_head == nil then
-        if label == 'string' then
-            return '"'..obj..'"'
-        elseif label == 'table' then
-            local res = '{'
-            local key, value, indent
-            indent = '  '
-            for k,v in pairs(obj) do
-                key = repr(k)
-                if type(v) == 'table' then
-                    value = '{'..repr(v, ok(string.len(key)+6), true)
-                else
-                    value = repr(v)
-                end
-                res = res..string.format('\n%s%s: %s,', indent, key, value)
-            end 
-            return res..'\n}'         
-        else
-            return tostring(obj)
-        end
-    else
-        if label == 'string' then
-            return '"'..obj..'"'
-        elseif label == 'table' then
-            local res = ''
-            local key, value, indent
-            indent = '  '
-            for k,v in pairs(obj) do
-                key = repr(k)
-                if type(v) == 'table' then
-                    value = '{'..repr(v, ok(string.len(key..ind)), true)
-                else
-                    value = repr(v)
-                end
-                res = res..string.format('\n%s%s: %s,', ind, key, value)
-            end 
-            return res..'\n'..ok(len(ind)-2)..'}'         
-        else
-            return tostring(obj)
-        end
-    end
-
-end
-print(repr{a=1, b=3})
-print(repr{a=1, b=3, d=3, e={a=1, b=2, d={a=1, b=2}}})

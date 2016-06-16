@@ -12,7 +12,6 @@ say = ngx.say
 -- var = ngx.var
 -- req = ngx.req
 basedir = ngx.config.prefix()
-
 for k,v in pairs(helper) do
     _G[k] = v
 end
