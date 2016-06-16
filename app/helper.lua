@@ -31,7 +31,19 @@ function Set.intersection(self, key)
     return res
 end
 m.Set = Set
-
+function m.sorted(t, func)
+    local keys = {}
+    for k,v in pairs(t) do
+        keys[#keys+1] = k
+    end
+    table.sort(keys, func)
+    local i = 1
+    return function ()
+                key = keys[i]
+                i = i+1
+                return key, t[key]
+            end
+end
 function m.list(func)
     local res = {}
     while true do
@@ -47,6 +59,12 @@ end
 
 local function default_map( ... )
     return {...}
+end
+function m.compare(t, func)
+    if func == nil then
+        func = function(a, b) return a>b end
+    end
+
 end
 function m.map(func, ...)
     func = func or default_map
@@ -112,54 +130,76 @@ local function ok(num)
 end
 local function simple(k)
     if type(k) == 'string' then 
-        return  '"'..k..'"'
-    else
+        local res = '"'..k..'"'
+        res = res:gsub('\n', '\\n')
+        res = res:gsub('\t', '\\t')
+        return  res
+    elseif type(k) == 'number' then 
         return tostring(k)
+    else
+        return '"'..tostring(k)..'"'
     end
 end   
-local function _repr(obj, ind, not_print_head, deep, already)
-    if deep == 10 then
-        return '****}'
+local MAX_DEEPTH = 20
+local MAX_LENGTH = 10
+function m.zfill(s, n, c) 
+    c = c or ' '
+    local len = string.len(s)
+    n = n or len
+    for i=1,n-len do
+        s = s..c
     end
+    return s
+end
+
+local function _repr(obj, ind, deep, already)
     local label = type(obj)
     if label == 'table' then
-        local key = tostring(obj)
-        if already[key] then
-            return key
-        else
-            already[key] = key
+        local res = {}
+        local normalize = {}
+        local indent = '  '..ind
+        local table_key = tostring(obj)
+        local max_key_len = 0
+        for k,v in pairs(obj) do
+            k = simple(k)
+            local k_len = string.len(k)
+            if k_len>max_key_len then
+                max_key_len = k_len
+            end
+            if max_key_len  == MAX_LENGTH then
+                break
+            end
         end
-        local indent, res
-        if not_print_head then
-            res = ''
-        else
-            res = '{'
-        end
-        if next(obj) == nil then
-            return res..'}'
-        end
-        indent = '  '..ind
+        already[table_key] = table_key
         for k,v in pairs(obj) do
             k = simple(k)
             if type(v) == 'table' then
-                if v~=obj then
-                    v = '{'.._repr(v, indent..ok(string.len(k)+2), true, deep+1, already)
+                local key = tostring(v)
+                if next(v) == nil then
+                    v = '{}'
+                elseif already[key] then
+                    v = simple(key)
+                elseif deep > MAX_DEEPTH then
+                    v = simple('*exceed max deepth*')
                 else
-                    v = '{...}'
+                    v = '{--'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)
             end
-            res = res..string.format('\n%s%s: %s,', indent, k, v)
+            normalize[k] = v --string.format('\n%s%s: %s,', indent, k, v)
         end 
-        return res..'\n'..ok(string.len(indent)-2)..'}'         
+        for k,v in m.sorted(normalize) do
+            res[#res+1] = string.format('\n%s%s: %s,', indent, m.zfill(k, max_key_len), v)
+        end
+        return table.concat(res)..'\n'..ok(string.len(indent)-3)..'}'         
     else
         return simple(obj)
     end
 end
 function m.repr(obj)
-    local table_set = {}
-    return _repr(obj, '', false, 1, table_set)
+    local already = {}
+    return '{'.._repr(obj, '', 1, already)
 end
 function m.rs(...) 
     for i,v in ipairs(...) do
@@ -205,7 +245,10 @@ local function test()
     local tt = {a=1, bc={c=3, e=4}}
     tt.x = tt
     print(m.repr(tt))
+    for k,v in m.sorted(_G) do
+        print(k,v)
+    end
 end
 
---test()
+test()
 return m

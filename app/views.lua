@@ -45,7 +45,7 @@ end
 function m.global(kw)
     ngx.header.content_type = 'text/plain'
     local x = {a=1, bddddd={a=1, b=2}}
-    return repr(gmt(_G))
+    return repr(gmt(_G).__index)
 end
 
 return m
