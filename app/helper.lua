@@ -166,9 +166,9 @@ local function _repr(obj, ind, deep, already)
             if k_len>max_key_len then
                 max_key_len = k_len
             end
-            if max_key_len  == MAX_LENGTH then
-                break
-            end
+        end
+        if max_key_len>MAX_LENGTH then
+            max_key_len = MAX_LENGTH
         end
         already[table_key] = table_key
         for k,v in pairs(obj) do
@@ -182,7 +182,7 @@ local function _repr(obj, ind, deep, already)
                 elseif deep > MAX_DEEPTH then
                     v = simple('*exceed max deepth*')
                 else
-                    v = '{--'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
+                    v = '{**'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)
@@ -192,7 +192,7 @@ local function _repr(obj, ind, deep, already)
         for k,v in m.sorted(normalize) do
             res[#res+1] = string.format('\n%s%s: %s,', indent, m.zfill(k, max_key_len), v)
         end
-        return table.concat(res)..'\n'..ok(string.len(indent)-3)..'}'         
+        return table.concat(res)..'\n'..ok(string.len(indent)-2)..'}'         
     else
         return simple(obj)
     end

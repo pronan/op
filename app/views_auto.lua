@@ -17,7 +17,7 @@ function m.content(request, kwargs)
     -- for k,v in pairs(args) do
     --     content = content..string.format('%s : %s<br/>', tostring(k), tostring(v)) 
     -- end
-    return render("content.html"){content=content}
+    return render("home.html"){sidebar = 'Messages'}
 end
 function m.header(request, kwargs)
     local header = ngx.header

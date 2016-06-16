@@ -47,5 +47,7 @@ function m.global(kw)
     local x = {a=1, bddddd={a=1, b=2}}
     return repr(gmt(_G).__index)
 end
-
+function m.home(kw)
+    return repr(gmt(_G).__index)
+end
 return m

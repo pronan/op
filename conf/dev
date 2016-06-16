@@ -6,7 +6,7 @@ events {worker_connections  1024;}
 
 http {
     #include       mime.types;
-    default_type  "text/html; charset=UTF-8";
+    default_type  "text/html; charset=utf-8";
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
@@ -21,9 +21,9 @@ http {
         include mime.types;
         set $session_secret 623q4hR325t36VsCD3g567922IC0073T;
         
-        location = / {
-            try_files /base.html =404;
-        }
+        #location = / {
+            #try_files /base.html =404;
+        #}
         
         location / {
             content_by_lua_file app/main.lua;
