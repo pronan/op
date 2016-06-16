@@ -125,9 +125,9 @@ local function _repr(obj, ind, not_print_head, deep, already)
     if label == 'table' then
         local key = tostring(obj)
         if already[key] then
-            return '{*cycle*}'
+            return key
         else
-            already[key] = true
+            already[key] = key
         end
         local indent, res
         if not_print_head then
