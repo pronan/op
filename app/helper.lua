@@ -245,10 +245,6 @@ local function test()
     local tt = {a=1, bc={c=3, e=4}}
     tt.x = tt
     print(m.repr(tt))
-    for k,v in m.sorted(_G) do
-        print(k,v)
-    end
 end
 
-test()
 return m
