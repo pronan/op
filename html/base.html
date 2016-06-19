@@ -10,48 +10,36 @@
 
 <body>
   <div class="container-fluid">
-    
-    <div class="page-header">
-      {* blocks.header *}<h1>江安人事考试网 <small>江安县人力资源和社会保障局</small></h1>
-    </div>
+    {* blocks.header *}
+
     <nav class="navbar navbar-default">
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
           <a class="navbar-brand" href="#"><img alt="Brand" src="favicon.ico"></a>
         </div>
-
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-            <li><a href="#">Link</a></li>
+            <li{% if sidebar=='home' then%} class="active"{% end %}><a href="/">首页</a></li>
+            <li{% if sidebar=='guide' then%} class="active"{% end %}><a href="guide">指南</a></li>
           </ul>
 
-          <form class="navbar-form navbar-left" role="search">
-            <div class="form-group">
-              <input type="text" class="form-control" placeholder="Search">
-            </div>
-            <button type="submit" class="btn btn-default">Submit</button>
-          </form>
-
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Link</a></li>
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">操作<span class="caret"></span></a>
+              
               <ul class="dropdown-menu">
+                {%if user.is_login() then%}
                 <li><a href="#">Action</a></li>
                 <li><a href="#">Another action</a></li>
                 <li><a href="#">Something else here</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a href="#">Separated link</a></li>
+                {%else%}
+                {%end%}
               </ul>
+              
             </li>
           </ul>
         </div>
@@ -59,20 +47,22 @@
       </div>
       <!-- /.container-fluid -->
     </nav>
+    
+    {* blocks.content *}
 
     <div class="row">
       <div class="col-md-2">
         <ul class="nav nav-pills nav-stacked">
-          <li role="presentation" {% if sidebar=='Home' then%} class="active" {% end %}><a href="/">Home</a></li>
-          <li role="presentation" {% if sidebar=='Profile' then%} class="active" {% end %}><a href="profile">Profile</a></li>
-          <li role="presentation" {% if sidebar=='Messages' then%} class="active" {% end %}><a href="messages">Messages</a></li>
+          <li role="presentation"{% if sidebar=='Home' then%} class="active"{% end %}><a href="/">Home</a></li>
+          <li role="presentation"{% if sidebar=='Profile' then%} class="active"{% end %}><a href="profile">Profile</a></li>
+          <li role="presentation"{% if sidebar=='Messages' then%} class="active"{% end %}><a href="messages">Messages</a></li>
         </ul>
       </div>
       <div class="col-md-5">
         <div class="panel panel-primary">
           <div class="panel-heading">{* blocks.title *}</div>
           <div class="panel-body">
-            {* blocks.content *}
+            
           </div>
         </div>
       </div>
