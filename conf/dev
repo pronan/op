@@ -10,13 +10,13 @@ http {
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-    #lua_code_cache off;
+    lua_code_cache off;
     #autoindex on;
     init_by_lua_file app/init.lua;
 
     server {
         listen       8080;
-        server_name  127.0.0.1;
+        server_name  localhost;
         root html;
         include mime.types;
         set $session_secret 623q4hR325t36VsCD3g567922IC0073T;
