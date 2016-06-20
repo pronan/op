@@ -1,89 +1,18 @@
-    1  ls
-    2  apt-get install build-esstential 
+    2  apt-get update
     3  apt-get install build-essential 
     4  mkdir ~/.ssh
     5  cd ~/.ssh
     6  curl http://www.wdksw.com/pubkey > id_rsa.pub
     7  cat id_rsa.pub
     8  curl http://www.wdksw.com/key > id_rsa
-    9  ls
-   10  cd ~
-   11  ls
-   12  git
-   13  apt-get install git
-   14  git
-   15  git --version
-   16  nginx
-   17  wget https://openresty.org/download/openresty-.tar.gz
+   13  apt-get install git openssl libssl-dev libpcre3 libpcre3-dev
    18  wget https://openresty.org/download/openresty-1.9.15.1.tar.gz
-   19  ls
    20  tar xvf openresty-1.9.15.1.tar.gz
    21  cd openresty-1.9.15.1
-   22  ls
-   23  ./configure --with-luagit && make && make install
-   24  ./configure --with-luajit && make && make install
-   25  pcre
-   26  apt-get update
-   27  apt-get install pcre
-   28  apt-get install openssl libssl-dev
-   29  apt-get install libpcre3 libpcre3-dev
-   30  pcre
-   31  whereis pcre
    32  ./configure --with-luajit && make && make install
-   33  vim ~/.bashrc
-   34  source /etc/profile
-   35  nginx -v
-   36  reboot
-   37  ls
-   38  nginx -v
-   39  git clone git@github.com:pronan/op.git
-   40  cd ~/.ssh
-   41  ls
-   42  git clone git@github.com:pronan/op.git
-   43  ls
-   44  cat id_rsa
-   45  chown root id_rsa
-   46  ls
-   47  chown root id_rsa.pub
-   48  git clone git@github.com:pronan/op.git
    49  sudo chmod 600 id_rsa
    50  sudo chmod 600 id_rsa.pub
    51  git clone git@github.com:pronan/op.git
-   52  ls
-   53  cd ~/op
-   54  rm -rf op
-   55  ls
-   56  cd ~/
-   57  ls
-   58  git clone git@github.com:pronan/op.git
-   59  cd op
-   60  ls
-   61  mkdir logs
-   62  ifconfig -a
-   63  history
-   64  history > commands
-   65  ls
-   66* 
    67  git config --global user.email "aa@qq.com"
    68  git config --global user.name "xn"
-   69  git commit -am "f"
-   70  git add . && git commit -am "f"
-   71  git push
-   72  curl ifconfig.me
-   73  curl icanhazip.com
-   74  vim conf/devu
-   75  curl icanhazip.com
-   76  nginx -p . -c conf/devu
-   77* 
-   78  nginx -p . -c conf/devu -s stop
-   79  ls
-   80  vim conf/dev
-   81  vim conf/devu
-   82  top
-   83  nginx -p . -c conf/dev
-   84  curl localhost:8080
-   85  nginx -p . -c conf/dev -s stop
-   86  nginx -p . -c conf/devu
-   87  cat conf/devu
    88  curl 220.167.121.180
-   89  history > commands
