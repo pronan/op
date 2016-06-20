@@ -1,16 +1,16 @@
-worker_processes  1;
+worker_processes  auto;
 error_log  logs/error.log;
 pid logs/nginx.pid;
 user root;
 
 events {
-    worker_connections  1024;
+    worker_connections  10240;
 }
 
 
 http {
     include       mime.types;
-    default_type  "text/html; charset=UTF-8";
+    default_type  "text/html; charset=utf-8";
     access_log  off;
     sendfile        on;
     keepalive_timeout  65;
@@ -21,7 +21,7 @@ http {
 
     server {
         listen       80;
-        server_name  www.wdksw.com wdksw.com;
+        server_name  220.167.121.180;
         root html;
 
         location = / {

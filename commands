@@ -62,3 +62,28 @@
    62  ifconfig -a
    63  history
    64  history > commands
+   65  ls
+   66* 
+   67  git config --global user.email "aa@qq.com"
+   68  git config --global user.name "xn"
+   69  git commit -am "f"
+   70  git add . && git commit -am "f"
+   71  git push
+   72  curl ifconfig.me
+   73  curl icanhazip.com
+   74  vim conf/devu
+   75  curl icanhazip.com
+   76  nginx -p . -c conf/devu
+   77* 
+   78  nginx -p . -c conf/devu -s stop
+   79  ls
+   80  vim conf/dev
+   81  vim conf/devu
+   82  top
+   83  nginx -p . -c conf/dev
+   84  curl localhost:8080
+   85  nginx -p . -c conf/dev -s stop
+   86  nginx -p . -c conf/devu
+   87  cat conf/devu
+   88  curl 220.167.121.180
+   89  history > commands
