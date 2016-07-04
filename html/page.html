@@ -1,2 +1,19 @@
 {% layout = "home.html" %}
-{-addition-}This is addtion.{-addition-}
+{-addition-}
+
+        <form enctype="multipart/form-data" method="post">
+            <p>
+                <label for="email">user</label>
+                <input id="email" name="email" type="text" />
+            </p>
+            <p>
+                <label for="files">File input</label>
+                <input type="file" id="files" name="myfile">
+            </p>
+            <p>
+                <label for="files1">File input2</label>
+                <input type="file" id="files1" name="myfile1">
+            </p>
+            <input type="submit" value="submit"/>
+        </form>
+{-addition-}
