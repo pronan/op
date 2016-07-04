@@ -198,8 +198,11 @@ local function _repr(obj, ind, deep, already)
     end
 end
 function m.repr(obj)
-    local already = {}
-    return '{'.._repr(obj, '', 1, already)
+    if type(obj)  == 'table' then
+        return '{'.._repr(obj, '', 1, {})
+    else
+        return simple(obj)
+    end
 end
 function m.rs(...) 
     for i,v in ipairs(...) do

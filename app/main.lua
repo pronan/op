@@ -7,7 +7,6 @@ local middlewares_reversed = settings.middlewares_post
 local function log( ... )
     ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "~~")))
 end
-print('xxxxxxxxxx')
 for regex, func in pairs(urls) do
     local capture, err = match(uri, regex)
     if capture then

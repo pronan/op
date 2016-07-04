@@ -80,17 +80,6 @@ function m.header(request, kwargs)
     local header = ngx.header
     return ''--render("content.html"){}
 end
-function m.session(request, kwargs)
-    local session = require "resty.session".start()
-    session.data.wow = 'yesdfssdfffffffffffffffffffsfsadfsadfsdfsfsdfsdfsdfdsddddddddddddddddddddddddddddddd'
-    session:save()
-    return render("content.html"){}
-end
-function m.check(request, kwargs)
-    local session = require "resty.session".open()
-    ngx.say(repr(session.data))
-    return ''
-end
 function m.form(request, kwargs)
     local query = request.get_uri_args()
     local path = './' --basedir..'html/'

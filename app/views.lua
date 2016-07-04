@@ -50,4 +50,21 @@ end
 function m.home(kw)
     return repr(gmt(_G).__index)
 end
+function m.session(request, kwargs)
+    local session = require "resty.session".start()
+    session.data.wow = 'yaaaakb12'
+    session:save()
+    return repr(ngx.var.args)
+end
+function m.check(request, kwargs)
+    local session = require "resty.session".open()
+    local ck = ngx.req.get_headers()
+    local  res = {}
+    ngx.header.content_type = 'text/plain'
+    ngx.header.charset = 'utf-8'
+    res[#res+1] = tostring(#ck["Cookie"])
+    res[#res+1] = ck
+    res[#res+1] = session
+    return repr(res)
+end
 return m
