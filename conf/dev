@@ -1,11 +1,10 @@
-worker_processes  1;
+worker_processes  auto;
 error_log  logs/error.log;
 pid logs/nginx.pid;
 
 events {worker_connections  1024;}
 
 http {
-    #include       mime.types;
     default_type  "text/html; charset=utf-8";
     access_log  off;
     sendfile        on;
@@ -16,7 +15,7 @@ http {
 
     server {
         listen       8080;
-        server_name  127.0.0.1;
+        server_name  localhost;
         root html;
         include mime.types;
         set $session_secret 623q4hR325t36VsCD3g567922IC0073T;
@@ -27,19 +26,6 @@ http {
         
         location / {
             content_by_lua_file app/main.lua;
-        }
-        location = /form1 {
-            content_by_lua_block{
-                local render = require"resty.template".render
-                local req=ngx.req
-                ngx.say(ngx.req.raw_header())
-                req.read_body()
-                local args, err = req.get_post_args()
-                for k,v in pairs(args) do
-                    ngx.say(k, ':::', v)
-                end
-                render("app/form.html")
-            }
         }
         location = /test {
             content_by_lua_file app/test.lua;
