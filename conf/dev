@@ -28,7 +28,7 @@ http {
             content_by_lua_file app/main.lua;
         }
         location = /test {
-            content_by_lua_file app/test.lua;
+            content_by_lua_file app/test/model.lua;
         }
 
         location = /favicon.ico {
