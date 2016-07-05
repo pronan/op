@@ -55,10 +55,12 @@ function m.session(request, kwargs)
     -- session.data.wow = 'yaaaakb12'
     -- session.data.ahaha = 'good'
     -- session:save()
-    local cookie = require"resty.cookie":new()
-    cookie:set{key='a', value='1'}
-    cookie:set{key='b', value='2'}
-    cookie:set{key='c', value='3'}
+    -- local cookie = require"resty.cookie":new()
+    -- cookie:set{key='a', value='1'}
+    -- cookie:set{key='b', value='2'}
+    -- cookie:set{key='c', value='3'}
+    -- cookie:set{key='d', value='4'}
+    ngx.header['Set-Cookie'] = {'ahaha=1', 'x=2'}
     return repr(ngx.header)
 end
 function m.check(request, kwargs)

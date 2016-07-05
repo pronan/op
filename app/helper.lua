@@ -199,7 +199,7 @@ local function _repr(obj, ind, deep, already)
 end
 function m.repr(obj)
     if type(obj)  == 'table' then
-        return '{'.._repr(obj, '', 1, {})
+        return '{**'..tostring(obj).._repr(obj, '', 1, {})
     else
         return simple(obj)
     end

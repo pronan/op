@@ -170,7 +170,6 @@ function _M.set(self, cookie)
     local set_cookie_type = type(set_cookie)
     local t = self.set_cookie_table
     clear_tab(t)
-    ngx.log(ngx.ERROR, '****', set_cookie, t)
     if set_cookie_type == "string" then
         -- only one cookie has been setted
         if set_cookie ~= cookie_str then
