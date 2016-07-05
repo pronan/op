@@ -1,4 +1,5 @@
-local MIDDLEWARES = require"app.middlewares"
+local middlewares = require"app.middlewares"
+
 local m = {}
 
 m.databases ={
@@ -26,18 +27,8 @@ m.databases ={
     }
 }
 
-
-
-local middlewares_pre = {
-    --MIDDLEWARES.auto_keepalive, 
+m.middlewares = {
+    middlewares.cookie, 
 }
-local middlewares_post = {
-    
-}
-for i,v in ipairs(middlewares_pre) do
-    middlewares_post[#middlewares_pre-i+1] = v
-end
-m.middlewares_pre = middlewares_pre
-m.middlewares_post = middlewares_post
 
 return m

@@ -20,8 +20,9 @@ http {
     init_by_lua_file app/init.lua;
 
     server {
-        listen       80;
-        server_name  220.167.121.180;
+        listen       8000;
+        server_name  localhost 171.93.26.59;
+        #server_name  220.167.121.180;
         root html;
 
         location = / {

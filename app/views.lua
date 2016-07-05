@@ -42,9 +42,10 @@ function m.inspect(kw)
     ngx.ctx.b = 2
     sprint_table(ngx.ctx)
 end
-function m.global(kw)
+function m.global(request, kwargs)
     ngx.header.content_type = 'text/plain'
     local x = {a=1, bddddd={a=1, b=2}}
+    request.cookie:set{key='goood', value='xiang nan rocks!'}
     return repr(gmt(_G).__index)
 end
 function m.home(kw)
@@ -52,7 +53,7 @@ function m.home(kw)
 end
 function m.session(request, kwargs)
     --ngx.header.content_type = 'text/plain; charset=utf-8'
-    local cookie = require"resty.cookie":new()
+    local cookie = request.cookie
     cookie:set{key='a', value='1'}
     cookie:set{key='b', value='2'}
     cookie:set{key='c', value='3'}
