@@ -18,7 +18,7 @@ http {
     proxy_temp_path temp/proxy_temp;
     scgi_temp_path temp/scgi_temp;
     uwsgi_temp_path temp/uwsgi_temp;
-    
+
     server {
         listen       8080;
         server_name  localhost;
@@ -34,7 +34,7 @@ http {
             content_by_lua_file app/main.lua;
         }
         location = /test {
-            content_by_lua_file app/test/model.lua;
+            content_by_lua_file app/test/main.lua;
         }
 
         location = /favicon.ico {

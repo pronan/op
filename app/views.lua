@@ -51,17 +51,13 @@ function m.home(kw)
     return repr(gmt(_G).__index)
 end
 function m.session(request, kwargs)
-    -- local session = require "resty.session".start()
-    -- session.data.wow = 'yaaaakb12'
-    -- session.data.ahaha = 'good'
-    -- session:save()
-    -- local cookie = require"resty.cookie":new()
-    -- cookie:set{key='a', value='1'}
-    -- cookie:set{key='b', value='2'}
-    -- cookie:set{key='c', value='3'}
-    -- cookie:set{key='d', value='4'}
-    ngx.header['Set-Cookie'] = {'ahaha=1', 'x=2'}
-    return repr(ngx.header)
+    --ngx.header.content_type = 'text/plain; charset=utf-8'
+    local cookie = require"resty.cookie":new()
+    cookie:set{key='a', value='1'}
+    cookie:set{key='b', value='2'}
+    cookie:set{key='c', value='3'}
+    cookie:set{key='d', value='4'}
+    return ''
 end
 function m.check(request, kwargs)
     --local session = require "resty.session".open()
