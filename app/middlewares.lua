@@ -42,12 +42,12 @@ local function _session(value, save)
 end
 
 local function SessionProxy(data)
-	local meta = { data = data,  modify = false, __index = data}
-	meta.__newindex = function(t, k, v) 
-					      data[k] = v 
-					      meta.modify  = true
-					  end
-	return setmetatable({}, meta)
+    local meta = { data = data,  modify = false, __index = data}
+    meta.__newindex = function(t, k, v) 
+                          data[k] = v 
+                          meta.modify  = true
+                      end
+    return setmetatable({}, meta)
 end
 local function session_middleware_before(req, kwargs)
     req.session = SessionProxy(_session(req.cookie:get('session')))
@@ -55,18 +55,18 @@ end
 local function session_middleware_after(req, kwargs)
     local proxy = getmetatable(req.session)
     if proxy.modify then
-    	req.cookie:set{key='session',  value= _session(proxy.data, true)}
+        req.cookie:set{key='session',  value= _session(proxy.data, true)}
     end
 end
 _M.session = {before=session_middleware_before, after=session_middleware_after}
 
 local SessionStore = {}
 function SessionStore.new(self, data)
-	self.__index = self
-	return setmetatable(data, self)
+    self.__index = self
+    return setmetatable(data, self)
 end
 function SessionStore.save(self)
-	ngx.req.cookie:set{key='session',  value= _session(self, true)}
+    ngx.req.cookie:set{key='session',  value= _session(self, true)}
 end
 local function session_plain_middleware_before(req, kwargs)
     req.session = SessionStore:new(_session(req.cookie:get('session')))
