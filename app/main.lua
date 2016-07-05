@@ -34,11 +34,11 @@ for regex, func in pairs(urls) do
 
         local response, err = func(req, kwargs)
 
-        for i=#middlewares, 1 do
+        for i=#middlewares, 1, -1 do
             local ware = middlewares[i]
             if ware.after then
                 local err, ok = ware.after(req, kwargs)
-                if not ok then
+                if err then
                     ngx.log(ngx.ERR, err)
                     return ngx.exit(500)
                 end

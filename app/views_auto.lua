@@ -19,6 +19,10 @@ function m.content(request, kwargs)
     -- end
     return render("page.html"){sidebar = 'Profile'}
 end
+function m.rs(request, kwargs)
+    local args, err = request.get_post_args()
+    return repr(s)
+end
 function m.pubkey(request, kwargs)
     local a = 1
     return [[ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP1qeXu+VLnTZrd1FVNBHuwW/80mkCW3lxnPqc5g5G8tvC6JX5TcIrRHm2qet1CKBqZwFaMpCK8QqsdGcbiuuOm9YPoWkfEEX4ngEnL6HRH1fHCWvP1sUPO+yiKiPlXgjlQrgrghNULH3Y6azrw+VYL1Zihs6LZsm77r+hKa/mhe9FIBQQeSkmZpPff+SgVpTglE9Oi9bY8a/4kueAIrhlKq+4+0S8oX+fWJWuN0KwZV79wy7vmJ6KoL/OcRnqv7cWZXX5B3hCF9nK+j34stR62lu4vIYMrcsCMKJBjWRXHtdblEcWdxm3z579QVARtCDkTYAP0sTieshBV2My7Y8B 280145668@qq.com

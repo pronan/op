@@ -51,14 +51,23 @@ end
 function m.home(kw)
     return repr(gmt(_G).__index)
 end
+local json = require "cjson.safe"
+
 function m.session(request, kwargs)
     --ngx.header.content_type = 'text/plain; charset=utf-8'
     local cookie = request.cookie
-    cookie:set{key='a', value='1'}
-    cookie:set{key='b', value='2'}
-    cookie:set{key='c', value='3'}
-    cookie:set{key='d', value='4'}
+    local session = request.session
+    -- cookie:set{key='a', value='1'}
+    -- cookie:set{key='b', value='2'}
+    -- cookie:set{key='c', value='3'}
+    -- cookie:set{key='d', value='4'}
+    session.ui = 1
+    session.u = {id=1, name='xn', password='111111'}
     return ''
+end
+function m.read_session(request, kwargs)
+    local x = 1
+    return repr(gmt(request.session).data)
 end
 function m.check(request, kwargs)
     --local session = require "resty.session".open()

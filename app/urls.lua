@@ -23,5 +23,6 @@ url('^/guide$', views.guide)
 url('^/inspect/(?<name>.+?)$', views.inspect)
 url('^/global$', views.global)
 url('^/session$', views.session)
+url('^/read_session$', views.read_session)
 url('^/check$', views.check)
 return urlpatterns

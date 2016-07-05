@@ -29,6 +29,7 @@ m.databases ={
 
 m.middlewares = {
     middlewares.cookie, 
+    middlewares.session, 
 }
 
 return m

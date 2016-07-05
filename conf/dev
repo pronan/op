@@ -1,4 +1,4 @@
-worker_processes  auto;
+worker_processes  1;
 error_log  logs/error.log;
 pid logs/nginx.pid;
 
@@ -18,6 +18,9 @@ http {
     proxy_temp_path temp/proxy_temp;
     scgi_temp_path temp/scgi_temp;
     uwsgi_temp_path temp/uwsgi_temp;
+
+    encrypted_session_key "abcdefghijklmnopqrstuvwxyz123456";
+    encrypted_session_iv "1234567812345678";
 
     server {
         listen       8080;
