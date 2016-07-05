@@ -5,7 +5,7 @@
   <!--<link href="css/bootstrap.min.css" rel="stylesheet"> -->
   <!--<link href="http://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">-->
   <link href="http://cdn.jarsj.cn/bootstrap.min.css" rel="stylesheet">
-  <link href="css/custom.css" rel="stylesheet"> {* blocks.css *}
+  <link href="/css/custom.css" rel="stylesheet"> {* blocks.css *}
 </head>
 
 <body>
@@ -50,6 +50,9 @@
     
     {* blocks.content *}
 
+    <div id="editor">some text</div>
+
+
     <div class="row">
       <div class="col-md-2">
         <ul class="nav nav-pills nav-stacked">
@@ -81,6 +84,10 @@
   <script src="http://cdn.jarsj.cn/jquery-1.11.0.min.js"></script>
   <script src="http://cdn.jarsj.cn/bootstrap.min.js"></script>
   {* blocks.js *}
+    <script src="/js/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        var editor = ace.edit("editor");
+    </script>
 </body>
 
 </html>

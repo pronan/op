@@ -19,9 +19,9 @@ function m.content(request, kwargs)
     -- end
     return render("page.html"){sidebar = 'Profile'}
 end
-function m.rs(request, kwargs)
-    local args, err = request.get_post_args()
-    return repr(s)
+function m.editor(request, kwargs)
+    local x = 1
+    return render("editor.html"){sidebar = 'Profile'}
 end
 function m.pubkey(request, kwargs)
     local a = 1
