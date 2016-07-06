@@ -29,10 +29,6 @@ http {
         root html;
         include mime.types;
 
-        location = / {
-            try_files /base.html =404;
-        }
-        
         location / {
             content_by_lua_file app/main.lua;
         }

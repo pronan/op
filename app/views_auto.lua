@@ -12,11 +12,78 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
+function m.register(req, kwargs)
+    if req.user then
+        return ngx.redirect('/profile')
+    end
+    local c={}
+    if req.get_method()=='POST' then
+        req.read_body()
+        local args, err = req.get_post_args()
+        if err then
+            return nil, err
+        end
+        local u=args.username
+        local p=args.password
+        if #u<3 then
+            c.username_error='用户名长度不能小于3'
+        end
+        if #p<6 then
+            c.password_error='密码长度不能小于6'
+        end
+        if next(c)==nil then
+            local usr,err=User:create{username=u,password=p}
+            if err then
+                return nil,err
+            end
+            local session=req.session
+            session.user=u
+            session.uid=usr.id
+            return render2('profile.html')
+        end
+    end
+    return render2("register.html", c)
+end
 function m.login(req, kwargs)
-    req.read_body()
-    local args, err = req.get_post_args()
-
-    return render2("login.html", {})
+    if req.user then
+        return ngx.redirect('/profile')
+    end
+    local c={}
+    if req.get_method()=='POST' then
+        req.read_body()
+        local args, err = req.get_post_args()
+        if err then
+            return nil, err
+        end
+        local u=args.username
+        local p=args.password
+        if #u<3 then
+            c.username_error='用户名长度不能小于3'
+        end
+        if #p<6 then
+            c.password_error='密码长度不能小于6'
+        end
+        local usr,err=User:get{username=u}
+        if err then
+            c.username_error='用户名错误'
+        elseif usr.password ~= p then
+            c.password_error='密码错误'
+        else
+            local session=req.session
+            session.user=u
+            session.uid=usr.id
+            return render2('profile.html')
+        end
+    end
+    return render2("login.html", c)
+end
+function m.logout(req, kwargs)
+    delete_session()
+    return ngx.redirect("/")
+end
+function m.profile(req, kwargs)
+    local x =1
+    return render2('profile.html', {})
 end
 function m.content(req, kwargs)
     req.read_body()
@@ -186,5 +253,12 @@ function m.init( kw )
     else
         return 'table is created'
     end
+end
+function m.users( req, kw )
+    local users, err = User:all()
+    if err then
+        return nil, err
+    end
+    return render2('users.html', {users=users})
 end
 return m

@@ -32,6 +32,12 @@ function Set.intersection(self, key)
 end
 m.Set = Set
 
+function m.delete_session()
+    ngx.req.cookie:set{key='session', value='',max_age=0,
+        expires='Thu, 01 Jan 1970 00:00:01 GMT'
+    }
+end
+
 function m.copy(old)
     local res = {};
     for i, v in pairs(old) do

@@ -1,16 +1,21 @@
-{% layout = "home.html" %}
-
-{-sidebar-}
-<li role="presentation"{% if sidebar=='home' then%} class="active"{% end %}><a href="/">首页</a></li>
-<li role="presentation"{% if sidebar=='profile' then%} class="active"{% end %}><a href="/profile">个人资料</a></li>
-<li role="presentation"{% if sidebar=='messages' then%} class="active"{% end %}><a href="/messages">消息</a></li>
-{-sidebar-}
+{% layout = "c444.html" %}
 
 {-content-}
-<div class="panel panel-primary">
-  <div class="panel-heading">{{pjl}}</div>
-  <div class="panel-body">
-    <p>{{content}}</p>
+<form method="post" action="">
+  <div class="form-group">
+    <label for="id_username">用户名</label>
+    <input class="form-control" type="text" id="id_username" placeholder="" name="username">
+    {% if username_error then %}
+    <div class="alert alert-danger" role="alert">{{username_error}}</div>
+    {% end%}
   </div>
-</div>
+  <div class="form-group">
+    <label for="id_password">密码</label>
+    <input class="form-control" type="password" id="id_password" name="password">
+    {% if password_error then %}
+    <div class="alert alert-danger" role="alert">{{password_error}}</div>
+    {% end%}
+  </div>
+  <button type="submit" class="btn btn-default">注册</button>
+</form>
 {-content-}

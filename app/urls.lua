@@ -17,7 +17,7 @@ for name, func in pairs(views_auto) do
     url('/'..name, func)
 end
 
-
+url('^/$', views.home)
 url('^/users/(?<pk>\\d+?)$', views.json)
 url('^/guide$', views.guide)
 url('^/inspect/(?<name>.+?)$', views.inspect)

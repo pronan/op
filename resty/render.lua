@@ -2,6 +2,7 @@ local compile = require"resty.template".compile
 local global = {pjl='大飞白嫩'}
 
 return function(path, context)
+    context=context or {}
     for k,v in pairs(global) do
         if context[k] == nil then
             context[k] = v

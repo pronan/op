@@ -1,0 +1,8 @@
+{% layout = "c444.html" %}
+
+{-content-}
+欢迎您, {{user or '游客'}}.
+{% if user then %}
+您的密码是{{user.password}}, 您的id是{{user.id}}
+{% end%}
+{-content-}

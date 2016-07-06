@@ -1,0 +1,9 @@
+{% layout = "c444.html" %}
+
+{-content-}
+<ul>
+  {% for i, u in ipairs(users) do%}
+  <li>{{u.username}}, {{u.password}}</li>
+  {% end%}
+</ul>
+{-content-}

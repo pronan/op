@@ -29,7 +29,7 @@ M.DATABASES ={
 M.MIDDLEWARES = {
     "app.middlewares.cookie", 
     "app.middlewares.session", 
-    --"app.middlewares.auth", 
+    "app.middlewares.auth", 
 }
 
 M.SESSION_EXPIRE_TIME = '30d' -- should be no less than the value of directive `encrypted_session_expires`

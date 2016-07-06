@@ -1,4 +1,5 @@
 local query = require"resty.model".RawQuery
+local render2 = require"resty.render"
 
 local m={}
 
@@ -41,8 +42,9 @@ function m.global(request, kwargs)
     ngx.header.content_type = 'text/plain'
     return repr(ngx.var.encrypted_session_expires)
 end
-function m.home(kw)
-    return repr(gmt(_G).__index)
+function m.home(req, kw)
+    local x =1
+    return render2('home.html')
 end
 local json = require "cjson.safe"
 
