@@ -66,7 +66,7 @@ function m.compare(t, func)
     end
 
 end
-function m.map(func, ...)
+function m.mappp(func, ...)
     func = func or default_map
     local res = {}
     local seqs = {...}
@@ -79,10 +79,10 @@ function m.map(func, ...)
     end
     return res
 end
-function m.mapkv(func, tbl)
+function m.map(func, tbl)
     local res = {}
-    for k,v in pairs(tbl) do
-        res[#res+1] = func(k, v)
+    for i=1, #tbl do
+        res[i] = func(tbl[i])
     end
     return res
 end

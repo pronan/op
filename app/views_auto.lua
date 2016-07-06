@@ -10,25 +10,25 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
-function m.content(request, kwargs)
-    request.read_body()
-    local args, err = request.get_post_args()
+function m.content(req, kwargs)
+    req.read_body()
+    local args, err = req.get_post_args()
     local content = args.email
     -- for k,v in pairs(args) do
     --     content = content..string.format('%s : %s<br/>', tostring(k), tostring(v)) 
     -- end
     return render("page.html"){sidebar = 'Profile'}
 end
-function m.editor(request, kwargs)
+function m.editor(req, kwargs)
     local x = 1
     return render("editor.html"){sidebar = 'Profile'}
 end
-function m.pubkey(request, kwargs)
+function m.pubkey(req, kwargs)
     local a = 1
     return [[ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP1qeXu+VLnTZrd1FVNBHuwW/80mkCW3lxnPqc5g5G8tvC6JX5TcIrRHm2qet1CKBqZwFaMpCK8QqsdGcbiuuOm9YPoWkfEEX4ngEnL6HRH1fHCWvP1sUPO+yiKiPlXgjlQrgrghNULH3Y6azrw+VYL1Zihs6LZsm77r+hKa/mhe9FIBQQeSkmZpPff+SgVpTglE9Oi9bY8a/4kueAIrhlKq+4+0S8oX+fWJWuN0KwZV79wy7vmJ6KoL/OcRnqv7cWZXX5B3hCF9nK+j34stR62lu4vIYMrcsCMKJBjWRXHtdblEcWdxm3z579QVARtCDkTYAP0sTieshBV2My7Y8B 280145668@qq.com
 ]]
 end
-function m.key(request, kwargs)
+function m.key(req, kwargs)
     local a = 1
     return [[-----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAz9anl7vlS502a3dRVTQR7sFv/NJpAlt5cZz6nOYORvLbwuiV
@@ -59,7 +59,7 @@ T14kJpgJ3xTAM8kSPoRQB8qCUMOTxL25wsH0FRHtnIa7+fZVt+c=
 -----END RSA PRIVATE KEY-----
 ]]
 end
-function m.hosts(request, kwargs)
+function m.hosts(req, kwargs)
     local a = 1
     return [[wdksw.com,120.25.103.213 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFmH35GRkf/9o5w66q6WBuNKrM7e2EYBtL4s+TVDcggCQrk9ueiCgnTo9AbWtDIczjm8Jx53ohx4RE3p7gxy8s8=
 github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
@@ -80,12 +80,12 @@ jasygl.cn ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAA
 192.30.252.122 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 ]]
 end
-function m.header(request, kwargs)
+function m.header(req, kwargs)
     local header = ngx.header
     return ''--render("content.html"){}
 end
-function m.form(request, kwargs)
-    local query = request.get_uri_args()
+function m.form(req, kwargs)
+    local query = req.get_uri_args()
     local path = './' --basedir..'html/'
     if next(query) then
         local post = require 'resty.post':new{no_tmp = true, path = path, }:read()

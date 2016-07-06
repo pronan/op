@@ -46,7 +46,8 @@ function m.global(request, kwargs)
     ngx.header.content_type = 'text/plain'
     local x = {a=1, bddddd={a=1, b=2}}
     request.cookie:set{key='goood', value='xiang nan rocks!'}
-    return repr(gmt(_G).__index)
+    local en = require"cjson.safe".encode
+    return en(gmt(_G).__index)
 end
 function m.home(kw)
     return repr(gmt(_G).__index)
@@ -62,7 +63,7 @@ function m.session(request, kwargs)
     -- cookie:set{key='c', value='3'}
     -- cookie:set{key='d', value='4'}
     session.ui = 1
-    session.u = {id=1, name='xn', password='111111'}
+    session.u = {id=1, name='xxxxyyyn', password='111111'}
     return ''
 end
 function m.read_session(request, kwargs)

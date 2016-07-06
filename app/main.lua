@@ -1,21 +1,14 @@
 local urls = require"app.urls"
+local _middlewares = require"app.settings".middlewares
 local match = ngx.re.match
 local uri = ngx.var.uri
-local middlewares = settings.middlewares
-local cookie = require"resty.cookie":new()
-
-
--- for regex, func in pairs(urls) do
---     local kwargs, err = match(uri, regex)
---     if kwargs then
---         local response, err = func(ngx.req, kwargs)
---         if not response then
---             return ngx.exit(500)
---         else
---             return ngx.print(response)
---         end
---     end
--- end
+local middlewares = map(function(k)
+        if type(k) == 'string' then
+            return require(k)
+        else
+            return k
+        end
+    end, _middlewares)
 
 for regex, func in pairs(urls) do
     local kwargs, err = match(uri, regex)

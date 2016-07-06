@@ -5,6 +5,9 @@ encode = require"cjson".encode
 -- upload = require "resty.upload"
 -- str = require "resty.string"
 helper = require"app.helper"
+for k,v in pairs(helper) do
+    _G[k] = v
+end
 settings = require"app.settings"
 smt = setmetatable
 gmt = getmetatable
@@ -12,6 +15,4 @@ say = ngx.say
 -- var = ngx.var
 -- req = ngx.req
 basedir = ngx.config.prefix()
-for k,v in pairs(helper) do
-    _G[k] = v
-end
+

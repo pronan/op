@@ -1,8 +1,7 @@
-local middlewares = require"app.middlewares"
 
-local m = {}
+local M = {}
 
-m.databases ={
+M.databases ={
     default = {
         engine = "resty.mysql", 
         host = "127.0.0.1", 
@@ -27,9 +26,10 @@ m.databases ={
     }
 }
 
-m.middlewares = {
-    middlewares.cookie, 
-    middlewares.session, 
+M.middlewares = {
+    "app.middlewares.cookie", 
+    "app.middlewares.session", 
+    --"app.middlewares.auth", 
 }
 
-return m
+return M
