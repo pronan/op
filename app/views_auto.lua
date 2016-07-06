@@ -179,7 +179,7 @@ function m.init( kw )
 [[create table users(
     id serial primary key,
     username varchar(10), 
-    password varchar(28);]]
+    password varchar(28));]]
 )
     if not res then
         return nil, err
