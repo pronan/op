@@ -21,13 +21,14 @@ http {
 
     encrypted_session_key "abcdefghijklmnopqrstuvwxyz123456";
     encrypted_session_iv "1234567812345678";
+    encrypted_session_expires 30d;
 
     server {
         listen       8080;
         server_name  localhost;
         root html;
         include mime.types;
-        
+
         location = / {
             try_files /base.html =404;
         }

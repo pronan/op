@@ -1,21 +1,21 @@
 local urls = require"app.urls"
-local _middlewares = require"app.settings".middlewares
+local _middlewares = require"app.settings".MIDDLEWARES
 local match = ngx.re.match
 local uri = ngx.var.uri
-local middlewares = map(function(k)
-        if type(k) == 'string' then
-            return require(k)
-        else
-            return k
-        end
-    end, _middlewares)
+local MIDDLEWARES = map(function(k)
+    if type(k) == 'string' then
+        return require(k)
+    else
+        return k
+    end
+end, _middlewares)
 
 for regex, func in pairs(urls) do
     local kwargs, err = match(uri, regex)
     local req = ngx.req
     if kwargs then
 
-        for i, ware in ipairs(middlewares) do
+        for i, ware in ipairs(MIDDLEWARES) do
             if ware.before then
                 local err, ok = ware.before(req, kwargs)
                 if err then
@@ -27,8 +27,8 @@ for regex, func in pairs(urls) do
 
         local response, err = func(req, kwargs)
 
-        for i=#middlewares, 1, -1 do
-            local ware = middlewares[i]
+        for i=#MIDDLEWARES, 1, -1 do
+            local ware = MIDDLEWARES[i]
             if ware.after then
                 local err, ok = ware.after(req, kwargs)
                 if err then

@@ -1,4 +1,4 @@
-local DATABASES = require"app.settings".databases
+local DATABASES = require"app.settings".DATABASES
 
 --helper functions
 local function copy(old)

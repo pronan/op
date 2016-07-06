@@ -1,7 +1,7 @@
 
 local M = {}
 
-M.databases ={
+M.DATABASES ={
     default = {
         engine = "resty.mysql", 
         host = "127.0.0.1", 
@@ -26,10 +26,12 @@ M.databases ={
     }
 }
 
-M.middlewares = {
+M.MIDDLEWARES = {
     "app.middlewares.cookie", 
     "app.middlewares.session", 
     --"app.middlewares.auth", 
 }
+
+M.SESSION_EXPIRE_TIME = '30d' -- should be no less than the value of directive `encrypted_session_expires`
 
 return M
