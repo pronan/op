@@ -1,5 +1,7 @@
 local query = require"resty.model".RawQuery
 local render = require"resty.template".compile
+local render2 = require"resty.render"
+local User = require"app.models".User
 
 local m={}
 local function log( ... )
@@ -10,14 +12,21 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
+function m.login(req, kwargs)
+    req.read_body()
+    local args, err = req.get_post_args()
+
+    return render2("login.html", {})
+end
 function m.content(req, kwargs)
     req.read_body()
     local args, err = req.get_post_args()
-    local content = args.email
     -- for k,v in pairs(args) do
     --     content = content..string.format('%s : %s<br/>', tostring(k), tostring(v)) 
     -- end
-    return render("page.html"){sidebar = 'Profile'}
+    local context = {sidebar = 'profile', navbar='guide', content = repr(ngx.req)}
+    --setmetatable(context, {req={user='xxn'}})
+    return render2("page.html", context)
 end
 function m.editor(req, kwargs)
     local x = 1
@@ -163,40 +172,19 @@ local function ran(step)
 end
 function m.init( kw )
     local res, err = query("drop table if exists users")
-    -- say(repr(res), err)
-    -- query("create table user "
-    --      .. "(id serial primary key, "
-    --      .. "name varchar(10), "
-    --      .. "sex integer, "
-    --      .. "age integer"
-    --      ..")"
-    -- )
+    if not res then
+        return nil, err
+    end
     local res, err = query(
 [[create table users(
     id serial primary key,
-    name varchar(10), 
-    price integer,  
-    count integer, 
-    time datetime);]]
+    username varchar(10), 
+    password varchar(28);]]
 )
-
-    
-    say(repr(res), err)
-    for i = 1, 50 do
-        local name = table.concat({
-            string.char(math.random(65, 90)), 
-            string.char(math.random(97, 122)), 
-            string.char(math.random(97, 122)),
-            string.char(math.random(97, 122)),
-            }, "")
-        query(
-            string.format([[insert into users(name, sex, age) values ('%s', %s, %s);]], name, ran(4), ran(120) )
-        )
-    end
     if not res then
-        ngx.say('fail to create')
+        return nil, err
     else
-        ngx.say('table is created')
+        return 'table is created'
     end
 end
 return m

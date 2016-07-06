@@ -28,9 +28,7 @@ local function extend(self, other)
     end
     return self
 end
-local function log( ... )
-    ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "~~")))
-end
+
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(kwargs)
     -- turn a hash table such as {age=23, id__in={1, 2, 3}} to a string array:

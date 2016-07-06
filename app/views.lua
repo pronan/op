@@ -2,11 +2,6 @@ local query = require"resty.model".RawQuery
 
 local m={}
 
-local function log( ... )
-    ngx.log(ngx.ERR, string.format('\n*************************************\n%s\n*************************************', table.concat({...}, "")))
-end
-
-
 local function getfield(f)
     local v = _G -- start with the table of globals
     for w in string.gmatch(f, "[%w_]+") do
@@ -44,9 +39,6 @@ function m.inspect(kw)
 end
 function m.global(request, kwargs)
     ngx.header.content_type = 'text/plain'
-    local x = {a=1, bddddd={a=1, b=2}}
-    request.cookie:set{key='goood', value='xiang nan rocks!'}
-    local en = require"cjson.safe".encode
     return repr(ngx.var.encrypted_session_expires)
 end
 function m.home(kw)

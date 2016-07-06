@@ -2,92 +2,53 @@
 <html lang='zh'>
 
 <head>
-  <!--<link href="css/bootstrap.min.css" rel="stylesheet"> -->
-  <!--<link href="http://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">-->
   <link href="http://cdn.jarsj.cn/bootstrap.min.css" rel="stylesheet">
-  <link href="/css/custom.css" rel="stylesheet"> {* blocks.css *}
+  <link href="/css/custom.css" rel="stylesheet"> 
+  {* blocks.page_css *}
+  <title>{* blocks.title *}</title> 
 </head>
 
 <body>
   <div class="container-fluid">
     {* blocks.header *}
-
     <nav class="navbar navbar-default">
       <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
           <a class="navbar-brand" href="#"><img alt="Brand" src="favicon.ico"></a>
         </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li{% if sidebar=='home' then%} class="active"{% end %}><a href="/">首页</a></li>
-            <li{% if sidebar=='guide' then%} class="active"{% end %}><a href="guide">指南</a></li>
+            <li{% if navbar=='home' then%} class="active"{% end %}><a href="/">首页</a></li>
+            <li{% if navbar=='guide' then%} class="active"{% end %}><a href="/guide">指南</a></li>
           </ul>
-
           <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">操作<span class="caret"></span></a>
-              
-              <ul class="dropdown-menu">
-                {%if user.is_login() then%}
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-                {%else%}
-                {%end%}
-              </ul>
-              
-            </li>
+            {%if user then%}
+            <li{% if navbar=='profile' then%} class="active"{% end %}><a href="/profile">{{user}}的账号</a></li>
+            <li{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
+            {%else%}
+            <li{% if navbar=='login' then%} class="active"{% end %}><a href="/login">登陆</a></li>
+            <li{% if navbar=='register' then%} class="active"{% end %}><a href="/register">注册</a></li>
+            {%end%}
           </ul>
         </div>
-        <!-- /.navbar-collapse -->
       </div>
-      <!-- /.container-fluid -->
     </nav>
-    
-    {* blocks.content *}
-
-    <div id="editor">some text</div>
-
-
-    <div class="row">
-      <div class="col-md-2">
-        <ul class="nav nav-pills nav-stacked">
-          <li role="presentation"{% if sidebar=='Home' then%} class="active"{% end %}><a href="/">Home</a></li>
-          <li role="presentation"{% if sidebar=='Profile' then%} class="active"{% end %}><a href="profile">Profile</a></li>
-          <li role="presentation"{% if sidebar=='Messages' then%} class="active"{% end %}><a href="messages">Messages</a></li>
-        </ul>
-      </div>
-      <div class="col-md-5">
-        <div class="panel panel-primary">
-          <div class="panel-heading">{* blocks.title *}</div>
-          <div class="panel-body">
-            
-          </div>
-        </div>
-      </div>
-    </div>
-
+    {* blocks.main *}
     <nav class="navbar navbar-default navbar-fixed-bottom">
       <div class="container">
         This is footer.
       </div>
     </nav>
   </div>
-
   <!--<script src="http://mat1.gtimg.com/www/asset/lib/jquery/jquery/jquery-1.11.1.min.js"></script>-->
   <!--<script src="js/bootstrap.min.js"></script> -->
   <!--<script src="http://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>-->
   <script src="http://cdn.jarsj.cn/jquery-1.11.0.min.js"></script>
   <script src="http://cdn.jarsj.cn/bootstrap.min.js"></script>
-  {* blocks.js *}
-    <script src="/js/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script>
+  {* blocks.page_js *}
+<!--     <script src="/js/ace.js" type="text/javascript" charset="utf-8"></script> -->
+<!--     <script>
         var editor = ace.edit("editor");
-    </script>
+    </script> -->
 </body>
-
 </html>

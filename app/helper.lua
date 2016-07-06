@@ -31,6 +31,35 @@ function Set.intersection(self, key)
     return res
 end
 m.Set = Set
+
+function m.copy(old)
+    local res = {};
+    for i, v in pairs(old) do
+        if type(v) == "table" and v ~= old then
+            res[i] = copy(v)
+        else
+            res[i] = v;
+        end
+    end
+    return res;
+end
+function m.update(self, other)
+    for i, v in pairs(other) do
+        if type(v) == "table" then
+            self[i] = copy(v);
+        else
+            self[i] = v;
+        end
+    end
+    return self
+end
+function m.extend(self, other)
+    for i, v in ipairs(other) do
+        self[#self+1] = v
+    end
+    return self
+end
+
 function m.sorted(t, func)
     local keys = {}
     for k,v in pairs(t) do
@@ -39,10 +68,10 @@ function m.sorted(t, func)
     table.sort(keys, func)
     local i = 1
     return function ()
-                key = keys[i]
-                i = i+1
-                return key, t[key]
-            end
+        key = keys[i]
+        i = i+1
+        return key, t[key]
+    end
 end
 function m.list(func)
     local res = {}
@@ -57,16 +86,27 @@ function m.list(func)
     return res
 end
 
-local function default_map( ... )
+local function default_map(...)
     return {...}
 end
-function m.compare(t, func)
-    if func == nil then
-        func = function(a, b) return a>b end
-    end
 
+function m.map(func, tbl)
+    local res = {}
+    for i=1, #tbl do
+        res[i] = func(tbl[i])
+    end
+    return res
 end
-function m.mappp(func, ...)
+function m.filter(func, seq)
+    local res = {}
+    for i, v in ipairs(seq) do
+        if func(v)  == true then
+            res[#res+1] = v
+        end
+    end
+    return res
+end
+function m.xmap(func, ...)
     func = func or default_map
     local res = {}
     local seqs = {...}
@@ -79,48 +119,8 @@ function m.mappp(func, ...)
     end
     return res
 end
-function m.map(func, tbl)
-    local res = {}
-    for i=1, #tbl do
-        res[i] = func(tbl[i])
-    end
-    return res
-end
-function m.filter(func, seq)
-    local res = {}
-    for i,v in ipairs(seq) do
-        if func(v)  == true then
-            res[#res+1] = v
-        end
-    end
-    return res
-end
 
-function m.copy(old)
-    local res = {};
-    for i,v in pairs(old) do
-        if type(v) == "table" and v ~= old then
-            res[i] = m.copy(v);
-        else
-            res[i] = v;
-        end
-    end
-    return res;
-end
-function m.update(self, other)
-    for i,v in pairs(other) do
-        if type(v) == "table" then
-            self[i] = m.copy(v);
-        else
-            self[i] = v;
-        end
-    end
-end
-function m.extend(self, other)
-    for i,v in ipairs(other) do
-        self[#self+1] = v
-    end
-end
+--repr
 local function ok(num)
     local res = ''
     for i=1,num do
@@ -151,7 +151,6 @@ function m.zfill(s, n, c)
     end
     return s
 end
-
 local function _repr(obj, ind, deep, already)
     local label = type(obj)
     if label == 'table' then
@@ -205,7 +204,7 @@ function m.repr(obj)
     end
 end
 function m.rs(...) 
-    for i,v in ipairs(...) do
+    for i, v in ipairs(...) do
         ngx.say(m.repr(v))
     end
 end
@@ -230,8 +229,8 @@ local function test()
         end
         return false
     end
-    for i,v in ipairs(m.map(f, {1, 2, 3}, {4, 5, 6})) do
-        print(i,v)
+    for i, v in ipairs(m.map(f, {1, 2, 3}, {4, 5, 6})) do
+        print(i, v)
     end
     print(m.repr(m.filter(g, {2, 3, 4, 5, 6, 7})))
     print(3%2)
