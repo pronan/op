@@ -237,6 +237,7 @@ local function ran(step)
     int, _ = math.modf(math.random()*step, step)
     return int
 end
+
 function m.init( kw )
     local res, err = query("drop table if exists users")
     if not res then

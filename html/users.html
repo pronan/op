@@ -1,9 +1,24 @@
 {% layout = "c444.html" %}
 
 {-content-}
-<ul>
-  {% for i, u in ipairs(users) do%}
-  <li>{{u.username}}, {{u.password}}</li>
+<table class="table">
+  {% if users[1] then %}
+    <tr>
+      {%for k,v in pairs(users[1]) do%}
+      <th>{{k}}</th>
+       {% end%}
+    </tr>
+    {% for i, u in ipairs(users) do%}
+    <tr>
+      {%for k,v in pairs(u) do%}
+      <td> {{v}} </td>
+       {% end%}
+    </tr>
+    {% end%}
+  {% else%}
+    没有任何记录
   {% end%}
-</ul>
+
+</table>
+
 {-content-}

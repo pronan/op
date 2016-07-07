@@ -42,6 +42,14 @@ function m.global(request, kwargs)
     ngx.header.content_type = 'text/plain'
     return repr(ngx.var.encrypted_session_expires)
 end
+function m.models(req,kw)
+    local name=kw.name or 'users'
+    local res, err = query("select * from "..name)
+    if not res then
+        return nil, err
+    end
+    return render2('users.html', {users=res})
+end
 function m.home(req, kw)
     local x =1
     return render2('home.html')

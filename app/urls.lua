@@ -19,6 +19,7 @@ end
 
 url('^/$', views.home)
 url('^/users/(?<pk>\\d+?)$', views.json)
+url('^/m/(?<name>\\w+?)$', views.models)
 url('^/guide$', views.guide)
 url('^/inspect/(?<name>.+?)$', views.inspect)
 url('^/global$', views.global)
