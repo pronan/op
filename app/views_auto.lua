@@ -246,6 +246,8 @@ function m.init( kw )
     local res, err = query(
 [[create table users(
     id serial primary key,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
     username varchar(10), 
     password varchar(28));]]
 )

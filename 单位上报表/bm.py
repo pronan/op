@@ -41,6 +41,7 @@ for root,dirs,files in os.walk(os.getcwd()):
                     except:
                         value = ''
                     res.append(value)
+                res.append(filespath[:-4])
                 SHEET_NAMES[sn].append('\t'.join(res))
                 r = r+1
         
