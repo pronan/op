@@ -103,6 +103,13 @@ function m.map(func, tbl)
     end
     return res
 end
+function m.mapkv(func, tbl)
+    local res = {}
+    for k, v in pairs(tbl) do
+        res[#res+1] = func(k, v)
+    end
+    return res
+end
 function m.filter(func, seq)
     local res = {}
     for i, v in ipairs(seq) do
