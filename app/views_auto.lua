@@ -1,6 +1,5 @@
 local query = require"resty.model".RawQuery
-local render = require"resty.template".compile
-local render2 = require"resty.render"
+local render = require"resty.render"
 local User = require"app.models".User
 local forms = require"app.forms"
 
@@ -13,7 +12,7 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
-function m.register(req, kwargs)
+function m.register2(req, kwargs)
     if req.user then
         return ngx.redirect('/profile')
     end
@@ -40,12 +39,42 @@ function m.register(req, kwargs)
             local session=req.session
             session.user=u
             session.uid=usr.id
-            return render2('profile.html')
+            return render('profile.html')
         end
     end
-    return render2("register.html", c)
+    return render("register.html", c)
+end
+function m.register(req, kwargs)
+    if req.user then
+        return ngx.redirect('/profile')
+    end
+    local form;
+    if req.get_method()=='POST' then
+        form = forms.UserForm{data=req.POST}
+        if form:is_valid() then
+            return ngx.redirect('/profile')
+        end
+    else
+        form = forms.UserForm{}
+    end
+    return render("register.html", {form=form})
 end
 function m.login(req, kwargs)
+    if req.user then
+        return ngx.redirect('/profile')
+    end
+    local form;
+    if req.get_method()=='POST' then
+        form = forms.LoginForm{data=req.POST}
+        if form:is_valid() then
+            return ngx.redirect('/profile')
+        end
+    else
+        form = forms.LoginForm{}
+    end
+    return render("login.html", {form=form})
+end
+function m.login2(req, kwargs)
     if req.user then
         return ngx.redirect('/profile')
     end
@@ -73,10 +102,10 @@ function m.login(req, kwargs)
             local session=req.session
             session.user=u
             session.uid=usr.id
-            return render2('profile.html')
+            return render('profile.html')
         end
     end
-    return render2("login.html", c)
+    return render("login.html", c)
 end
 function m.logout(req, kwargs)
     delete_session()
@@ -84,7 +113,7 @@ function m.logout(req, kwargs)
 end
 function m.profile(req, kwargs)
     local x =1
-    return render2('profile.html', {})
+    return render('profile.html', {})
 end
 function m.content(req, kwargs)
     req.read_body()
@@ -94,7 +123,7 @@ function m.content(req, kwargs)
     -- end
     local context = {sidebar = 'profile', navbar='guide', content = repr(ngx.req)}
     --setmetatable(context, {req={user='xxn'}})
-    return render2("page.html", context)
+    return render("page.html", context)
 end
 function m.editor(req, kwargs)
     local x = 1
@@ -263,6 +292,6 @@ function m.users( req, kw )
     if err then
         return nil, err
     end
-    return render2('users.html', {users=users})
+    return render('users.html', {users=users})
 end
 return m

@@ -27,6 +27,7 @@ M.DATABASES ={
 }
 
 M.MIDDLEWARES = {
+    "app.middlewares.post", 
     "app.middlewares.cookie", 
     "app.middlewares.session", 
     "app.middlewares.auth", 

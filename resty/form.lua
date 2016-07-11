@@ -19,20 +19,32 @@ function M.initialize(self)
     self.is_bound = self.data or self.files
     self.data = self.data or {}
     self.files = self.files or {}
+    self.initial = self.initial or {}
     self.label_suffix = self.label_suffix or ''
+    return self
+end
+function M.get_value(self, field)
+	local name = field.name
+    if self.is_bound then
+    	return self.data[name]
+    elseif self.instance then
+    	return self.instance[name]
+    else
+    	return field.initial or self.initial[name]
+    end
 end
 function M.render(self)
     local res = {}
     for i, field in ipairs(self.fields) do
         local name = field.name
         local errors_string = ''
-        if self.errors[name] then
+        if self.errors and self.errors[name] then
             errors_string = table.concat(helper.map(function(k)
                 return'<li>'..k..'</li>'end, self.errors[name]), "\n" )
             errors_string = string.format(self.error_template, errors_string)
         end
         res[#res+1] = string.format(self.template, field.id_prefix..name, field.label, 
-            field:render(), errors_string)
+            field:render(self:get_value(field), self.global_field_attrs), errors_string)
     end
     return table.concat( res, "\n")
 end
@@ -55,7 +67,7 @@ function M._clean_fields(self)
         else
             self.cleaned_data[name] = value
             if self['clean_'..name] then
-                value, errors = self['clean_'..name]()
+                value, errors = self['clean_'..name](self)
                 if errors then
                     self.errors[name] = errors
                 else
