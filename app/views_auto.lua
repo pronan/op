@@ -67,6 +67,9 @@ function m.login(req, kwargs)
     if req.get_method()=='POST' then
         form = forms.LoginForm{data=req.POST}
         if form:is_valid() then
+            local session=req.session
+            session.user=form.user.username
+            session.uid=form.user.id
             return ngx.redirect('/profile')
         end
     else
