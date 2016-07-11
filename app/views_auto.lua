@@ -2,6 +2,7 @@ local query = require"resty.model".RawQuery
 local render = require"resty.template".compile
 local render2 = require"resty.render"
 local User = require"app.models".User
+local forms = require"app.forms"
 
 local m={}
 local function log( ... )
