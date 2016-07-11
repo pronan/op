@@ -29,7 +29,7 @@ function Field.initialize(self)
     self.required = self.required or true
     self.initial = self.initial or ''
     self.help_text = self.help_text or ''
-    self.label_suffix = self.label_suffix or ''
+    --self.label_suffix = self.label_suffix or ''
     self.validators = self.validators or {}
     return self
 end
@@ -43,30 +43,38 @@ end
 function Field.render(self, value, attrs)
 
 end
-function Field.get_label(self)
-    return string.format('<label for="%s">%s</label>', self.id_prefix..self.name, self.label)
-end
-function Field.get_errors(self)
-    return string.format('<label for="%s">%s</label>', self.id_prefix..self.name, self.label)
-end
-function Field.clean(self, value)
-    value = self:validate(value)
-    value = self:run_validators(value)
+function Field.to_lua(self, value)
     return value
+end
+
+function Field.clean(self, value)
+    value = self:to_lua(value)
+    -- validate
+    local err = self:validate(value)
+    if err then
+        return nil, {err}
+    end
+    -- validators
+    local errors = {}
+    for i, validator in ipairs(self.validators) do
+        err = validator(value)
+        if err then
+            errors[#errors+1] = err
+        end
+    end
+    if next(errors) then
+        return nil, errors
+    else
+        return value
+    end
 end
 function Field.validate(self, value)
     if (value == nil or value == '') and self.required then
-        table.insert(self.errors, self.label..' is required')
+        return 'this field is required.'
     end
-    return value
 end
 function Field.run_validators(self, value)
-    for i, validator in ipairs(self.validators) do
-        value, err = validator(value)
-        if err~=nil then
-            table.insert(self.errors, err)
-        end
-    end
+
     return value
 end
 --<input id="id_sfzh" maxlength="18" name="sfzh" placeholder="" type="text">
@@ -84,8 +92,11 @@ function CharField.initialize(self)
     --self.errors = {}
     return self
 end
-function CharField.validate(self, value)
-    value = getmetatable(self).validate(self, value)
+function CharField.to_lua(self, value)
+    if not value then
+        return ''
+    end
+    value = tostring(value)
     if self.strip then
         value = string.gsub(value, '^%s*(.-)%s*$', '%1')
     end
