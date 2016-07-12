@@ -1,5 +1,5 @@
 local query = require"resty.model".RawQuery
-local render2 = require"resty.render"
+local response = require"resty.response"
 
 local m={}
 
@@ -39,8 +39,7 @@ function m.inspect(kw)
     sprint_table(ngx.ctx)
 end
 function m.global(request, kwargs)
-    ngx.header.content_type = 'text/plain'
-    return repr(ngx.var.encrypted_session_expires)
+    return response.Plain(repr(ngx.var))
 end
 function m.models(req,kw)
     local name=kw.name or 'users'

@@ -331,13 +331,14 @@ function QueryManager.exec(self)
 end
 
 local Model = {}
-function Model.new(self, init)
-    init = init or {}
-    setmetatable(init, self)
+function Model.new(self, subclass)
+    subclass = subclass or {}
+    setmetatable(subclass, self)
     self.__index = self
-    init.QueryManager = QueryManager:new{table_name=init.table_name, fields=init.fields}
-    init:_get_table_create_string()
-    return init
+    subclass.QueryManager = QueryManager:new{table_name=subclass.table_name, 
+        fields=subclass.fields}
+    subclass:_get_table_create_string()
+    return subclass
 end
 function Model._get_table_create_string(self)
     if not self._table_create_string then

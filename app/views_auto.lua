@@ -1,5 +1,6 @@
 local query = require"resty.model".RawQuery
 local render = require"resty.render"
+local response = require"resty.response"
 local User = require"app.models".User
 local forms = require"app.forms"
 
@@ -12,56 +13,24 @@ local function log( ... )
         '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
     ))
 end
-function m.register2(req, kwargs)
-    if req.user then
-        return ngx.redirect('/profile')
-    end
-    local c={}
-    if req.get_method()=='POST' then
-        req.read_body()
-        local args, err = req.get_post_args()
-        if err then
-            return nil, err
-        end
-        local u=args.username
-        local p=args.password
-        if #u<3 then
-            c.username_error='用户名长度不能小于3'
-        end
-        if #p<6 then
-            c.password_error='密码长度不能小于6'
-        end
-        if next(c)==nil then
-            local usr,err=User:create{username=u,password=p}
-            if err then
-                return nil,err
-            end
-            local session=req.session
-            session.user=u
-            session.uid=usr.id
-            return render('profile.html')
-        end
-    end
-    return render("register.html", c)
-end
 function m.register(req, kwargs)
     if req.user then
-        return ngx.redirect('/profile')
+        return response.Redirect('/profile')
     end
     local form;
     if req.get_method()=='POST' then
         form = forms.UserForm{data=req.POST}
         if form:is_valid() then
-            return ngx.redirect('/profile')
+            return response.Redirect('/profile')
         end
     else
         form = forms.UserForm{}
     end
-    return render("register.html", {form=form})
+    return response.Template("register.html", {form=form})
 end
 function m.login(req, kwargs)
     if req.user then
-        return ngx.redirect('/profile')
+        return response.Redirect('/profile')
     end
     local form;
     if req.get_method()=='POST' then
@@ -70,49 +39,16 @@ function m.login(req, kwargs)
             local session=req.session
             session.user=form.user.username
             session.uid=form.user.id
-            return ngx.redirect('/profile')
+            return response.Redirect('/profile')
         end
     else
         form = forms.LoginForm{}
     end
-    return render("login.html", {form=form})
-end
-function m.login2(req, kwargs)
-    if req.user then
-        return ngx.redirect('/profile')
-    end
-    local c={}
-    if req.get_method()=='POST' then
-        req.read_body()
-        local args, err = req.get_post_args()
-        if err then
-            return nil, err
-        end
-        local u=args.username
-        local p=args.password
-        if #u<3 then
-            c.username_error='用户名长度不能小于3'
-        end
-        if #p<6 then
-            c.password_error='密码长度不能小于6'
-        end
-        local usr,err=User:get{username=u}
-        if err then
-            c.username_error='用户名错误'
-        elseif usr.password ~= p then
-            c.password_error='密码错误'
-        else
-            local session=req.session
-            session.user=u
-            session.uid=usr.id
-            return render('profile.html')
-        end
-    end
-    return render("login.html", c)
+    return response.Template("login.html", {form=form})
 end
 function m.logout(req, kwargs)
     delete_session()
-    return ngx.redirect("/")
+    return response.Redirect("/")
 end
 function m.profile(req, kwargs)
     local x =1
@@ -126,20 +62,17 @@ function m.content(req, kwargs)
     -- end
     local context = {sidebar = 'profile', navbar='guide', content = repr(ngx.req)}
     --setmetatable(context, {req={user='xxn'}})
-    return render("page.html", context)
+    return response.Template("page.html", context)
 end
 function m.editor(req, kwargs)
-    local x = 1
-    return render("editor.html"){sidebar = 'Profile'}
+    return response.Template("editor.html", {sidebar = 'Profile'})
 end
 function m.pubkey(req, kwargs)
-    local a = 1
-    return [[ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP1qeXu+VLnTZrd1FVNBHuwW/80mkCW3lxnPqc5g5G8tvC6JX5TcIrRHm2qet1CKBqZwFaMpCK8QqsdGcbiuuOm9YPoWkfEEX4ngEnL6HRH1fHCWvP1sUPO+yiKiPlXgjlQrgrghNULH3Y6azrw+VYL1Zihs6LZsm77r+hKa/mhe9FIBQQeSkmZpPff+SgVpTglE9Oi9bY8a/4kueAIrhlKq+4+0S8oX+fWJWuN0KwZV79wy7vmJ6KoL/OcRnqv7cWZXX5B3hCF9nK+j34stR62lu4vIYMrcsCMKJBjWRXHtdblEcWdxm3z579QVARtCDkTYAP0sTieshBV2My7Y8B 280145668@qq.com
-]]
+    return response.Plain([[ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP1qeXu+VLnTZrd1FVNBHuwW/80mkCW3lxnPqc5g5G8tvC6JX5TcIrRHm2qet1CKBqZwFaMpCK8QqsdGcbiuuOm9YPoWkfEEX4ngEnL6HRH1fHCWvP1sUPO+yiKiPlXgjlQrgrghNULH3Y6azrw+VYL1Zihs6LZsm77r+hKa/mhe9FIBQQeSkmZpPff+SgVpTglE9Oi9bY8a/4kueAIrhlKq+4+0S8oX+fWJWuN0KwZV79wy7vmJ6KoL/OcRnqv7cWZXX5B3hCF9nK+j34stR62lu4vIYMrcsCMKJBjWRXHtdblEcWdxm3z579QVARtCDkTYAP0sTieshBV2My7Y8B 280145668@qq.com
+]])
 end
 function m.key(req, kwargs)
-    local a = 1
-    return [[-----BEGIN RSA PRIVATE KEY-----
+    return response.Plain([[-----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAz9anl7vlS502a3dRVTQR7sFv/NJpAlt5cZz6nOYORvLbwuiV
 +U3CK0R5tqnrdQigamcBWjKQivEKrHRnG4rrjpvWD6FpHxBF+J4BJy+h0R9Xxwlr
 z9bFDzvsoioj5V4I5UK4K4ITVCx92Oms68PlWC9WYobOi2bJu+6/oSmv5oXvRSAU
@@ -166,11 +99,10 @@ FH1hAoGAPAnSoMv6DGi0W0vZU/cl31AKT2Z8D7m5rdSxDRGLri45NLHBscbiZ9Gh
 VyHHBL/WW3Y04P6NUCY8SNFzBjo3MU7rRrwutop7GPkjxV7MsAQ2BeBjxW7xmQ3A
 T14kJpgJ3xTAM8kSPoRQB8qCUMOTxL25wsH0FRHtnIa7+fZVt+c=
 -----END RSA PRIVATE KEY-----
-]]
+]])
 end
 function m.hosts(req, kwargs)
-    local a = 1
-    return [[wdksw.com,120.25.103.213 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFmH35GRkf/9o5w66q6WBuNKrM7e2EYBtL4s+TVDcggCQrk9ueiCgnTo9AbWtDIczjm8Jx53ohx4RE3p7gxy8s8=
+    return response.Plain([[wdksw.com,120.25.103.213 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFmH35GRkf/9o5w66q6WBuNKrM7e2EYBtL4s+TVDcggCQrk9ueiCgnTo9AbWtDIczjm8Jx53ohx4RE3p7gxy8s8=
 github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 jarsj.cn,120.24.244.38 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFmH35GRkf/9o5w66q6WBuNKrM7e2EYBtL4s+TVDcggCQrk9ueiCgnTo9AbWtDIczjm8Jx53ohx4RE3p7gxy8s8=
 120.24.194.166 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFmH35GRkf/9o5w66q6WBuNKrM7e2EYBtL4s+TVDcggCQrk9ueiCgnTo9AbWtDIczjm8Jx53ohx4RE3p7gxy8s8=
@@ -187,24 +119,9 @@ jasygl.cn ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAA
 192.30.252.129 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 192.30.252.128 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 192.30.252.122 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-]]
+]])
 end
-function m.header(req, kwargs)
-    local header = ngx.header
-    return ''--render("content.html"){}
-end
-function m.form(req, kwargs)
-    local query = req.get_uri_args()
-    local path = './' --basedir..'html/'
-    if next(query) then
-        local post = require 'resty.post':new{no_tmp = true, path = path, }:read()
-        ngx.say(repr(post))
-    else
-        local get, post, files = require"resty.reqargs"{dir=path}
-        ngx.say(repr(get), repr(files), repr(post))
-    end
-    return render("app/form.html"){}
-end
+
 function m.sql(kwargs)
     local u = require"app.models".User
     -- for i,v in ipairs(-u:where{id=1}) do

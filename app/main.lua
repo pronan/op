@@ -42,7 +42,7 @@ for regex, func in pairs(urls) do
             ngx.log(ngx.ERR, err)
             return ngx.exit(500)
         else
-            return ngx.print(response)
+            return response:exec()
         end
     end
 end
