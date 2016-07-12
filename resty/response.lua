@@ -11,7 +11,9 @@ local function render(path, context)
         end
     end
     context.req = ngx.req
-    context.user = ngx.req.user
+    local user = ngx.req.user
+    context.user = user
+    context.username = user and user.username or '游客'
     return compile(path)(context)
 end
 
@@ -57,13 +59,13 @@ function Template.exec(self)
 end
 
 local RedirectMeta = M:new{}
-RedirectMeta.__call = function(tbl, url)
-    return tbl:new{url=url}
+RedirectMeta.__call = function(tbl, url, status)
+    return tbl:new{url=url, status=status or 302}
 end
 
 local Redirect = RedirectMeta:new{}
 function Redirect.exec(self)
-    return ngx.redirect(self.url)
+    return ngx.redirect(self.url, self.status)
 end
 
 local JsonMeta = M:new{}

@@ -39,7 +39,7 @@ function m.inspect(kw)
     sprint_table(ngx.ctx)
 end
 function m.global(request, kwargs)
-    return response.Plain(repr(ngx.var))
+    return response.Plain(repr(gmt(_G).__index))
 end
 function m.models(req,kw)
     local name=kw.name or 'users'
@@ -47,11 +47,10 @@ function m.models(req,kw)
     if not res then
         return nil, err
     end
-    return render2('users.html', {users=res})
+    return response.Template('users.html', {users=res})
 end
 function m.home(req, kw)
-    local x =1
-    return render2('home.html')
+    return response.Template('home.html')
 end
 local json = require "cjson.safe"
 

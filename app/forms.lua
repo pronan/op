@@ -10,6 +10,15 @@ M.UserForm = Form:new{
         Field.PasswordField{"password", "密码", maxlength=28},    
     }, 
     global_field_attrs = {class='form-control'}, 
+    clean_username = function(self)
+        local username = self.cleaned_data.username
+        local user = User:get{username=username}
+        if user then
+            return nil, {'用户名已存在.'}
+        end
+        return username
+    end, 
+    
 }
 M.LoginForm = Form:new{
     fields = {

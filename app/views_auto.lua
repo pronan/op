@@ -21,6 +21,9 @@ function m.register(req, kwargs)
     if req.get_method()=='POST' then
         form = forms.UserForm{data=req.POST}
         if form:is_valid() then
+            local cd=form.cleaned_data
+            local user=User:create{username=cd.username, password=cd.password}
+            req.session.user=user
             return response.Redirect('/profile')
         end
     else
@@ -37,8 +40,7 @@ function m.login(req, kwargs)
         form = forms.LoginForm{data=req.POST}
         if form:is_valid() then
             local session=req.session
-            session.user=form.user.username
-            session.uid=form.user.id
+            session.user=form.user
             return response.Redirect('/profile')
         end
     else
@@ -51,8 +53,7 @@ function m.logout(req, kwargs)
     return response.Redirect("/")
 end
 function m.profile(req, kwargs)
-    local x =1
-    return render('profile.html', {})
+    return response.Template('profile.html', {})
 end
 function m.content(req, kwargs)
     req.read_body()
