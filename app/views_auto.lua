@@ -52,6 +52,9 @@ function m.logout(req, kwargs)
     delete_session()
     return response.Redirect("/")
 end
+function m.error(req, kwargs)
+    return response.Error("你出错了")
+end
 function m.profile(req, kwargs)
     return response.Template('profile.html', {})
 end

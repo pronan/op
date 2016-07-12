@@ -58,6 +58,17 @@ function Template.exec(self)
     return ngx.print(render(self.path, self.context))
 end
 
+local ErrorMeta = M:new{}
+ErrorMeta.__call = function(tbl, message)
+    return tbl:new{message=message}
+end
+
+local Error = ErrorMeta:new{}
+function Error.exec(self)
+    ngx.header['Content-Type'] = "text/html; charset=utf-8"
+    return ngx.print(render('error.html', {message=self.message}))
+end
+
 local RedirectMeta = M:new{}
 RedirectMeta.__call = function(tbl, url, status)
     return tbl:new{url=url, status=status or 302}
@@ -87,4 +98,5 @@ return {
     Redirect = Redirect, 
     Plain = Plain, 
     Html = Html, 
+    Error = Error, 
 }
