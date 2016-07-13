@@ -148,6 +148,47 @@ function QueryManager.initialize(self)
     self.Row = Row{table_name=self.table_name, fields=self.fields}
     return self
 end
+    -- insert_id   0   number --0代表是update 或 delete
+    -- server_status   2   number
+    -- warning_count   0   number
+    -- affected_rows   1   number
+    -- message   (Rows matched: 1  Changed: 0  Warnings: 0   string
+
+    -- insert_id   1006   number --大于0代表成功的insert
+    -- server_status   2   number
+    -- warning_count   0   number
+    -- affected_rows   1   number
+function QueryManager.exec(self)
+    local statement, err = self:to_sql()
+    if not statement then
+        return nil, err
+    end
+    local res, err = RawQuery(statement)
+    if not res then
+        return nil, err
+    end
+    local altered = res.insert_id
+    if altered ~= nil then
+        -- update or delete or insert
+        if altered > 0 then --insert
+            return self.Row(update({id = altered}, self._create))
+            --
+        else --update or delete
+            return res
+        end
+    elseif (next(self._group) == nil and self._group_string == nil and
+            next(self._having) == nil and self._having_string == nil ) then
+        -- wrapp the result only for non-aggregation query.
+        local wrapped_res = {} 
+        --local _meta = {table_name=self.table_name, fields=self.fields}
+        for i, attrs in ipairs(res) do
+            wrapped_res[i] = self.Row(attrs)
+        end
+        return wrapped_res
+    else
+        return res
+    end
+end
 function QueryManager.to_sql(self)
     if next(self._update)~=nil or self._update_string~=nil then
         return self:to_sql_update()
@@ -272,47 +313,6 @@ function QueryManager.exec_raw(self)
         return nil, err
     end
     return RawQuery(statement)
-end
-    -- insert_id   0   number --0代表是update 或 delete
-    -- server_status   2   number
-    -- warning_count   0   number
-    -- affected_rows   1   number
-    -- message   (Rows matched: 1  Changed: 0  Warnings: 0   string
-
-    -- insert_id   1006   number --大于0代表成功的insert
-    -- server_status   2   number
-    -- warning_count   0   number
-    -- affected_rows   1   number
-function QueryManager.exec(self)
-    local statement, err = self:to_sql()
-    if not statement then
-        return nil, err
-    end
-    local res, err = RawQuery(statement)
-    if not res then
-        return nil, err
-    end
-    local altered = res.insert_id
-    if altered ~= nil then
-        -- update or delete or insert
-        if altered > 0 then --insert
-            return self.Row(update({id = altered}, self._create))
-            --
-        else --update or delete
-            return res
-        end
-    elseif (next(self._group) == nil and self._group_string == nil and
-            next(self._having) == nil and self._having_string == nil ) then
-        -- wrapp the result only for non-aggregation query.
-        local wrapped_res = {} 
-        --local _meta = {table_name=self.table_name, fields=self.fields}
-        for i, attrs in ipairs(res) do
-            wrapped_res[i] = self.Row(attrs)
-        end
-        return wrapped_res
-    else
-        return res
-    end
 end
 
 local Model = {}
