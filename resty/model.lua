@@ -90,28 +90,32 @@ local function RawQuery(statement, using)
 end
 
 local Row = {}
-function Row.new(self, attrs)
-    -- requires a attribute called `QueryManager` that's derived from QueryManager
-    attrs = attrs or {}
-    setmetatable(attrs, self)
+function Row.new(self, opts)
+    -- opts should be something like {table_name='foo', fields={...},}
+    opts = opts or {}
+    setmetatable(opts, self)
     self.__index = self
-    return attrs
+    self.__call = function (t, opts) return t:new(opts):initialize() end
+    return opts
+end
+function Row.initialize(self)
+    self.QueryManager = require"resty.model".QueryManager
+    return self
 end
 function Row.save(self)
     local valid_attrs = {}
-    for i,field in ipairs(self.QueryManager.fields) do
+    for i, field in ipairs(self.fields) do
         local value = self[field.name]
         if value ~= nil then
             valid_attrs[field.name] = value
         end
     end
-    local res, err = self.QueryManager:new{}:update(valid_attrs):where{id=self.id}:exec()
-    self._res, self._err = res, err
+    self._res, self._err = self.QueryManager{table_name=self.table_name, 
+        fields=self.fields}:update(valid_attrs):where{id=self.id}:exec()
     return self
 end
 function Row.delete(self)
-    local res, err = self.QueryManager:new{}:delete{id=self.id}:exec()
-    return res, err
+    return self.QueryManager{table_name=self.table_name, fields=self.fields}:delete{id=self.id}:exec()
 end
 
 local QueryManager = {}
@@ -128,19 +132,20 @@ for method_name, processor in pairs(sql_method_names) do
         return self
     end
 end
-function QueryManager.new(self, subclass)
-    subclass = subclass or {}
-    setmetatable(subclass, self)
+function QueryManager.new(self, opts)
+    opts = opts or {}
+    setmetatable(opts, self)
     self.__index = self
     -- a shortcut for execute the statement
     self.__unm = function (t) return t:exec() end
-    subclass.Row = Row:new{QueryManager = subclass}
-    return subclass:init()
+    self.__call = function (t, opts) return t:new(opts):initialize() end
+    return opts
 end
-function QueryManager.init(self)
+function QueryManager.initialize(self)
     for method_name, _ in pairs(sql_method_names) do
         self['_'..method_name] = {}
     end
+    self.Row = Row{table_name=self.table_name, fields=self.fields}
     return self
 end
 function QueryManager.to_sql(self)
@@ -261,27 +266,6 @@ function QueryManager.to_sql_select(self)
     return string.format(statement, select_args, self.table_name, where_args, 
         group_args, having_args, order_args)
 end
--- function QueryManager.get(self, params)
---     -- special process for get
---     if type(params) == 'table' then
---         update(self._where, params)
---     else
---         self['_where_string'] = params
---     end 
---     local where_args = self:get_where_args()
---     if where_args == '' then
---         return nil, 'filter arguments must be provied'
---     end  
---     local statement = string.format('SELECT * FROM %s%s;', self.table_name, where_args)
---     local res, err = RawQuery(statement)
---     if not res then
---         return res, err
---     end
---     if #res ~= 1 then
---         return nil, 'result count must equal 1'
---     end
---     return self.Row:new(res[1])
--- end
 function QueryManager.exec_raw(self)
     local statement, err = self:to_sql()
     if not statement then
@@ -306,13 +290,14 @@ function QueryManager.exec(self)
     end
     local res, err = RawQuery(statement)
     if not res then
-        return res, err
+        return nil, err
     end
     local altered = res.insert_id
     if altered ~= nil then
         -- update or delete or insert
         if altered > 0 then --insert
-            return self.Row:new(update({id = altered}, self._create))
+            return self.Row(update({id = altered}, self._create))
+            --
         else --update or delete
             return res
         end
@@ -320,9 +305,9 @@ function QueryManager.exec(self)
             next(self._having) == nil and self._having_string == nil ) then
         -- wrapp the result only for non-aggregation query.
         local wrapped_res = {} 
-        local _meta = {table_name=self.table_name, fields=self.fields}
+        --local _meta = {table_name=self.table_name, fields=self.fields}
         for i, attrs in ipairs(res) do
-            wrapped_res[i] = self.Row:new(attrs)
+            wrapped_res[i] = self.Row(attrs)
         end
         return wrapped_res
     else
@@ -331,14 +316,11 @@ function QueryManager.exec(self)
 end
 
 local Model = {}
-function Model.new(self, subclass)
-    subclass = subclass or {}
-    setmetatable(subclass, self)
+function Model.new(self, opts)
+    opts = opts or {}
+    setmetatable(opts, self)
     self.__index = self
-    subclass.QueryManager = QueryManager:new{table_name=subclass.table_name, 
-        fields=subclass.fields}
-    subclass:_get_table_create_string()
-    return subclass
+    return opts
 end
 function Model._get_table_create_string(self)
     if not self._table_create_string then
@@ -364,8 +346,8 @@ function Model._get_table_create_string(self)
     return self._table_create_string
 end
 function Model._proxy_sql(self, method, params)
-    local subclass = self.QueryManager:new{}
-    return subclass[method](subclass, params)
+    local query = QueryManager{table_name=self.table_name, fields=self.fields}
+    return query[method](query, params)
 end
 -- define methods by a loop, `create` will be override
 for method_name, func in pairs(sql_method_names) do
