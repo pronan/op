@@ -93,9 +93,7 @@ local function RawQuery(statement, using)
     return res, err, errno, sqlstate
 end
 
-local Row = {}
-Row.__index = Row
-Row.__call = caller
+local Row = setmetatable({}, {__call = caller})
 function Row.new(self, opts)
     -- opts should be something like {table_name='foo', fields={...},}
     opts = opts or {}
@@ -124,10 +122,7 @@ function Row.delete(self)
     return self.QueryManager{table_name=self.table_name, fields=self.fields}:delete{id=self.id}:exec()
 end
 
-local QueryManager = {}
-QueryManager.__index = QueryManager
-QueryManager.__call = caller
-QueryManager.__unm = execer
+local QueryManager = setmetatable({}, {__call = caller})
 local sql_method_names = {select=extend, group=extend, order=extend,
     create=update, update=update, where=update, having=update, delete=update,}
 -- add methods by a loop    
