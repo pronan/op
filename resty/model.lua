@@ -28,6 +28,10 @@ local function extend(self, other)
     end
     return self
 end
+local function caller(t, opts) 
+    return t:new(opts):initialize() 
+end
+local function execer(t) return t:exec() end
 
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(kwargs)
@@ -90,12 +94,14 @@ local function RawQuery(statement, using)
 end
 
 local Row = {}
+Row.__index = Row
+Row.__call = caller
 function Row.new(self, opts)
     -- opts should be something like {table_name='foo', fields={...},}
     opts = opts or {}
     setmetatable(opts, self)
     self.__index = self
-    self.__call = function (t, opts) return t:new(opts):initialize() end
+    self.__call = caller
     return opts
 end
 function Row.initialize(self)
@@ -119,6 +125,9 @@ function Row.delete(self)
 end
 
 local QueryManager = {}
+QueryManager.__index = QueryManager
+QueryManager.__call = caller
+QueryManager.__unm = execer
 local sql_method_names = {select=extend, group=extend, order=extend,
     create=update, update=update, where=update, having=update, delete=update,}
 -- add methods by a loop    
@@ -136,9 +145,8 @@ function QueryManager.new(self, opts)
     opts = opts or {}
     setmetatable(opts, self)
     self.__index = self
-    -- a shortcut for execute the statement
-    self.__unm = function (t) return t:exec() end
-    self.__call = function (t, opts) return t:new(opts):initialize() end
+    self.__unm = execer
+    self.__call = caller
     return opts
 end
 function QueryManager.initialize(self)
