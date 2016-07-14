@@ -22,7 +22,7 @@ function m.register(req, kwargs)
         form = forms.UserForm{data=req.POST}
         if form:is_valid() then
             local cd=form.cleaned_data
-            local user=User:create{username=cd.username, password=cd.password}
+            local user=User{username=cd.username, password=cd.password}:save()
             req.session.user=user
             return response.Redirect('/profile')
         end
@@ -41,6 +41,7 @@ function m.login(req, kwargs)
         if form:is_valid() then
             local session=req.session
             session.user=form.user
+            ngx.log(ngx.ERR, repr(form.user))
             return response.Redirect('/profile')
         end
     else
@@ -51,6 +52,12 @@ end
 function m.logout(req, kwargs)
     delete_session()
     return response.Redirect("/")
+end
+function m.testa(req, kwargs)
+    User:delete{username='ahaha'}:exec()
+    local user,err=User{username='ahaha',password='666666'}:save()
+    log('but user is:',user)
+    return response.Plain(repr(user))
 end
 function m.error(req, kwargs)
     return response.Error("你出错了")

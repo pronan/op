@@ -97,13 +97,11 @@ local Row = setmetatable({}, {__call = caller})
 function Row.new(self, opts)
     -- opts should be something like {table_name='foo', fields={...},}
     opts = opts or {}
-    setmetatable(opts, self)
     self.__index = self
     self.__call = caller
-    return opts
+    return setmetatable(opts, self)
 end
 function Row.initialize(self)
-    self.QueryManager = require"resty.model".QueryManager
     return self
 end
 function Row.save(self)
@@ -114,8 +112,14 @@ function Row.save(self)
             valid_attrs[field.name] = value
         end
     end
-    self._res, self._err = self.QueryManager{table_name=self.table_name, 
-        fields=self.fields}:update(valid_attrs):where{id=self.id}:exec()
+    if self.created then
+        self._res, self._err = self.QueryManager{table_name=self.table_name,
+            fields=self.fields}:create(valid_attrs):exec()
+        self.id = self._res.id
+    else
+        self._res, self._err = self.QueryManager{table_name=self.table_name, 
+            fields=self.fields}:update(valid_attrs):where{id=self.id}:exec()
+    end
     return self
 end
 function Row.delete(self)
@@ -123,6 +127,7 @@ function Row.delete(self)
 end
 
 local QueryManager = setmetatable({}, {__call = caller})
+Row.QueryManager = QueryManager --avoid circular require
 local sql_method_names = {select=extend, group=extend, order=extend,
     create=update, update=update, where=update, having=update, delete=update,}
 -- add methods by a loop    
@@ -138,11 +143,10 @@ for method_name, processor in pairs(sql_method_names) do
 end
 function QueryManager.new(self, opts)
     opts = opts or {}
-    setmetatable(opts, self)
     self.__index = self
-    self.__unm = execer
     self.__call = caller
-    return opts
+    self.__unm = execer
+    return setmetatable(opts, self)
 end
 function QueryManager.initialize(self)
     for method_name, _ in pairs(sql_method_names) do
@@ -171,11 +175,9 @@ function QueryManager.exec(self)
         return nil, err
     end
     local altered = res.insert_id
-    if altered ~= nil then
-        -- update or delete or insert
+    if altered ~= nil then -- update or delete or insert
         if altered > 0 then --insert
             return self.Row(update({id = altered}, self._create))
-            --
         else --update or delete
             return res
         end
@@ -319,11 +321,14 @@ function QueryManager.exec_raw(self)
 end
 
 local Model = {}
+local function model_caller(self, attrs)
+    return Row{table_name=self.table_name,fields=self.fields,created=true}(attrs)
+end
 function Model.new(self, opts)
     opts = opts or {}
-    setmetatable(opts, self)
     self.__index = self
-    return opts
+    self.__call = model_caller
+    return setmetatable(opts, self)
 end
 function Model._get_table_create_string(self)
     if not self._table_create_string then

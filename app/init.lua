@@ -8,6 +8,11 @@ helper = require"app.helper"
 for k,v in pairs(helper) do
     _G[k] = v
 end
+function log(...)
+    for i,v in ipairs({...}) do
+       ngx.log(ngx.ERR,repr(v))
+    end
+end
 settings = require"app.settings"
 local function RawQuery(statement, using)
     local res, err, errno, sqlstate;
