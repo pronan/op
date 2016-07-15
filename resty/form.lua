@@ -33,7 +33,7 @@ function M.get_value(self, field)
     elseif self.instance then
     	return self.instance[name]
     else
-    	return field.initial or self.initial[name]
+    	return field.initial or self.initial[name] or field.default
     end
 end
 function M.render(self)

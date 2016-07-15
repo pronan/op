@@ -179,8 +179,10 @@ function OptionField.render(self, value, attrs)
         final_attrs[k] = v
     end
     local choices={}
+    -- if value == nil and not self.required then
+    --     choice
     for i, choice in ipairs(self.choices) do
-        local db_val, val=choice
+        local db_val, val=choice[1], choice[2]
         local inner_attrs={value=db_val}
         if value==db_val then
             inner_attrs.selected="selected"
