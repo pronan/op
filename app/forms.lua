@@ -54,7 +54,7 @@ M.BlogForm = Form:new{
 }
 M.TestForm = Form:new{
     fields = {
-        Field.CharField{"name", "姓名", maxlength=20},    
+        Field.CharField{"name", "姓名", maxlength=20, help_text='填姓名撒\n啊啊啊'},    
         Field.OptionField{"class", "阶级", choices={'工人','农民','其他'}},    
     }, 
     global_field_attrs = {class='form-control'}, 

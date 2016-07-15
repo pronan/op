@@ -26,6 +26,8 @@ end
 function Field.initialize(self)
     self.name = self.name or self[1] or assert(nil, 'name is required for Field')
     self.label = self.label or self[2] or self.name
+    self.label_html = string.format('<label for="%s">%s%s</label>', self.id_prefix..self.name, 
+        self.label, self.label_suffix or '')
     self.required = self.required or true
     --self.initial = self.initial or ''
     --self.help_text = self.help_text or ''
@@ -163,8 +165,11 @@ function OptionField.validate(self, value)
     if err then
         return err
     end
-    local valid=false
-    for i,v in ipairs(self.choices) do
+    if value == nil or value == '' then
+        return --this field is not required, passed
+    end
+    local valid = false
+    for i, v in ipairs(self.choices) do
         if v[1]==value then
            valid=true
         end

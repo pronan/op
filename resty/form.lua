@@ -1,7 +1,8 @@
 local M = {}
 M.template = [[
 <div class="form-group">
-    <label for="%s">%s</label>
+    %s 
+    %s
     %s
     %s
 </div>]]
@@ -9,6 +10,8 @@ M.error_template = [[
     <div class="alert alert-danger" role="alert">
         <ul class="error">%s</ul>
     </div>]]
+M.help_template = '<div class="alert alert-info" role="alert">%s</div>'
+M.help_template = '<p class="help-block">%s</p>'
 local function caller(t, opts) 
     return t:new(opts):initialize() 
 end
@@ -46,8 +49,13 @@ function M.render(self)
                 return'<li>'..k..'</li>'end, self.errors[name]), "\n" )
             errors_string = string.format(self.error_template, errors_string)
         end
-        res[#res+1] = string.format(self.template, field.id_prefix..name, field.label, 
-            field:render(self:get_value(field), self.global_field_attrs), errors_string)
+        local help_text_string = ''
+        if field.help_text then
+            help_text_string = string.format(self.help_template, field.help_text)
+        end
+        res[#res+1] = string.format(self.template, field.label_html, 
+            field:render(self:get_value(field), self.global_field_attrs), 
+            errors_string, help_text_string)
     end
     return table.concat( res, "\n")
 end
