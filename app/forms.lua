@@ -10,13 +10,12 @@ M.UserForm = Form:new{
         Field.PasswordField{"password", "密码", maxlength=28},    
     }, 
     global_field_attrs = {class='form-control'}, 
-    clean_username = function(self)
-        local username = self.cleaned_data.username
-        local user = User:get{username=username}
+    clean_username = function(self,value)
+        local user = User:get{username=value}
         if user then
             return nil, {'用户名已存在.'}
         end
-        return username
+        return value
     end, 
     
 }
@@ -29,29 +28,34 @@ M.LoginForm = Form:new{
         },    
     }, 
     global_field_attrs = {class='form-control'}, 
-    clean_username = function(self)
-        local username = self.cleaned_data.username
-        local user = User:get{username=username}
+    clean_username = function(self, value)
+        local user = User:get{username=value}
         if not user then
             return nil, {'用户名不存在.'}
         end
-        self.user = user
-        return username
+        self.user = user --for reuses
+        return value
     end, 
-    clean_password = function(self)
-        local password = self.cleaned_data.password
+    clean_password = function(self, value)
         if self.user then
-            if self.user.password~=password then
+            if self.user.password~=value then
                 return nil, {'密码错误.'}
             end
         end
-        return password
+        return value
     end, 
 }
 M.BlogForm = Form:new{
     fields = {
         Field.CharField{"title", "标题", maxlength=50},    
         Field.TextField{"content", "内容", maxlength=520},    
+    }, 
+    global_field_attrs = {class='form-control'}, 
+}
+M.TestForm = Form:new{
+    fields = {
+        Field.CharField{"name", "姓名", maxlength=20},    
+        Field.OptionField{"class", "阶级", choices={'工人','农民','其他'}},    
     }, 
     global_field_attrs = {class='form-control'}, 
 }

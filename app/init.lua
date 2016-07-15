@@ -10,7 +10,7 @@ for k,v in pairs(helper) do
 end
 function log(...)
     for i,v in ipairs({...}) do
-       ngx.log(ngx.ERR,repr(v))
+       ngx.log(ngx.ERR,'\n',repr(v))
     end
 end
 settings = require"app.settings"

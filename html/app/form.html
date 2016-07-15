@@ -1,21 +1,8 @@
-    <html lang='zh'>
-        <head>
-        </head>
-        <body>
-        <form enctype="multipart/form-data" method="post">
-            <p>
-                <label for="username">user</label>
-                <input id="username" name="username" type="text" />
-            </p>
-            <p>
-                <label for="files">File input</label>
-                <input type="file" id="files" name="myfile">
-            </p>
-            <p>
-                <label for="files1">File input2</label>
-                <input type="file" id="files1" name="myfile1">
-            </p>
-            <input type="submit" value="submit"/>
-        </form>
-        </body>
-    </html>
+{% layout = "c444.html" %}
+
+{-content-}
+<form method="post" action="">
+  {*form:render()*}
+  <button type="submit" class="btn btn-default">提交</button>
+</form>
+{-content-}

@@ -9,10 +9,13 @@ M.error_template = [[
     <div class="alert alert-danger" role="alert">
         <ul class="error">%s</ul>
     </div>]]
+local function caller(t, opts) 
+    return t:new(opts):initialize() 
+end
 function M.new(self, init)
     init = init or {}
     self.__index = self
-    self.__call = function(tbl, init) return tbl:new(init):initialize() end
+    self.__call = caller
     return setmetatable(init, self)
 end
 function M.initialize(self)
@@ -67,7 +70,7 @@ function M._clean_fields(self)
         else
             self.cleaned_data[name] = value
             if self['clean_'..name] then
-                value, errors = self['clean_'..name](self)
+                value, errors = self['clean_'..name](self,value)
                 if errors then
                     self.errors[name] = errors
                 else

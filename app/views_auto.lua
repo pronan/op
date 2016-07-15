@@ -5,14 +5,6 @@ local User = require"app.models".User
 local forms = require"app.forms"
 
 local m={}
-local function log( ... )
-    local x = mapkv(function(k, v) 
-        return repr(v)
-    end, {...})
-    ngx.log(ngx.ERR, string.format(
-        '\n*************************************\n%s\n*************************************', table.concat(x, "\n")
-    ))
-end
 function m.register(req, kwargs)
     if req.user then
         return response.Redirect('/profile')
@@ -38,16 +30,40 @@ function m.login(req, kwargs)
     local form;
     if req.get_method()=='POST' then
         form = forms.LoginForm{data=req.POST}
+        log(form)
         if form:is_valid() then
             local session=req.session
             session.user=form.user
-            ngx.log(ngx.ERR, repr(form.user))
             return response.Redirect('/profile')
         end
     else
         form = forms.LoginForm{}
     end
     return response.Template("login.html", {form=form})
+end
+function m.form(req, kwargs)
+    local form;
+    if req.get_method()=='POST' then
+        form = forms.TestForm{data=req.POST}
+        if form:is_valid() then
+            return response.Plain(repr(form))
+        end
+    else
+        form = forms.TestForm{}
+    end
+    return response.Template("app/form.html", {form=form})
+end
+function m.edituser(req, kwargs)
+    local form;
+    if req.get_method()=='POST' then
+        form = forms.UserForm{data=req.POST}
+        if form:is_valid() then
+            return response.Plain(repr(form))
+        end
+    else
+        form = forms.UserForm{instance=User:get{id=2}}
+    end
+    return response.Template("app/form.html", {form=form})
 end
 function m.logout(req, kwargs)
     delete_session()
@@ -56,7 +72,6 @@ end
 function m.testa(req, kwargs)
     User:delete{username='ahaha'}:exec()
     local user,err=User{username='ahaha',password='666666'}:save()
-    log('but user is:',user)
     return response.Plain(repr(user))
 end
 function m.error(req, kwargs)

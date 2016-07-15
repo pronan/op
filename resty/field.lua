@@ -14,13 +14,13 @@ local function table_to_html_attrs(tbl)
     end
     return table.concat(res, " ")
 end
-
+local function caller(tbl, init) return tbl:new(init):initialize() end
 local Field = {}
-Field.id_prefix = 'id_'
+Field.id_prefix = 'id-'
 function Field.new(self, init)
     init = init or {}
     self.__index = self
-    self.__call = function(tbl, init) return tbl:new(init):initialize() end
+    self.__call = caller
     return setmetatable(init, self)
 end
 function Field.initialize(self)
@@ -73,19 +73,16 @@ function Field.validate(self, value)
         return 'this field is required.'
     end
 end
-function Field.run_validators(self, value)
+-- function Field.run_validators(self, value)
 
-    return value
-end
+--     return value
+-- end
 --<input id="id_sfzh" maxlength="18" name="sfzh" placeholder="" type="text">
 --逻辑值 <input checked="checked" id="id_enable" name="enable" type="checkbox" />
---下拉框<select id="id_model_name" name="model_name">
--- <option value="hetong" selected="selected">劳动合同制</option>
--- </select>
 
 local CharField = Field:new{template='<input %s />', attrs={type='text'}}
 function CharField.initialize(self)
-    Field.initialize(self)
+    Field.initialize(self) -- getmetatable(self).initialize(self)
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for CharField')
     self.strip = self.strip or true
     table.insert(self.validators, validator.maxlen(self.maxlength))
@@ -132,8 +129,86 @@ function TextField.render(self, value, attrs)
     final_attrs.maxlength = self.maxlength
     return string.format(self.template, table_to_html_attrs(final_attrs), value)
 end
+
+-- <select id="id_model_name" name="model_name">
+--  <option value="hetong" selected="selected">劳动合同制</option>
+-- </select>
+
+local OptionField = Field:new{template='<select %s>%s</select>', 
+    choice_template='<option %s>%s</option>', 
+}
+function OptionField.initialize(self)
+    Field.initialize(self)
+    local choices = self.choices or assert(nil, 'choices is required for OptionField')
+    local first=choices[1]
+    if not first then
+        assert(nil,'you must provide 1 choice at least')
+    end
+    if type(first)=='string' then
+        self.choices={}
+        for i,v in ipairs(choices) do
+           self.choices[i]={v,v}
+        end
+    end
+    return self
+end
+function OptionField.to_lua(self, value)
+    if not value then
+        return ''
+    end
+    return value
+end
+function OptionField.validate(self, value)
+    local err=Field:validate(value)
+    if err then
+        return err
+    end
+    local valid=false
+    for i,v in ipairs(self.choices) do
+        if v[1]==value then
+           valid=true
+        end
+    end
+    if not valid then
+        return '无效选择项'
+    end
+end
+function OptionField.render(self, value, attrs)
+    local final_attrs = self:get_base_attrs()
+    for k,v in pairs(attrs or {}) do
+        final_attrs[k] = v
+    end
+    local choices={}
+    for i, choice in ipairs(self.choices) do
+        local db_val, val=choice
+        local inner_attrs={value=db_val}
+        if value==db_val then
+            inner_attrs.selected="selected"
+        end
+        choices[#choices+1]=string.format(self.choice_template, table_to_html_attrs(inner_attrs),val)
+    end
+    return string.format(self.template, table_to_html_attrs(final_attrs), 
+        table.concat(choices,'\n'))
+end
+-- <ul id="id-name">
+-- <li><label for="id-name-0"><input type="radio" value="-1" id="id-name-0" name="name" />拒绝</label></li>
+-- <li><label for="id-name-1"><input type="radio" value="0"  id="id-name-1" name="name" checked="checked" />复原</label></li>
+-- <li><label for="id-name-2"><input type="radio" value="1"  id="id-name-2" name="name" />通过</label></li>
+-- </ul>
+
+local RadioField = Field:new{attrs={type='radio'}, template='<ul %s>%s</ul>', 
+    choice_template='<li><label %s><input %s />%s</label></li>', 
+}
+function RadioField.initialize(self)
+    Field.initialize(self)
+    self.choices = self.choices or assert(nil, 'choices is required for RadioField')
+    return self
+end
+
 return{
     CharField = CharField, 
     TextField = TextField, 
+    RadioField = RadioField,
+    OptionField = OptionField,
     PasswordField = PasswordField
 }
