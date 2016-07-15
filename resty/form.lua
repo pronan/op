@@ -51,10 +51,16 @@ function M.render(self)
         end
         local help_text_string = ''
         if field.help_text then
-            help_text_string = string.format(self.help_template, field.help_text)
+            help_text_string = string.format(self.help_template, string.gsub(field.help_text, '\n', '<br/>'))
         end
+        local attrs = field:get_base_attrs()
+        if self.global_field_attrs then
+	        for k,v in pairs(self.global_field_attrs) do
+	        	attrs[k] = v
+	        end
+	    end
         res[#res+1] = string.format(self.template, field.label_html, 
-            field:render(self:get_value(field), self.global_field_attrs), 
+            field:render(self:get_value(field), attrs), 
             errors_string, help_text_string)
     end
     return table.concat( res, "\n")

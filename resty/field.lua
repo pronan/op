@@ -37,9 +37,11 @@ function Field.initialize(self)
 end
 function Field.get_base_attrs(self)
     local base_attrs = {id=self.id_prefix..self.name, name=self.name}
-    for k,v in pairs(self.attrs or {}) do
-        base_attrs[k] = v
-    end    
+    if self.attrs then
+        for k,v in pairs(self.attrs) do
+            base_attrs[k] = v
+        end   
+    end 
     return base_attrs
 end
 function Field.render(self, value, attrs)
@@ -102,13 +104,9 @@ function CharField.to_lua(self, value)
     return value
 end
 function CharField.render(self, value, attrs)
-    local final_attrs = self:get_base_attrs()
-    for k,v in pairs(attrs or {}) do
-        final_attrs[k] = v
-    end
-    final_attrs.maxlength = self.maxlength
-    final_attrs.value = value
-    return string.format(self.template, table_to_html_attrs(final_attrs))
+    attrs.maxlength = self.maxlength
+    attrs.value = value
+    return string.format(self.template, table_to_html_attrs(attrs))
 end
 
 local PasswordField = CharField:new{attrs={type='password'}}
@@ -124,12 +122,8 @@ end
 --     return value
 -- end
 function TextField.render(self, value, attrs)
-    local final_attrs = self:get_base_attrs()
-    for k,v in pairs(attrs or {}) do
-        final_attrs[k] = v
-    end
-    final_attrs.maxlength = self.maxlength
-    return string.format(self.template, table_to_html_attrs(final_attrs), value)
+    attrs.maxlength = self.maxlength
+    return string.format(self.template, table_to_html_attrs(attrs), value or '')
 end
 
 -- <select id="id_model_name" name="model_name">
@@ -166,7 +160,7 @@ function OptionField.validate(self, value)
         return err
     end
     if value == nil or value == '' then
-        return --this field is not required, passed
+        return '必填项'--this field is not required, passed
     end
     local valid = false
     for i, v in ipairs(self.choices) do
@@ -179,13 +173,10 @@ function OptionField.validate(self, value)
     end
 end
 function OptionField.render(self, value, attrs)
-    local final_attrs = self:get_base_attrs()
-    for k,v in pairs(attrs or {}) do
-        final_attrs[k] = v
-    end
     local choices={}
-    -- if value == nil and not self.required then
-    --     choice
+    if value == nil or value =='' then
+        choices[1]='<option value=""></option>'
+    end
     for i, choice in ipairs(self.choices) do
         local db_val, val=choice[1], choice[2]
         local inner_attrs={value=db_val}
@@ -194,7 +185,7 @@ function OptionField.render(self, value, attrs)
         end
         choices[#choices+1]=string.format(self.choice_template, table_to_html_attrs(inner_attrs),val)
     end
-    return string.format(self.template, table_to_html_attrs(final_attrs), 
+    return string.format(self.template, table_to_html_attrs(attrs), 
         table.concat(choices,'\n'))
 end
 -- <ul id="id-name">

@@ -20,7 +20,9 @@ for regex, func in pairs(urls) do
                 local err, ok = ware.before(req, kwargs)
                 if err then
                     ngx.log(ngx.ERR, err)
-                    return ngx.exit(500)
+                    if ware.strict then 
+                        return ngx.exit(500)
+                    end
                 end
             end
         end
@@ -33,7 +35,9 @@ for regex, func in pairs(urls) do
                 local err, ok = ware.after(req, kwargs)
                 if err then
                     ngx.log(ngx.ERR, err)
-                    return ngx.exit(500)
+                    if ware.strict then 
+                        return ngx.exit(500)
+                    end
                 end
             end
         end

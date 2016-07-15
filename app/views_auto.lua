@@ -49,7 +49,7 @@ function m.form(req, kwargs)
             return response.Plain(repr(form))
         end
     else
-        form = forms.TestForm{instance={name='xxxxx', class='农民', s=1}}
+        form = forms.TestForm{}
     end
     return response.Template("app/form.html", {form=form})
 end
