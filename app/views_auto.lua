@@ -30,7 +30,6 @@ function m.login(req, kwargs)
     local form;
     if req.get_method()=='POST' then
         form = forms.LoginForm{data=req.POST}
-        log(form)
         if form:is_valid() then
             local session=req.session
             session.user=form.user
@@ -50,6 +49,9 @@ function m.form(req, kwargs)
         end
     else
         form = forms.TestForm{}
+        form.fields.class.choices = {{'a', 'a'}, {'b', 'b'}}
+        log(form)
+        log(forms.TestForm)
     end
     return response.Template("app/form.html", {form=form})
 end

@@ -21,12 +21,34 @@ function M.new(self, init)
     self.__call = caller
     return setmetatable(init, self)
 end
+function M._resolve_fields(self)
+    local fields = self.fields
+    if self.field_order == nil then
+    	local fo = {}
+    	for name,v in pairs(fields) do
+    		fo[#fo+1] = name
+    	end
+    	self.field_order = fo
+    end
+    for name, field_maker in pairs(fields) do
+    	fields[name] = field_maker{name=name}
+    end
+    return self
+end
+function M.create(self, init)
+    return self:new(init):_resolve_fields()
+end
 function M.initialize(self)
     self.is_bound = self.data or self.files
     self.data = self.data or {}
     self.files = self.files or {}
     self.initial = self.initial or {}
     self.label_suffix = self.label_suffix or ''
+    local fields = {}
+    for name, parent_field in pairs(self.fields) do
+    	fields[name] = parent_field:new()
+    end
+    self.fields = fields
     return self
 end
 function M.get_value(self, field)
@@ -41,8 +63,8 @@ function M.get_value(self, field)
 end
 function M.render(self)
     local res = {}
-    for i, field in ipairs(self.fields) do
-        local name = field.name
+    for i, name in ipairs(self.field_order) do
+        local field = self.fields[name]
         local errors_string = ''
         if self.errors and self.errors[name] then
             errors_string = table.concat(helper.map(function(k)
@@ -75,8 +97,8 @@ function M.is_valid(self)
     return self.is_bound and not next(self:get_errors())
 end
 function M._clean_fields(self)
-    for i, field in ipairs(self.fields) do
-        local name = field.name
+    for i, name in ipairs(self.field_order) do
+        local field = self.fields[name]
         local value = self.data[name] or self.files[name]
         local value, errors = field:clean(value)
         if errors then

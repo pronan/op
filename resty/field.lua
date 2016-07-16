@@ -14,7 +14,14 @@ local function table_to_html_attrs(tbl)
     end
     return table.concat(res, " ")
 end
-local function caller(tbl, init) return tbl:new(init):initialize() end
+local function caller(tbl, init) 
+    return function(attrs_from_form)
+        for k,v in pairs(attrs_from_form) do
+            init[k] = v
+        end
+        return tbl:new(init):initialize() 
+    end
+end
 local Field = {}
 Field.id_prefix = 'id-'
 function Field.new(self, init)
@@ -24,11 +31,12 @@ function Field.new(self, init)
     return setmetatable(init, self)
 end
 function Field.initialize(self)
-    self.name = self.name or self[1] or assert(nil, 'name is required for Field')
-    self.label = self.label or self[2] or self.name
+    self.label = self.label or self[1] or self.name
     self.label_html = string.format('<label for="%s">%s%s</label>', self.id_prefix..self.name, 
         self.label, self.label_suffix or '')
-    self.required = self.required or true
+    if self.required == nil then
+        self.required = true
+    end
     --self.initial = self.initial or ''
     --self.help_text = self.help_text or ''
     --self.label_suffix = self.label_suffix or ''
@@ -73,7 +81,6 @@ function Field.clean(self, value)
     end
 end
 function Field.validate(self, value)
-    log(self.name, value, self.required)
     if (value == nil or value == '') and self.required then
         return 'this field is required.'
     end
@@ -116,6 +123,7 @@ local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=4
 function TextField.initialize(self)
     Field.initialize(self)
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for TextField')
+    table.insert(self.validators, validator.maxlen(self.maxlength))
     return self
 end
 -- function TextField.validate(self, value)

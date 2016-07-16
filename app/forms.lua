@@ -4,10 +4,10 @@ local validator = require"resty.validator"
 local User = require"app.models".User
 
 local M = {}
-M.UserForm = Form:new{
+M.UserForm = Form:create{
     fields = {
-        Field.CharField{"username", "用户名", maxlength=20},    
-        Field.PasswordField{"password", "密码", maxlength=28},    
+        username = Field.CharField{"用户名", maxlength=20},    
+        password = Field.PasswordField{"密码", maxlength=28},    
     }, 
     global_field_attrs = {class='form-control'}, 
     clean_username = function(self,value)
@@ -19,13 +19,10 @@ M.UserForm = Form:new{
     end, 
     
 }
-M.LoginForm = Form:new{
+M.LoginForm = Form:create{
     fields = {
-        Field.CharField{"username", "用户名", maxlength=20, validators={validator.minlen(6)}, 
-            --initial = 'default name', 
-        },    
-        Field.PasswordField{"password", "密码", maxlength=28, validators={validator.minlen(6)},
-        },    
+        username = Field.CharField{"用户名", maxlength=20, validators={validator.minlen(6)}, },    
+        password = Field.PasswordField{"密码", maxlength=28, validators={validator.minlen(6)},},    
     }, 
     global_field_attrs = {class='form-control'}, 
     clean_username = function(self, value)
@@ -45,18 +42,18 @@ M.LoginForm = Form:new{
         return value
     end, 
 }
-M.BlogForm = Form:new{
+M.BlogForm = Form:create{
     fields = {
-        Field.CharField{"title", "标题", maxlength=50},    
-        Field.TextField{"content", "内容", maxlength=520},    
+        title = Field.CharField{"标题", maxlength=50},    
+        content = Field.TextField{"内容", maxlength=520},    
     }, 
     global_field_attrs = {class='form-control'}, 
 }
-M.TestForm = Form:new{
+M.TestForm = Form:create{
     fields = {
-        Field.CharField{"name", "姓名", maxlength=20, help_text='清河户口本一致', attrs={placeholder='填姓名啊'}},    
-        Field.TextField{"content", "内容", maxlength=20, help_text='不要乱填', attrs={placeholder='填内容啊'}},  
-        Field.OptionField{"class", "阶级", choices={'工人','农民','其他'}, required=false},    
+        name = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致', attrs={placeholder='填姓名啊'}},    
+        content = Field.TextField{"内容", maxlength=20, help_text='不要乱填', attrs={placeholder='填内容啊'}},  
+        class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
     }, 
     global_field_attrs = {class='form-control'}, 
 }
