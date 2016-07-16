@@ -56,7 +56,7 @@ M.TestForm = Form:new{
     fields = {
         Field.CharField{"name", "姓名", maxlength=20, help_text='清河户口本一致', attrs={placeholder='填姓名啊'}},    
         Field.TextField{"content", "内容", maxlength=20, help_text='不要乱填', attrs={placeholder='填内容啊'}},  
-        Field.OptionField{"class", "阶级", choices={'工人','农民','其他'}},    
+        Field.OptionField{"class", "阶级", choices={'工人','农民','其他'}, required=false},    
     }, 
     global_field_attrs = {class='form-control'}, 
 }

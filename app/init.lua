@@ -8,10 +8,16 @@ helper = require"app.helper"
 for k,v in pairs(helper) do
     _G[k] = v
 end
+local delimiter = ''
+for i=1,50 do
+    delimiter = delimiter..'*'
+end
 function log(...)
+    local res = {}
     for i,v in ipairs({...}) do
-       ngx.log(ngx.ERR,'\n',repr(v))
+        res[i] = repr(v)
     end
+    ngx.log(ngx.ERR,string.format('\n%s\n%s\n%s', delimiter,  table.concat( res, " " ), delimiter))
 end
 settings = require"app.settings"
 local function RawQuery(statement, using)

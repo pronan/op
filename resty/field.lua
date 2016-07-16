@@ -73,6 +73,7 @@ function Field.clean(self, value)
     end
 end
 function Field.validate(self, value)
+    log(self.name, value, self.required)
     if (value == nil or value == '') and self.required then
         return 'this field is required.'
     end
@@ -155,12 +156,12 @@ function OptionField.to_lua(self, value)
     return value
 end
 function OptionField.validate(self, value)
-    local err=Field:validate(value)
+    local err = Field.validate(self, value)
     if err then
         return err
     end
     if value == nil or value == '' then
-        return '必填项'--this field is not required, passed
+        return --this field is not required, passed
     end
     local valid = false
     for i, v in ipairs(self.choices) do
