@@ -9,7 +9,7 @@ M.UserForm = Form:create{
         username = Field.CharField{"用户名", maxlength=20},    
         password = Field.PasswordField{"密码", maxlength=28},    
     }, 
-    global_field_attrs = {class='form-control'}, 
+    
     clean_username = function(self,value)
         local user = User:get{username=value}
         if user then
@@ -24,7 +24,7 @@ M.LoginForm = Form:create{
         username = Field.CharField{"用户名", maxlength=20, validators={validator.minlen(6)}, },    
         password = Field.PasswordField{"密码", maxlength=28, validators={validator.minlen(6)},},    
     }, 
-    global_field_attrs = {class='form-control'}, 
+    
     clean_username = function(self, value)
         local user = User:get{username=value}
         if not user then
@@ -47,14 +47,15 @@ M.BlogForm = Form:create{
         title = Field.CharField{"标题", maxlength=50},    
         content = Field.TextField{"内容", maxlength=520},    
     }, 
-    global_field_attrs = {class='form-control'}, 
+    
 }
 M.TestForm = Form:create{
     fields = {
         name = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致', attrs={placeholder='填姓名啊'}},    
-        content = Field.TextField{"内容", maxlength=20, help_text='不要乱填', attrs={placeholder='填内容啊'}},  
+        content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  
         class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
+        sex = Field.RadioField{"性别", choices={'男','女'}},   
     }, 
-    global_field_attrs = {class='form-control'}, 
+    
 }
 return M

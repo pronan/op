@@ -49,9 +49,6 @@ function m.form(req, kwargs)
         end
     else
         form = forms.TestForm{}
-        form.fields.class.choices = {{'a', 'a'}, {'b', 'b'}}
-        log(form)
-        log(forms.TestForm)
     end
     return response.Template("app/form.html", {form=form})
 end

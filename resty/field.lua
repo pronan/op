@@ -31,6 +31,7 @@ function Field.new(self, init)
     return setmetatable(init, self)
 end
 function Field.initialize(self)
+    self.id = self.id_prefix..self.name
     self.label = self.label or self[1] or self.name
     self.label_html = string.format('<label for="%s">%s%s</label>', self.id_prefix..self.name, 
         self.label, self.label_suffix or '')
@@ -44,12 +45,13 @@ function Field.initialize(self)
     return self
 end
 function Field.get_base_attrs(self)
-    local base_attrs = {id=self.id_prefix..self.name, name=self.name}
+    local base_attrs = {id=self.id, name=self.name}
     if self.attrs then
         for k,v in pairs(self.attrs) do
             base_attrs[k] = v
         end   
     end 
+    log(self.name, base_attrs)
     return base_attrs
 end
 function Field.render(self, value, attrs)
@@ -92,7 +94,7 @@ end
 --<input id="id_sfzh" maxlength="18" name="sfzh" placeholder="" type="text">
 --逻辑值 <input checked="checked" id="id_enable" name="enable" type="checkbox" />
 
-local CharField = Field:new{template='<input %s />', attrs={type='text'}}
+local CharField = Field:new{template='<input %s />', type='text'}
 function CharField.initialize(self)
     Field.initialize(self) -- getmetatable(self).initialize(self)
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for CharField')
@@ -114,12 +116,13 @@ end
 function CharField.render(self, value, attrs)
     attrs.maxlength = self.maxlength
     attrs.value = value
+    attrs.type = self.type
     return string.format(self.template, table_to_html_attrs(attrs))
 end
 
-local PasswordField = CharField:new{attrs={type='password'}}
+local PasswordField = CharField:new{type='password'}
 
-local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=40, rows=4}}
+local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=40, rows=6}}
 function TextField.initialize(self)
     Field.initialize(self)
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for TextField')
@@ -140,8 +143,7 @@ end
 -- </select>
 
 local OptionField = Field:new{template='<select %s>%s</select>', 
-    choice_template='<option %s>%s</option>', 
-}
+    choice_template='<option %s>%s</option>', }
 function OptionField.initialize(self)
     Field.initialize(self)
     local choices = self.choices or assert(nil, 'choices is required for OptionField')
@@ -192,7 +194,8 @@ function OptionField.render(self, value, attrs)
         if value==db_val then
             inner_attrs.selected="selected"
         end
-        choices[#choices+1]=string.format(self.choice_template, table_to_html_attrs(inner_attrs),val)
+        choices[#choices+1]=string.format(self.choice_template, 
+            table_to_html_attrs(inner_attrs),val)
     end
     return string.format(self.template, table_to_html_attrs(attrs), 
         table.concat(choices,'\n'))
@@ -203,13 +206,22 @@ end
 -- <li><label for="id-name-2"><input type="radio" value="1"  id="id-name-2" name="name" />通过</label></li>
 -- </ul>
 
-local RadioField = Field:new{attrs={type='radio'}, template='<ul %s>%s</ul>', 
+local RadioField = OptionField:new{template='<ul %s>%s</ul>', 
     choice_template='<li><label %s><input %s />%s</label></li>', 
 }
-function RadioField.initialize(self)
-    Field.initialize(self)
-    self.choices = self.choices or assert(nil, 'choices is required for RadioField')
-    return self
+function RadioField.render(self, value, attrs)
+    local choices={}
+    for i, choice in ipairs(self.choices) do
+        local db_val, val=choice[1], choice[2]
+        local inner_id = attrs.id..'-'..i
+        local inner_attrs={value=db_val, name=attrs.name, id=inner_id, type='radio'}
+        if value==db_val then
+            inner_attrs.checked="checked"
+        end
+        choices[#choices+1]=string.format(self.choice_template, table_to_html_attrs({['for']=inner_id}), 
+            table_to_html_attrs(inner_attrs),val)
+    end
+    return string.format(self.template, table_to_html_attrs(attrs), table.concat(choices,'\n'))
 end
 
 return{
