@@ -22,6 +22,7 @@ local function caller(tbl, init)
         return tbl:new(init):initialize() 
     end
 end
+local BootstrapFields = {}
 local Field = {}
 Field.id_prefix = 'id-'
 function Field.new(self, init)
@@ -118,8 +119,10 @@ function CharField.render(self, value, attrs)
     attrs.type = self.type
     return string.format(self.template, table_to_html_attrs(attrs))
 end
+BootstrapFields.CharField = CharField:new{attrs={class='form-control'}}
 
 local PasswordField = CharField:new{type='password'}
+BootstrapFields.PasswordField = CharField:new{type='password', attrs={class='form-control'}}
 
 local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=40, rows=6}}
 function TextField.initialize(self)
@@ -136,7 +139,7 @@ function TextField.render(self, value, attrs)
     attrs.maxlength = self.maxlength
     return string.format(self.template, table_to_html_attrs(attrs), value or '')
 end
-
+BootstrapFields.TextField = TextField:new{attrs={cols=40, rows=6, class='form-control'}}
 -- <select id="id_model_name" name="model_name">
 --  <option value="hetong" selected="selected">劳动合同制</option>
 -- </select>
@@ -204,6 +207,7 @@ end
 -- <li><label for="id-name-1"><input type="radio" value="0"  id="id-name-1" name="name" checked="checked" />复原</label></li>
 -- <li><label for="id-name-2"><input type="radio" value="1"  id="id-name-2" name="name" />通过</label></li>
 -- </ul>
+BootstrapFields.OptionField = OptionField:new{attrs={class='form-control'}}
 
 local RadioField = OptionField:new{template='<ul %s>%s</ul>', 
     choice_template='<li><label %s><input %s />%s</label></li>', 
@@ -218,16 +222,18 @@ function RadioField.render(self, value, attrs)
             inner_attrs.checked="checked"
         end
         choices[#choices+1]=string.format(self.choice_template, 
-            table_to_html_attrs({class='radio', ['for']=inner_id}), 
+            table_to_html_attrs({['for']=inner_id}), 
             table_to_html_attrs(inner_attrs),val)
     end
     return string.format(self.template, table_to_html_attrs(attrs), table.concat(choices,'\n'))
 end
+BootstrapFields.RadioField = RadioField:new{attrs={class='radio'}}
 
 return{
     CharField = CharField, 
     TextField = TextField, 
     RadioField = RadioField,
     OptionField = OptionField,
-    PasswordField = PasswordField
+    PasswordField = PasswordField, 
+    BootstrapFields = BootstrapFields, 
 }

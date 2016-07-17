@@ -1,0 +1,7 @@
+.radio{
+	display: inline-block;
+}
+.radio li{
+	display: inline-block;
+	list-style: none;
+}

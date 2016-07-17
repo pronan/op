@@ -1,5 +1,5 @@
 local Form = require"resty.form"
-local Field = require"resty.field"
+local Field = require"resty.field".BootstrapFields
 local validator = require"resty.validator"
 local User = require"app.models".User
 
@@ -51,7 +51,7 @@ M.BlogForm = Form:create{
 }
 M.TestForm = Form:create{
     fields = {
-        name = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致', attrs={placeholder='填姓名啊'}},    
+        name = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致'},    
         content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  
         class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
         sex = Field.RadioField{"性别", choices={'男','女'}},   
