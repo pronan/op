@@ -51,7 +51,6 @@ function Field.get_base_attrs(self)
             base_attrs[k] = v
         end   
     end 
-    log(self.name, base_attrs)
     return base_attrs
 end
 function Field.render(self, value, attrs)
@@ -218,7 +217,8 @@ function RadioField.render(self, value, attrs)
         if value==db_val then
             inner_attrs.checked="checked"
         end
-        choices[#choices+1]=string.format(self.choice_template, table_to_html_attrs({['for']=inner_id}), 
+        choices[#choices+1]=string.format(self.choice_template, 
+            table_to_html_attrs({class='radio', ['for']=inner_id}), 
             table_to_html_attrs(inner_attrs),val)
     end
     return string.format(self.template, table_to_html_attrs(attrs), table.concat(choices,'\n'))
