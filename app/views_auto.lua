@@ -50,7 +50,7 @@ function m.form(req, kwargs)
     else
         form = forms.TestForm{}
     end
-    return response.Template("docx.html", {form=form})
+    return response.Template("app/form.html", {form=form})
 end
 function m.edituser(req, kwargs)
     local form;
