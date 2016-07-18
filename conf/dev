@@ -49,7 +49,9 @@ http {
         location /images { 
             root html/static;
         }
-
+        location /files { 
+            root html/static;
+        }
     }
 
 
