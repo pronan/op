@@ -229,11 +229,53 @@ function RadioField.render(self, value, attrs)
 end
 BootstrapFields.RadioField = RadioField:new{attrs={class='radio'}}
 
+local FileField = Field:new{template='<input %s />', type='file'}
+function FileField.render(self, value, attrs)
+    attrs.type = self.type
+    return string.format(self.template, table_to_html_attrs(attrs))
+end
+-- function FileField.to_lua(self, value)
+--     return value.temp
+-- end
+-- empty file input needs to remove the file
+-- {
+--   "file": "",
+--   "name": "avatar",
+--   "size": 0,
+--   "temp": "\s8rk.c",
+--   "type": "application/octet-stream",},
+function FileField.validate(self, value)
+    local value = value.file
+    if (value == nil or value == '') and self.required then
+        return 'this field is required.'
+    end 
+end
+function FileField.initialize(self)
+    Field.initialize(self) -- getmetatable(self).initialize(self)
+    self.upload_to = self.upload_to or assert(nil, 'upload_to is required for FileField')
+    local last_char = string.sub(self.upload_to, -1, -1)
+    if last_char ~= '/' and last_char ~= '\\' then
+        self.upload_to = self.upload_to..'/'
+    end
+    return self
+end
+function FileField.clean(self, value)
+    local value, errors = Field.clean(self, value) 
+    if errors then
+        return nil, errors
+    end
+    value.save_path = self.upload_to..value.file
+    os.rename(value.temp, value.save_path)
+    return value
+end
+BootstrapFields.FileField = FileField:new{attrs={class='form-control'}}
+
 return{
     CharField = CharField, 
     TextField = TextField, 
     RadioField = RadioField,
     OptionField = OptionField,
     PasswordField = PasswordField, 
+    FileField = FileField, 
     BootstrapFields = BootstrapFields, 
 }

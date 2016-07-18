@@ -52,9 +52,10 @@ M.BlogForm = Form:create{
 M.TestForm = Form:create{
     fields = {
         name = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致'},    
-        content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  
-        class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
-        sex = Field.RadioField{"性别", choices={'男','女'}},   
+        --content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  
+        --class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
+        --sex = Field.RadioField{"性别", choices={'男','女'}},   
+        avatar = Field.FileField{'头像', upload_to='files/', help_text='请上传标准证件照'}, 
     }, 
     
 }

@@ -194,7 +194,7 @@ local function _repr(obj, ind, deep, already)
                 elseif deep > MAX_DEEPTH then
                     v = simple('*exceed max deepth*')
                 else
-                    v = '{**'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
+                    v = '{\\\\'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)
@@ -211,7 +211,7 @@ local function _repr(obj, ind, deep, already)
 end
 function m.repr(obj)
     if type(obj)  == 'table' then
-        return '{**'..tostring(obj).._repr(obj, '', 1, {})
+        return '{\\\\'..tostring(obj).._repr(obj, '', 1, {})
     else
         return simple(obj)
     end

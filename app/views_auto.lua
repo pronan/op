@@ -43,7 +43,7 @@ end
 function m.form(req, kwargs)
     local form;
     if req.get_method()=='POST' then
-        form = forms.TestForm{data=req.POST}
+        form = forms.TestForm{data=req.POST, files=req.FILES}
         if form:is_valid() then
             return response.Plain(repr(form))
         end

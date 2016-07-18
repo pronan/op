@@ -54,7 +54,7 @@ end
 function M.get_value(self, field)
 	local name = field.name
     if self.is_bound then
-    	return self.data[name]
+    	return self.data[name] or self.files[name]
     elseif self.instance then
     	return self.instance[name]
     else
