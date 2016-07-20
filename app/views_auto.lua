@@ -224,7 +224,7 @@ function m.init( kw )
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
     username varchar(10), 
-    password varchar(28));]]
+    password varchar(30));]]
 )
     if not res then
         return nil, err
