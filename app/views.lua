@@ -3,6 +3,9 @@ local response = require"resty.response"
 
 local m={}
 
+function m.home(req, kw)
+    return response.Template('home.html')
+end
 local function getfield(f)
     local v = _G -- start with the table of globals
     for w in string.gmatch(f, "[%w_]+") do
@@ -48,9 +51,6 @@ function m.models(req,kw)
         return nil, err
     end
     return response.Template('users.html', {users=res})
-end
-function m.home(req, kw)
-    return response.Template('home.html')
 end
 local json = require "cjson.safe"
 
