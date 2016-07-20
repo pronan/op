@@ -213,6 +213,9 @@ local function ran(step)
     return int
 end
 
+--     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+-- Incorrect table definition; there can be only one TIMESTAMP column with CURRENT_TIMESTAMP in DEFAULT or ON UPDATE clause,
 function m.init( kw )
     local res, err = query("drop table if exists users")
     if not res then
@@ -221,8 +224,6 @@ function m.init( kw )
     local res, err = query(
 [[create table users(
     id serial primary key,
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
     username varchar(10), 
     password varchar(30));]]
 )
