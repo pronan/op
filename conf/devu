@@ -1,6 +1,7 @@
 worker_processes  1;
 error_log  logs/error.log;
 pid logs/nginx.pid;
+user root;
 
 events {worker_connections  10240;}
 
