@@ -9,7 +9,7 @@ http {
     #access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-    lua_code_cache off;
+    #lua_code_cache off;
 
     init_by_lua_file app/init.lua;
 
