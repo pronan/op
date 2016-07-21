@@ -30,6 +30,7 @@ http {
         include mime.types;
 
         location / {
+            resolver 8.8.8.8;
             content_by_lua_file app/main.lua;
         }
         location = /test {

@@ -242,4 +242,10 @@ function m.testa(req, kwargs)
     )
     return response.Redirect(url)
 end
+function m.r(req, kwargs)
+    local client = require "resty.http":new()
+    local res, err = client:request_uri('http://www.jarsj.cn', {
+    })
+    return response.Plain(repr(err))
+end
 return m
