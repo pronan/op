@@ -96,9 +96,7 @@ function m.qq(request, kwargs)
     log(url)
     -- local access_token = get_access_token(url)
     local client = require "resty.http":new()
-    local res, err = client:request_uri('https://graph.qq.com/oauth2.0/token', {
-        query = string.format('grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s', 
-            qq.id, qq.key, code, qq.redirect_uri), 
+    local res, err = client:request_uri(url, {
         ssl_verify = false, 
     })
     log('err:', err)
