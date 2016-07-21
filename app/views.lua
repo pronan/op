@@ -93,8 +93,10 @@ function m.qq(request, kwargs)
     local url = string.format('https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s', 
         qq.id, qq.key, code, qq.redirect_uri
     )
+    log(url)
     local client = require "resty.http":new()
     local res, err = client:request_uri(url)
-    return response.Plain(res)
+    log('err:', err)
+    return response.Plain(repr(res))
 end
 return m
