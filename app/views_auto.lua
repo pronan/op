@@ -68,14 +68,6 @@ function m.logout(req, kwargs)
     delete_session()
     return response.Redirect("/")
 end
-function m.testa(req, kwargs)
-    local qq = settings.OAUTH2.qq
-    local url = string.format('https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=%s&redirect_uri=%s', 
-        qq.id, qq.redirect_uri
-    )
-    log('url:', url)
-    return response.Redirect(url)
-end
 function m.error(req, kwargs)
     return response.Error("你出错了")
 end
@@ -242,5 +234,12 @@ function m.users( req, kw )
         return nil, err
     end
     return render('users.html', {users=users})
+end
+function m.testa(req, kwargs)
+    local qq = settings.OAUTH2.qq
+    local url = string.format('https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=%s&redirect_uri=%s', 
+        qq.id, qq.redirect_uri
+    )
+    return response.Redirect(url)
 end
 return m

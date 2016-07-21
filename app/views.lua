@@ -88,6 +88,13 @@ function m.read_session(request, kwargs)
 end
 function m.qq(request, kwargs)
     log('come from qq:', request.GET, request.POST)
-    return repr(gmt(request.session).data)
+    local code = request.GET.code
+    local qq = settings.OAUTH2.qq
+    local url = string.format('https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s', 
+        qq.id, qq.key, code, qq.redirect_uri
+    )
+    local client = require "resty.http":new()
+    local res, err = client:request_uri(url)
+    return response.Plain(res)
 end
 return m
