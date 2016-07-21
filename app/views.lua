@@ -87,27 +87,11 @@ function m.read_session(request, kwargs)
     return repr(gmt(request.session).data)
 end
 function m.qq(request, kwargs)
-    log('come from qq:', request.GET, request.POST)
+    local qq = require"resty.oauth".qq
     local code = request.GET.code
-    local qq = settings.OAUTH2.qq
-    local url = string.format('https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s', 
-        qq.id, qq.key, code, qq.redirect_uri
-    )
-
-    -- local access_token = get_access_token(url)
-    local client = require "resty.http":new()
-    local res, err = client:request_uri(url, {
-        ssl_verify = false, 
-    })
-    log('err:', err)
-    -- access_token=5A7E1A50ED8FF900A58BDBD283C0AE3D&expires_in=7776000&refresh_token=AA851E53744FA5CE43A24722B4FB78D1
-    -- local url2 = https://graph.qq.com/oauth2.0/me?access_token=YOUR_ACCESS_TOKEN
-    -- local openid = get_openid(url2)
-    -- callback( {"client_id":"101337042","openid":"2137B3472EE5068BABF950D73669821F"} );
-    -- local info = string.format('https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s', 
-        -- access_token, qq.id, openid)
-    --{ "ret": 0, "msg": "", "is_lost":0, "nickname": "楠字数补丁也", "gender": "男", "province": "四川", "city": "成都", "year": "1987", "figureurl": "http:\/\/qzapp.qlogo.cn\/qzapp\/101337042\/2137B3472EE5068BABF950D73669821F\/30", "figureurl_1": "http:\/\/qzapp.qlogo.cn\/qzapp\/101337042\/2137B3472EE5068BABF950D73669821F\/50", "figureurl_2": "http:\/\/qzapp.qlogo.cn\/qzapp\/101337042\/2137B3472EE5068BABF950D73669821F\/100", "figureurl_qq_1": "http:\/\/q.qlogo.cn\/qqapp\/101337042\/2137B3472EE5068BABF950D73669821F\/40", "figureurl_qq_2": "http:\/\/q.qlogo.cn\/qqapp\/101337042\/2137B3472EE5068BABF950D73669821F\/100", "is_yellow_vip": "0", "vip": "0", "yellow_vip_level": "0", "level": "0", "is_yellow_year_vip": "0" } 
-
-    return response.Plain(repr(res)..repr(err))
+    local token = qq:get_access_token(code)
+    local openid = qq:get_openid(token)
+    local user = qq:get_user_info(openid, token)
+    return response.Plain(token..openid..repr(user))
 end
 return m

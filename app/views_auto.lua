@@ -236,7 +236,7 @@ function m.users( req, kw )
     return render('users.html', {users=users})
 end
 function m.testa(req, kwargs)
-    local uri = require"resty.oauth".myqq.login_redirect_uri
+    local uri = require"resty.oauth".qq.login_redirect_uri
     log(uri)
     return response.Redirect(uri)
 end
