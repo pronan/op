@@ -82,4 +82,12 @@ function m.check(request, kwargs)
     res.c = gmt(ngx.var)
     return repr(res)
 end
+function m.read_session(request, kwargs)
+    local x = 1
+    return repr(gmt(request.session).data)
+end
+function m.qq(request, kwargs)
+    log('come from qq:', request.GET, request.POST)
+    return repr(gmt(request.session).data)
+end
 return m

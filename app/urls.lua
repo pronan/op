@@ -26,4 +26,6 @@ url('^/global$', views.global)
 url('^/session$', views.session)
 url('^/read_session$', views.read_session)
 url('^/check$', views.check)
+
+url('^/oauth2/qq$', views.qq)
 return urlpatterns

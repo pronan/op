@@ -30,12 +30,12 @@ M.OAUTH2 = {
     qq = {
         id = '101337042', 
         key = '46310704a4a3295844bf397dd7a3807f', 
-        callback = 'http://www.httper.cn/oauth2/qq',  
+        redirect_uri = 'http://www.httper.cn/oauth2/qq',  
     }, 
     github = {
         id = '35350283921fce581eb6', 
         key = '75f3157ee95cd436b37ce484b9733beedcfcad66',
-        callback = 'http://www.httper.cn/oauth2/git',  
+        redirect_uri = 'http://www.httper.cn/oauth2/git',  
     }, 
 }
 M.MIDDLEWARES = {
