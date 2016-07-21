@@ -99,6 +99,7 @@ function m.qq(request, kwargs)
     local res, err = client:request_uri('https://graph.qq.com/oauth2.0/token', {
         query = string.format('grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s', 
             qq.id, qq.key, code, qq.redirect_uri), 
+        ssl_verify = false, 
     })
     log('err:', err)
     -- access_token=5A7E1A50ED8FF900A58BDBD283C0AE3D&expires_in=7776000&refresh_token=AA851E53744FA5CE43A24722B4FB78D1
