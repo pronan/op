@@ -109,6 +109,6 @@ function m.qq(request, kwargs)
         -- access_token, qq.id, openid)
     --{ "ret": 0, "msg": "", "is_lost":0, "nickname": "楠字数补丁也", "gender": "男", "province": "四川", "city": "成都", "year": "1987", "figureurl": "http:\/\/qzapp.qlogo.cn\/qzapp\/101337042\/2137B3472EE5068BABF950D73669821F\/30", "figureurl_1": "http:\/\/qzapp.qlogo.cn\/qzapp\/101337042\/2137B3472EE5068BABF950D73669821F\/50", "figureurl_2": "http:\/\/qzapp.qlogo.cn\/qzapp\/101337042\/2137B3472EE5068BABF950D73669821F\/100", "figureurl_qq_1": "http:\/\/q.qlogo.cn\/qqapp\/101337042\/2137B3472EE5068BABF950D73669821F\/40", "figureurl_qq_2": "http:\/\/q.qlogo.cn\/qqapp\/101337042\/2137B3472EE5068BABF950D73669821F\/100", "is_yellow_vip": "0", "vip": "0", "yellow_vip_level": "0", "level": "0", "is_yellow_year_vip": "0" } 
 
-    return response.Plain(repr(res))
+    return response.Plain(repr(res)..repr(err))
 end
 return m
