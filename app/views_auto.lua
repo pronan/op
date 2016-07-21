@@ -236,16 +236,11 @@ function m.users( req, kw )
     return render('users.html', {users=users})
 end
 function m.testa(req, kwargs)
-    local qq = settings.OAUTH2.qq
-    local url = string.format('https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=%s&redirect_uri=%s', 
-        qq.id, qq.redirect_uri
-    )
-    return response.Redirect(url)
+    local uri = require"resty.oauth".myqq.login_redirect_uri
+    log(uri)
+    return response.Redirect(uri)
 end
 function m.r(req, kwargs)
-    local client = require "resty.http":new()
-    local res, err = client:request_uri('http://www.jarsj.cn', {
-    })
-    return response.Plain(repr(err))
+    return response.Plain(ngx.encode_args{a=1, b=2}..repr(ngx.decode_args'access_token=5A7E1A50ED8FF900A58BDBD283C0AE3D&expires_in=7776000&refresh_token=AA851E53744FA5CE43A24722B4FB78D1'))
 end
 return m
