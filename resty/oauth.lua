@@ -66,7 +66,7 @@ function qq.get_openid(self, access_token)
     local uri = self.me_uri..'?access_token='..access_token
     local res, err = client:request_uri(uri, {ssl_verify = false})
     local openid = match(res.body, [["openid":"(.+?)"]])[1]
-    log('openid', openid)
+    --log('openid', openid)
     return openid
 end
 
@@ -75,17 +75,62 @@ function qq.get_user_info(self, openid, access_token)
     local uri = self.user_info_uri..'?'..encode_args{openid=openid, 
         access_token=access_token, oauth_consumer_key=self.client_id}
     local res, err = client:request_uri(uri, {ssl_verify = false})
-    log('user info:', res, err)
+    --log('user info:', res, err)
     return decode(res.body)
 end
 
-local github = {}
+local github = setmetatable({
+        client_id = '35350283921fce581eb6', 
+        client_secret = '75f3157ee95cd436b37ce484b9733beedcfcad66', 
+        redirect_uri = 'http://www.httper.cn/oauth2/git',  
+        authorize_uri = 'https://github.com/login/oauth/authorize', 
+        token_uri = 'https://github.com/login/oauth/access_token', 
+        me_uri = 'https://api.github.com/user', 
+        user_info_uri = 'https://graph.qq.com/user/get_user_info', 
+    }, {__call=caller})
 function github.new(self, init)
     init = init or {}
     self.__index = self
+    self.__call = caller
     return setmetatable(init, self)
 end
+function github.initialize(self)
+    self.login_redirect_uri = self:get_login_redirect_uri()
+    return self
+end
+function github.get_login_redirect_uri(self)
+    return self.authorize_uri..'?'..encode_args{response_type='code', 
+        client_id=self.client_id, redirect_uri=self.redirect_uri}
+end
+github.initialize(github)
+function github.get_access_token(self, code)
+    local client = http:new()
+    local uri = self.token_uri..'?'..encode_args{grant_type='authorization_code', 
+        client_id=self.client_id, client_secret=self.client_secret, 
+        code=code, redirect_uri=self.redirect_uri}
+    local res, err = client:request_uri(uri, {ssl_verify = false})
+    local body = decode_args(res.body)
+    return body.access_token
+end
+-- callback( {"client_id":"101337042","openid":"2137B3472EE5068BABF950D73669821F"} );
+function github.get_openid(self, access_token)
+    local client = http:new()
+    local uri = self.me_uri..'?access_token='..access_token
+    local res, err = client:request_uri(uri, {ssl_verify = false})
+    log('res:', res, 'err:', err)
+    local openid = match(res.body, [["openid":"(.+?)"]])[1]
+    --log('openid', openid)
+    return openid
+end
 
+function github.get_user_info(self, openid, access_token)
+    local client = http:new()
+    local uri = self.user_info_uri..'?'..encode_args{openid=openid, 
+        access_token=access_token, oauth_consumer_key=self.client_id}
+    local res, err = client:request_uri(uri, {ssl_verify = false})
+    --log('user info:', res, err)
+    return decode(res.body)
+end
 
 return {
     qq = qq, 
