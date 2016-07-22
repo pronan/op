@@ -98,8 +98,8 @@ function m.github(request, kwargs)
     local qq = require"resty.oauth".github
     local code = request.GET.code
     local token = qq:get_access_token(code)
-    local openid = qq:get_openid(token)
+    local user = qq:get_user_info(token)
     --local user = qq:get_user_info(openid, token)
-    return response.Plain(string.format('code:%s,\n token:%s,\n openid:%s', code, token, repr(openid)))
+    return response.Plain(string.format('code:%s,\n token:%s,\n openid:%s', code, token, repr(user)))
 end
 return m
