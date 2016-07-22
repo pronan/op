@@ -28,4 +28,5 @@ url('^/read_session$', views.read_session)
 url('^/check$', views.check)
 
 url('^/oauth2/qq$', views.qq)
+url('^/oauth2/github$', views.github)
 return urlpatterns

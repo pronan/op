@@ -92,6 +92,14 @@ function m.qq(request, kwargs)
     local token = qq:get_access_token(code)
     local openid = qq:get_openid(token)
     local user = qq:get_user_info(openid, token)
-    return response.Plain(token..openid..repr(user))
+    return response.Plain(string.format('code:%s,\n token:%s,\n openid:%s, \nuser:%s', code, token, openid, repr(user)))
+end
+function m.github(request, kwargs)
+    local qq = require"resty.oauth".github
+    local code = request.GET.code
+    local token = qq:get_access_token(code)
+    local openid = qq:get_openid(token)
+    --local user = qq:get_user_info(openid, token)
+    return response.Plain(string.format('code:%s,\n token:%s,\n openid:%s', code, token, repr(openid)))
 end
 return m
