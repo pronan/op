@@ -26,6 +26,7 @@ function qq.new(self, init)
 end
 function qq.initialize(self)
     self.login_redirect_uri = self:get_login_redirect_uri()
+    self.client = http:new()
     return self
 end
 function qq.get_login_redirect_uri(self)
@@ -52,19 +53,17 @@ qq.initialize(qq)
 --   "status"  : 200,
 -- }
 function qq.get_access_token(self, code)
-    local client = http:new()
     local uri = self.token_uri..'?'..encode_args{grant_type='authorization_code', 
         client_id=self.client_id, client_secret=self.client_secret, 
         code=code, redirect_uri=self.redirect_uri}
-    local res, err = client:request_uri(uri, {ssl_verify = false})
+    local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local body = decode_args(res.body)
     return body.access_token
 end
 -- callback( {"client_id":"101337042","openid":"2137B3472EE5068BABF950D73669821F"} );
 function qq.get_openid(self, access_token)
-    local client = http:new()
     local uri = self.me_uri..'?access_token='..access_token
-    local res, err = client:request_uri(uri, {ssl_verify = false})
+    local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local openid = match(res.body, [["openid":"(.+?)"]])[1]
     --log('openid', openid)
     return openid
@@ -90,10 +89,9 @@ end
 --   "yellow_vip_level": "0",
 -- }
 function qq.get_user_info(self, openid, access_token)
-    local client = http:new()
     local uri = self.user_info_uri..'?'..encode_args{openid=openid, 
         access_token=access_token, oauth_consumer_key=self.client_id}
-    local res, err = client:request_uri(uri, {ssl_verify = false})
+    local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local info = decode(res.body)
     return {username=info.nickname, avatar=info.figureurl_qq_2}
 end
@@ -114,6 +112,7 @@ function github.new(self, init)
     return setmetatable(init, self)
 end
 function github.initialize(self)
+    self.client = http:new()
     self.login_redirect_uri = self:get_login_redirect_uri()
     return self
 end
@@ -123,11 +122,10 @@ function github.get_login_redirect_uri(self)
 end
 github.initialize(github)
 function github.get_access_token(self, code)
-    local client = http:new()
     local uri = self.token_uri..'?'..encode_args{grant_type='authorization_code', 
         client_id=self.client_id, client_secret=self.client_secret, 
         code=code, redirect_uri=self.redirect_uri}
-    local res, err = client:request_uri(uri, {ssl_verify = false})
+    local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local body = decode_args(res.body)
     return body.access_token
 end
@@ -212,9 +210,8 @@ end
 -- end
 
 function github.get_user_info(self, access_token)
-    local client = http:new()
     local uri = self.me_uri..'?access_token='..access_token
-    local res, err = client:request_uri(uri, {ssl_verify = false})
+    local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local info = decode(res.body)
     return {username=info.name, avatar=info.avatar_url}
 end

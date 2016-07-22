@@ -91,10 +91,13 @@ local oauth2 = {
     qq = require"resty.oauth".qq.login_redirect_uri, 
 }
 function m.oauth(req, kwargs)
+    if req.user then
+        return response.Redirect('/profile')
+    end
     return response.Redirect(oauth2[kwargs.name or 'qq'])
 end
 function m.qq(request, kwargs)
-    local qq = require"resty.oauth".qq
+    local qq = require"resty.oauth".qq()
     local code = request.GET.code
     local token = qq:get_access_token(code)
     local openid = qq:get_openid(token)
@@ -102,7 +105,7 @@ function m.qq(request, kwargs)
     return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n openid:%s, \nuser:%s', oauth2.qq, code, token, openid, repr(user)))
 end
 function m.github(request, kwargs)
-    local qq = require"resty.oauth".github
+    local qq = require"resty.oauth".github()
     local code = request.GET.code
     local token = qq:get_access_token(code)
     local user = qq:get_user_info(token)
