@@ -69,14 +69,33 @@ function qq.get_openid(self, access_token)
     --log('openid', openid)
     return openid
 end
-
+-- user:{\\table: 0x40e80778
+--   "city"    : "成都",
+--   "figureurl": "http://qzapp.qlogo.cn/qzapp/101337042/2137B3472EE5068BABF950D73669821F/30",
+--   "figureurl_1": "http://qzapp.qlogo.cn/qzapp/101337042/2137B3472EE5068BABF950D73669821F/50",
+--   "figureurl_2": "http://qzapp.qlogo.cn/qzapp/101337042/2137B3472EE5068BABF950D73669821F/100",
+--   "figureurl_qq_1": "http://q.qlogo.cn/qqapp/101337042/2137B3472EE5068BABF950D73669821F/40",
+--   "figureurl_qq_2": "http://q.qlogo.cn/qqapp/101337042/2137B3472EE5068BABF950D73669821F/100",
+--   "gender"  : "男",
+--   "is_lost" : 0,
+--   "is_yellow_vip": "0",
+--   "is_yellow_year_vip": "0",
+--   "level"   : "0",
+--   "msg"     : "",
+--   "nickname": "楠字数补丁也",
+--   "province": "四川",
+--   "ret"     : 0,
+--   "vip"     : "0",
+--   "year"    : "1987",
+--   "yellow_vip_level": "0",
+-- }
 function qq.get_user_info(self, openid, access_token)
     local client = http:new()
     local uri = self.user_info_uri..'?'..encode_args{openid=openid, 
         access_token=access_token, oauth_consumer_key=self.client_id}
     local res, err = client:request_uri(uri, {ssl_verify = false})
     local info = decode(res.body)
-    return info --{'username':info.nickname, 'avatar':info.url}
+    return {username=info.nickname, avatar=info.figureurl_qq_2}
 end
 
 local github = setmetatable({
