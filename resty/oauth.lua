@@ -82,7 +82,7 @@ end
 local github = setmetatable({
         client_id = '35350283921fce581eb6', 
         client_secret = '75f3157ee95cd436b37ce484b9733beedcfcad66', 
-        redirect_uri = 'http://www.httper.cn/oauth2/git',  
+        redirect_uri = 'http://www.httper.cn/oauth2/github',  
         authorize_uri = 'https://github.com/login/oauth/authorize', 
         token_uri = 'https://github.com/login/oauth/access_token', 
         me_uri = 'https://api.github.com/user', 
