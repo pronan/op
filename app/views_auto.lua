@@ -235,10 +235,6 @@ function m.users( req, kw )
     end
     return render('users.html', {users=users})
 end
-function m.testa(req, kwargs)
-    local uri = require"resty.oauth".github.login_redirect_uri
-    return response.Redirect(uri)
-end
 function m.r(req, kwargs)
     return response.Plain(ngx.encode_args{a=1, b=2}..repr(ngx.decode_args'access_token=5A7E1A50ED8FF900A58BDBD283C0AE3D&expires_in=7776000&refresh_token=AA851E53744FA5CE43A24722B4FB78D1'))
 end

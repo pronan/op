@@ -86,6 +86,13 @@ function m.read_session(request, kwargs)
     local x = 1
     return repr(gmt(request.session).data)
 end
+local oauth2 = {
+    github = require"resty.oauth".github.login_redirect_uri, 
+    qq = require"resty.oauth".qq.login_redirect_uri, 
+}
+function m.oauth(req, kwargs)
+    return response.Redirect(oauth2[kwargs.name or 'qq'])
+end
 function m.qq(request, kwargs)
     local qq = require"resty.oauth".qq
     local code = request.GET.code
@@ -99,7 +106,6 @@ function m.github(request, kwargs)
     local code = request.GET.code
     local token = qq:get_access_token(code)
     local user = qq:get_user_info(token)
-    --local user = qq:get_user_info(openid, token)
-    return response.Plain(string.format('code:%s,\n token:%s,\n openid:%s', code, token, repr(user)))
+    return response.Plain(string.format('code:%s,\n token:%s,\n user:%s', code, token, repr(user)))
 end
 return m

@@ -75,8 +75,8 @@ function qq.get_user_info(self, openid, access_token)
     local uri = self.user_info_uri..'?'..encode_args{openid=openid, 
         access_token=access_token, oauth_consumer_key=self.client_id}
     local res, err = client:request_uri(uri, {ssl_verify = false})
-    --log('user info:', res, err)
-    return decode(res.body)
+    local info = decode(res.body)
+    return info --{'username':info.nickname, 'avatar':info.url}
 end
 
 local github = setmetatable({
@@ -86,7 +86,7 @@ local github = setmetatable({
         authorize_uri = 'https://github.com/login/oauth/authorize', 
         token_uri = 'https://github.com/login/oauth/access_token', 
         me_uri = 'https://api.github.com/user', 
-        user_info_uri = 'https://graph.qq.com/user/get_user_info', 
+        -- user_info_uri = 'https://graph.qq.com/user/get_user_info', 
     }, {__call=caller})
 function github.new(self, init)
     init = init or {}
@@ -113,7 +113,38 @@ function github.get_access_token(self, code)
     return body.access_token
 end
 -- "res:" {\\table: 0x40e26e30
---   "body"    : "{"login":"pronan","id":8246344,"avatar_url":"https://avatars.githubusercontent.com/u/8246344?v=3","gravatar_id":"","url":"https://api.github.com/users/pronan","html_url":"https://github.com/pronan","followers_url":"https://api.github.com/users/pronan/followers","following_url":"https://api.github.com/users/pronan/following{/other_user}","gists_url":"https://api.github.com/users/pronan/gists{/gist_id}","starred_url":"https://api.github.com/users/pronan/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/pronan/subscriptions","organizations_url":"https://api.github.com/users/pronan/orgs","repos_url":"https://api.github.com/users/pronan/repos","events_url":"https://api.github.com/users/pronan/events{/privacy}","received_events_url":"https://api.github.com/users/pronan/received_events","type":"User","site_admin":false,"name":"zhuanyenan","company":null,"blog":null,"location":"China","email":"280145668@qq.com","hireable":null,"bio":null,"public_repos":22,"public_gists":0,"followers":0,"following":0,"created_at":"2014-07-23T13:21:36Z","updated_at":"2016-07-06T01:01:25Z"}",
+     -- "body":{\\table: 0x40de7418
+     --          "avatar_url": "https://avatars.githubusercontent.com/u/8246344?v=3",
+     --          "bio"     : "userdata: NULL",
+     --          "blog"    : "userdata: NULL",
+     --          "company" : "userdata: NULL",
+     --          "created_at": "2014-07-23T13:21:36Z",
+     --          "email"   : "280145668@qq.com",
+     --          "events_url": "https://api.github.com/users/pronan/events{/privacy}",
+     --          "followers": 0,
+     --          "followers_url": "https://api.github.com/users/pronan/followers",
+     --          "following": 0,
+     --          "following_url": "https://api.github.com/users/pronan/following{/other_user}",
+     --          "gists_url": "https://api.github.com/users/pronan/gists{/gist_id}",
+     --          "gravatar_id": "",
+     --          "hireable": "userdata: NULL",
+     --          "html_url": "https://github.com/pronan",
+     --          "id"      : 8246344,
+     --          "location": "China",
+     --          "login"   : "pronan",
+     --          "name"    : "zhuanyenan",
+     --          "organizations_url": "https://api.github.com/users/pronan/orgs",
+     --          "public_gists": 0,
+     --          "public_repos": 22,
+     --          "received_events_url": "https://api.github.com/users/pronan/received_events",
+     --          "repos_url": "https://api.github.com/users/pronan/repos",
+     --          "site_admin": "false",
+     --          "starred_url": "https://api.github.com/users/pronan/starred{/owner}{/repo}",
+     --          "subscriptions_url": "https://api.github.com/users/pronan/subscriptions",
+     --          "type"    : "User",
+     --          "updated_at": "2016-07-22T09:35:22Z",
+     --          "url"     : "https://api.github.com/users/pronan",
+     --        }, 
 --   "body_reader": "function: 0x40e26de8",
 --   "has_body": "true",
 --   "headers" : {\\table: 0x40e24d08
@@ -165,7 +196,8 @@ function github.get_user_info(self, access_token)
     local client = http:new()
     local uri = self.me_uri..'?access_token='..access_token
     local res, err = client:request_uri(uri, {ssl_verify = false})
-    return decode(res.body)
+    local info = decode(res.body)
+    return {'username':info.name, 'avatar':info.avatar_url}
 end
 
 return {
