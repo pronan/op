@@ -197,7 +197,7 @@ function github.get_user_info(self, access_token)
     local uri = self.me_uri..'?access_token='..access_token
     local res, err = client:request_uri(uri, {ssl_verify = false})
     local info = decode(res.body)
-    return {'username':info.name, 'avatar':info.avatar_url}
+    return {username=info.name, avatar=info.avatar_url}
 end
 
 return {
