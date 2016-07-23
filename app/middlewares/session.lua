@@ -59,7 +59,7 @@ end
 local function after(req, kwargs)
     local proxy = getmetatable(req.session)
     if proxy.modified then
-        req.cookie:set{ key='session', value= encrypt_session(proxy.data, true), 
+        req.cookie:set{ key='session', value= encrypt_session(proxy.data, true), path='/', 
         	max_age = SESSION_EXPIRE_TIME, expires = http_time(time()+SESSION_EXPIRE_TIME), }
     end
 end
