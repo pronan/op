@@ -105,7 +105,7 @@ function m.qq(request, kwargs)
     local user = User:get{openid=openid}
     if not user then
         local data = qq:get_user_info(openid, token)
-        user = User:create{openid=openid, username=data.username, avatar=data.avatar}
+        user = User:create(data)
     end
     request.session.user = user
     return response.Redirect('/profile')
@@ -115,10 +115,10 @@ function m.github(request, kwargs)
     local qq = require"resty.oauth".github()
     local code = request.GET.code
     local token = qq:get_access_token(code)
-    local user = qq:get_user_info(token)
-    user = User:get{openid=user.openid}
+    local res = qq:get_user_info(token)
+    user = User:get{openid=res.openid}
     if not user then
-        user = User:create{openid=user.openid, username=user.username, avatar=user.avatar}
+        user = User:create(res)
     end
     request.session.user = user
     return response.Redirect('/profile')
