@@ -43,7 +43,7 @@ M.MIDDLEWARES = {
     "app.middlewares.post", 
     "app.middlewares.cookie", 
     "app.middlewares.session", 
-    "app.middlewares.messages", 
+    --"app.middlewares.messages", 
     "app.middlewares.auth", 
 }
 

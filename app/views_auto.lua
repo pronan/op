@@ -227,7 +227,7 @@ function m.init( kw )
     if not res then
         return nil, err
     else
-        return 'table is created'
+        return response.Plain'table is created'
     end
 end
 function m.users( req, kw )

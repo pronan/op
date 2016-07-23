@@ -10,6 +10,6 @@ return function(path, context)
     end
     context.req = ngx.req
     context.user = ngx.req.user
-    context.messages = ngx.req.messages
+    --context.messages = ngx.req.messages
     return compile(path)(context)
 end
