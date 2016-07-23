@@ -220,6 +220,8 @@ function m.init( kw )
 [[create table users(
     id serial primary key,
     username varchar(10), 
+    avatar varchar(200), 
+    openid varchar(64), 
     password varchar(30));]]
 )
     if not res then

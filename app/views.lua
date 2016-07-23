@@ -1,5 +1,6 @@
 local query = require"resty.model".RawQuery
 local response = require"resty.response"
+local User = require"app.models".User
 
 local m={}
 
@@ -101,8 +102,14 @@ function m.qq(request, kwargs)
     local code = request.GET.code
     local token = qq:get_access_token(code)
     local openid = qq:get_openid(token)
-    local user = qq:get_user_info(openid, token)
-    return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n openid:%s, \nuser:%s', repr(qq), code, token, openid, repr(user)))
+    local user = User:get{openid=openid}
+    if not user then
+        local data = qq:get_user_info(openid, token)
+        user = User:create{openid=openid, username=data.username, avatar=data.avatar}
+    end
+    request.session.user = user
+    return response.Template("home.html", {messages = {'成功通过qq登陆'}})
+    --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n openid:%s, \nuser:%s', repr(qq), code, token, openid, repr(user)))
 end
 function m.github(request, kwargs)
     local qq = require"resty.oauth".github()
