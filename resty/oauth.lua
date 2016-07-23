@@ -93,7 +93,7 @@ function qq.get_user_info(self, openid, access_token)
         access_token=access_token, oauth_consumer_key=self.client_id}
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local info = decode(res.body)
-    return {username=info.nickname, avatar=info.figureurl_qq_2}
+    return {username=info.nickname, avatar=info.figureurl_qq_2, openid=openid}
 end
 
 local github = setmetatable({
@@ -213,7 +213,7 @@ function github.get_user_info(self, access_token)
     local uri = self.me_uri..'?access_token='..access_token
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local info = decode(res.body)
-    return {username=info.name, avatar=info.avatar_url}
+    return {username=info.name, avatar=info.avatar_url, openid=tostring(info.id)}
 end
 
 return {

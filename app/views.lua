@@ -116,6 +116,12 @@ function m.github(request, kwargs)
     local code = request.GET.code
     local token = qq:get_access_token(code)
     local user = qq:get_user_info(token)
-    return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n user:%s', repr(qq), code, token, repr(user)))
+    user = User:get{openid=user.openid}
+    if not user then
+        user = User:create{openid=user.openid, username=user.username, avatar=user.avatar}
+    end
+    request.session.user = user
+    return response.Redirect('/profile')
+    --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n user:%s', repr(qq), code, token, repr(user)))
 end
 return m
