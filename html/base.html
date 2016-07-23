@@ -38,7 +38,7 @@
     {% if messages then %}
     <ul class="list-group">
       {% for i, message in ipairs(messages) do %}
-      <li class="list-group-item list-group-item-info">message</li>
+      <li class="list-group-item list-group-item-info">{{message}}</li>
       {% end %}
     </ul>
     {% end %}

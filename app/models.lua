@@ -5,6 +5,8 @@ _M.User = Model:new{table_name='users',
     fields = {
         {name = 'id' }, 
         {name = 'username'}, 
+        {name = 'avatar'}, 
+        {name = 'openid'}, 
         {name = 'password'}, 
     }, 
 }
