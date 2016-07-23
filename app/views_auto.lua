@@ -217,12 +217,14 @@ function m.init( kw )
         return nil, err
     end
     local res, err = query(
-[[create table users(
-    id serial primary key,
-    username varchar(10), 
-    avatar varchar(200), 
-    openid varchar(64), 
-    password varchar(30));]]
+    [[create table users
+    (
+        id serial primary key,
+        username varchar(10), 
+        avatar varchar(200), 
+        openid varchar(64), 
+        password varchar(30)
+    )default charset=utf8;]]
 )
     if not res then
         return nil, err
