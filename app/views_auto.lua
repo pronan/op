@@ -220,7 +220,7 @@ function m.init( kw )
     [[create table users
     (
         id serial primary key,
-        username varchar(10), 
+        username varchar(30), 
         avatar varchar(200), 
         openid varchar(64), 
         password varchar(30)
