@@ -93,7 +93,6 @@ function qq.get_user_info(self, openid, access_token)
         access_token=access_token, oauth_consumer_key=self.client_id}
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
     local info = decode(res.body)
-    log('len:', string.len(info.nickname), '#', #info.nickname)
     return {username=info.nickname, avatar=info.figureurl_qq_2, openid=openid}
 end
 
