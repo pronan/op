@@ -53,6 +53,7 @@ local function SessionProxy(data)
     return setmetatable({}, meta)
 end
 local function before(req, kwargs)
+    loger('before session:', req.cookie.session)
     req.session = SessionProxy(decrypt_session(req.cookie.session))
 end
 local function after(req, kwargs)
