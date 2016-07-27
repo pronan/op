@@ -24,7 +24,8 @@ local function simple_time_parser(t)
         assert(false)
     end
 end
-local EXPIRE_TIME = simple_time_parser(settings.EXPIRE_TIME or '30d')
+local EXPIRE_TIME = simple_time_parser(settings.COOKIE_EXPIRE_TIME or '30d')
+local COOKIE_PATH = '/'
 -- expire time set
 
 local EQUAL         = byte("=")
@@ -108,14 +109,15 @@ local function __newindex( t, k, v )
     if v == nil then
         v = {key=k, value='', max_age=0, expires='Thu, 01 Jan 1970 00:00:01 GMT'}
     elseif type(v) == 'string' then
-        v = {key=k, value=v, path='/', max_age=EXPIRE_TIME, expires=http_time(time()+EXPIRE_TIME)}  
+        v = {key=k, value=v, path=COOKIE_PATH, max_age=EXPIRE_TIME, expires=http_time(time()+EXPIRE_TIME)}  
     elseif v.key == nil then
         v.key = k   
     end
     rawset(t, k, v)
 end
 local function __call(self)
-    return setmetatable({}, {__index=setmetatable(get_cookie_table(ngx.var.http_cookie), self), __newindex=__newindex})
+    return setmetatable({}, {__newindex=__newindex, 
+        __index=setmetatable(get_cookie_table(ngx.var.http_cookie), self)})
 end
 
 local M = {}

@@ -107,9 +107,7 @@ function m.qq(request, kwargs)
         local data = qq:get_user_info(openid, token)
         user = User:create(data)
     end
-    loger('user:', user)
     request.session.user = user
-    loger('session:', getmetatable(request.session))
     return response.Redirect('/profile')
     --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n openid:%s, \nuser:%s', repr(qq), code, token, openid, repr(user)))
 end

@@ -35,7 +35,6 @@ local function encrypt_session(value)
     return value
 end
 local function decrypt_session(value)
-    loger('de:', value)
     if not value then 
         return {}
     end
@@ -43,7 +42,6 @@ local function decrypt_session(value)
         value= de(value)
         if not value then return {} end
     end
-    loger('de:', value)
     return value
 end
 local function SessionProxy(data)
