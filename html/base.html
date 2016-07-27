@@ -26,8 +26,7 @@
           <ul class="nav navbar-nav navbar-right">
             {%if user then%}
             <li{% if navbar=='profile' then%} class="active"{% end %}>
-            <img width="32" height="32" src="{{user.avatar}}" />
-            <a href="/profile">{{user.username}}的账号</a></li>
+            <a href="/profile"><img width="32" height="32" src="{{user.avatar}}" />{{user.username}}的账号</a></li>
             <li{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
             {%else%}
             <li{% if navbar=='login' then%} class="active"{% end %}><a href="/login">登陆</a></li>
