@@ -10,24 +10,6 @@ local log           = ngx.log
 local ERR           = ngx.ERR
 local WARN          = ngx.WARN
 local ngx_header    = ngx.header
-local time          = ngx.time
-local http_time     = ngx.http_time
-
-local settings = require"app.settings"
-
-local dd = {s=1, m=60, h=3600, d=3600*24, w=3600*24*7, M=3600*24*30, y=3600*24*365}
-
-local function simple_time_parser(t)
-    if type(t) == 'string' then
-        return tonumber(string.sub(t,1,-2)) * dd[string.sub(t,-1,-1)]
-    elseif type(t) == 'number' then
-        return t
-    else
-        assert(false)
-    end
-end
-
-local EXPIRE_TIME = simple_time_parser(settings.EXPIRE_TIME or '30d')
 
 local EQUAL         = byte("=")
 local SEMICOLON     = byte(";")
@@ -45,7 +27,18 @@ if not ok then
     clear_tab = function(tab) for k, _ in pairs(tab) do tab[k] = nil end end
 end
 
+local _M = new_tab(0, 2)
+
+_M._VERSION = '0.01'
+
+
 local function get_cookie_table(text_cookie)
+    if type(text_cookie) ~= "string" then
+        log(ERR, format("expect text_cookie to be \"string\" but found %s",
+                type(text_cookie)))
+        return {}
+    end
+
     local EXPECT_KEY    = 1
     local EXPECT_VALUE  = 2
     local EXPECT_SP     = 3
@@ -103,27 +96,37 @@ local function get_cookie_table(text_cookie)
 
     return cookie_table
 end
-local function _newk( t, k, v )
-    if v == nil then
-        v = {key=k, value='',max_age=0,expires='Thu, 01 Jan 1970 00:00:01 GMT'}
-    elseif type(v) == 'string' then
-        v = {key=k, value=v, path='/', max_age=EXPIRE_TIME,expires=http_time(time()+EXPIRE_TIME)}  
-    elseif v.key == nil then
-        v.key = k   
+
+function _M.new(self)
+    local _cookie = ngx.var.http_cookie
+    --if not _cookie then
+        --return nil, "no cookie found in current request"
+    --end
+    return setmetatable({ _cookie = _cookie, set_cookie_table = new_tab(4, 0) },
+        { __index = self })
+end
+
+function _M.get(self, key)
+    if not self._cookie then
+        return nil, "no cookie found in the current request"
     end
-    t[k] = v
+    if self.cookie_table == nil then
+        self.cookie_table = get_cookie_table(self._cookie)
+    end
+
+    return self.cookie_table[key]
 end
-local function _caller(self)
-    return setmetatable({}, setmetatable({__index=get_cookie_table(ngx.var.http_cookie), 
-        __newindex=_newk}, self))
-end
 
-local M = new_tab(0, 2)
+function _M.get_all(self)
+    if not self._cookie then
+        return nil, "no cookie found in the current request"
+    end
 
-setmetatable(M, {__index=M, __call=_caller})
+    if self.cookie_table == nil then
+        self.cookie_table = get_cookie_table(self._cookie)
+    end
 
-function M._origin(self)
-    return getmetatable(self).__index
+    return self.cookie_table
 end
 
 local function bake(cookie)
@@ -157,14 +160,16 @@ local function bake(cookie)
     return str
 end
 
-function M._set(self, cookie)
+function _M.set(self, cookie)
     local cookie_str, err = bake(cookie)
     if not cookie_str then
         return nil, err
     end
+
     local set_cookie = ngx_header['Set-Cookie']
     local set_cookie_type = type(set_cookie)
-    local t = {}
+    local t = self.set_cookie_table
+    clear_tab(t)
     if set_cookie_type == "string" then
         -- only one cookie has been setted
         if set_cookie ~= cookie_str then
@@ -194,10 +199,4 @@ function M._set(self, cookie)
     return true
 end
 
-function M._save(self)
-    for k, v in pairs(self) do
-        self:_set(v)
-    end
-end
-
-return M
+return _M

@@ -28,14 +28,14 @@ local decrypt_callbacks = {
     ndk.set_var.set_decrypt_session, 
     json.decode, 
 }
-local function encrypt_session(value, save)
+local function encrypt_session(value)
     for i, en in ipairs(encrypt_callbacks) do
         value = en(value)
         if not value then return nil end
     end
     return value
 end
-local function decrypt_session(value, save)
+local function decrypt_session(value)
     if not value then 
         return {}
     end
@@ -54,12 +54,12 @@ local function SessionProxy(data)
     return setmetatable({}, meta)
 end
 local function before(req, kwargs)
-    req.session = SessionProxy(decrypt_session(req.cookie:get('session')))
+    req.session = SessionProxy(decrypt_session(req.cookie.session))
 end
 local function after(req, kwargs)
     local proxy = getmetatable(req.session)
     if proxy.modified then
-        req.cookie:set{ key='session', value= encrypt_session(proxy.data, true), path='/', 
+        req.cookie:_set{ key='session', value= encrypt_session(proxy.data), path='/', 
         	max_age = SESSION_EXPIRE_TIME, expires = http_time(time()+SESSION_EXPIRE_TIME), }
     end
 end

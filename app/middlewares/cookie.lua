@@ -1,5 +1,7 @@
 local function before(req, kwargs)
-    req.cookie = require"resty.cookie":new()
+    req.cookie = require"resty.cookie"()
 end
-
-return { before = before}
+local function after(req, kwargs)
+    req.cookie:_save()
+end
+return { before = before, after = after}
