@@ -65,7 +65,7 @@ function m.edituser(req, kwargs)
     return response.Template("app/form.html", {form=form})
 end
 function m.logout(req, kwargs)
-    delete_session()
+    req.cookie.session = nil
     return response.Redirect("/")
 end
 function m.error(req, kwargs)
