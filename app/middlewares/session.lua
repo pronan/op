@@ -35,6 +35,7 @@ local function encrypt_session(value)
     return value
 end
 local function decrypt_session(value)
+    loger('de:', value)
     if not value then 
         return {}
     end
@@ -42,10 +43,10 @@ local function decrypt_session(value)
         value= de(value)
         if not value then return {} end
     end
+    loger('de:', value)
     return value
 end
 local function SessionProxy(data)
-    loger('session data:', data)
     local meta = {modified = false, __index = data}
     meta.__newindex = function(t, k, v) 
         data[k] = v  
@@ -57,6 +58,7 @@ local function before(req, kwargs)
     req.session = SessionProxy(decrypt_session(req.cookie.session))
 end
 local function after(req, kwargs)
+    --test
     local proxy = getmetatable(req.session)
     if proxy.modified then
         req.cookie.session = {value=encrypt_session(proxy.data), path=SESSION_PATH, 
