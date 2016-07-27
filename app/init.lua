@@ -12,7 +12,7 @@ local delimiter = ''
 for i=1,50 do
     delimiter = delimiter..'*'
 end
-function log(...)
+function loger(...)
     local res = {}
     for i,v in ipairs({...}) do
         res[i] = repr(v)

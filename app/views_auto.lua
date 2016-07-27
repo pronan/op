@@ -75,14 +75,8 @@ function m.profile(req, kwargs)
     return response.Template('profile.html', {})
 end
 function m.content(req, kwargs)
-    req.read_body()
-    local args, err = req.get_post_args()
-    -- for k,v in pairs(args) do
-    --     content = content..string.format('%s : %s<br/>', tostring(k), tostring(v)) 
-    -- end
-    local context = {sidebar = 'profile', navbar='guide', content = repr(ngx.req)}
-    --setmetatable(context, {req={user='xxn'}})
-    return response.Template("page.html", context)
+    req.cookie.sess = nil
+    return response.Plain('ok')
 end
 function m.editor(req, kwargs)
     return response.Template("editor.html", {sidebar = 'Profile'})
