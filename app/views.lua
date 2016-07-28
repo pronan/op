@@ -57,12 +57,12 @@ local json = require "cjson.safe"
 
 function m.session(request, kwargs)
     --ngx.header.content_type = 'text/plain; charset=utf-8'
-    local cookie = request.cookie
+    local cookies = request.cookies
     local session = request.session
-    -- cookie:set{key='a', value='1'}
-    -- cookie:set{key='b', value='2'}
-    -- cookie:set{key='c', value='3'}
-    -- cookie:set{key='d', value='4'}
+    -- cookies:set{key='a', value='1'}
+    -- cookies:set{key='b', value='2'}
+    -- cookies:set{key='c', value='3'}
+    -- cookies:set{key='d', value='4'}
     session.ui = 123
     return repr(gmt(request.session).data)
 end
@@ -78,7 +78,7 @@ function m.check(request, kwargs)
     ngx.header.content_type = 'text/plain; charset=utf-8'
     ngx.header['Set-Cookie'] = {'c=2; Domain=.baidu.com', 'b=; expires=Thu, 01 Jan 1970 00:00:00 GMT'}
     --ngx.header['Set-Cookie'] = 
-    res.cookie = headers["Cookie"]
+    res.cookies = headers["Cookie"]
     res.session = session
     res.c = gmt(ngx.var)
     return repr(res)

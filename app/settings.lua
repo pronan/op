@@ -40,11 +40,11 @@ M.OAUTH2 = {
     }, 
 }
 M.MIDDLEWARES = {
-    "app.middlewares.post", 
-    "app.middlewares.cookie", 
-    "app.middlewares.session", 
-    --"app.middlewares.messages", 
-    "app.middlewares.auth", 
+    "middlewares.post", 
+    "middlewares.cookie", 
+    "middlewares.session", 
+    --"middlewares.messages", 
+    "middlewares.auth", 
 }
 
 M.SESSION_EXPIRE_TIME = '30d' -- should be no less than the value of directive `encrypted_session_expires`

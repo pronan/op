@@ -11,12 +11,9 @@ local function render(path, context)
         end
     end
     context.req = ngx.req
-    local user = ngx.req.user
-    context.user = user
-    context.username = user and user.username or '游客'
+    context.user = ngx.req.user
     return compile(path)(context)
 end
-
 
 local M = {}
 function M.new(self, init)

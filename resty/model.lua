@@ -1,36 +1,9 @@
 local DATABASES = require"app.settings".DATABASES
+local copy = require"utils.base".copy
+local update = require"utils.base".update
+local extend = require"utils.base".extend
+local caller = require"utils.base".caller
 
---helper functions
-local function copy(old)
-    local res = {};
-    for i,v in pairs(old) do
-        if type(v) == "table" and v ~= old then
-            res[i] = copy(v)
-        else
-            res[i] = v;
-        end
-    end
-    return res;
-end
-local function update(self, other)
-    for i,v in pairs(other) do
-        if type(v) == "table" then
-            self[i] = copy(v);
-        else
-            self[i] = v;
-        end
-    end
-    return self
-end
-local function extend(self, other)
-    for i,v in ipairs(other) do
-        self[#self+1] = v
-    end
-    return self
-end
-local function caller(t, opts) 
-    return t:new(opts):initialize() 
-end
 local function execer(t) return t:exec() end
 
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}

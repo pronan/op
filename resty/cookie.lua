@@ -10,23 +10,6 @@ local log           = ngx.log
 local ERR           = ngx.ERR
 local WARN          = ngx.WARN
 local ngx_header    = ngx.header
--- expire time set
-local time          = ngx.time
-local http_time     = ngx.http_time
-local settings = require"app.settings"
-local dd = {s=1, m=60, h=3600, d=3600*24, w=3600*24*7, M=3600*24*30, y=3600*24*365}
-local function simple_time_parser(t)
-    if type(t) == 'string' then
-        return tonumber(string.sub(t,1,-2)) * dd[string.sub(t,-1,-1)]
-    elseif type(t) == 'number' then
-        return t
-    else
-        assert(false)
-    end
-end
-local EXPIRE_TIME = simple_time_parser(settings.COOKIE_EXPIRE_TIME or '30d')
-local COOKIE_PATH = '/'
--- expire time set
 
 local EQUAL         = byte("=")
 local SEMICOLON     = byte(";")
@@ -39,12 +22,9 @@ if not ok then
     new_tab = function () return {} end
 end
 
-local ok, clear_tab = pcall(require, "table.clear")
-if not ok then
-    clear_tab = function(tab) for k, _ in pairs(tab) do tab[k] = nil end end
-end
+local M = {}
 
-local function get_cookie_table(text_cookie)
+function M.get_cookie_table(text_cookie)
     if text_cookie == nil then
         return {}
     end
@@ -105,28 +85,20 @@ local function get_cookie_table(text_cookie)
 
     return cookie_table
 end
+
 local function __newindex( t, k, v )
     if v == nil then
-        v = {key=k, value='', max_age=0, expires='Thu, 01 Jan 1970 00:00:01 GMT'}
-    elseif type(v) == 'string' then
-        v = {key=k, value=v, path=COOKIE_PATH, max_age=EXPIRE_TIME, expires=http_time(time()+EXPIRE_TIME)}  
-    elseif v.key == nil then
-        v.key = k   
+        v = {key=k, value='', max_age=0, expires='Thu, 01 Jan 1970 00:00:01 GMT'} 
     end
     rawset(t, k, v)
 end
-local function __call(self)
+
+function M.new()
     return setmetatable({}, {__newindex=__newindex, 
-        __index=setmetatable(get_cookie_table(ngx.var.http_cookie), self)})
+        __index=M.get_cookie_table(ngx.var.http_cookie)})
 end
 
-local M = {}
-
-setmetatable(M, {__call=__call})
-
-M.__index = M
-
-local function bake(cookie)
+function M.bake(cookie)
     if not cookie.key or not cookie.value then
         return nil, 'missing cookie field "key" or "value"'
     end
@@ -157,8 +129,8 @@ local function bake(cookie)
     return str
 end
 
-local function set_cookie(cookie)
-    local cookie_str, err = bake(cookie)
+function M.set_cookie(cookie)
+    local cookie_str, err = M.bake(cookie)
     if not cookie_str then
         return nil, err
     end
@@ -192,12 +164,6 @@ local function set_cookie(cookie)
         ngx_header['Set-Cookie'] = cookie_str
     end
     return true
-end
-
-function M._save(self)
-    for k, v in pairs(self) do
-        set_cookie(v)
-    end
 end
 
 return M

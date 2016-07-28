@@ -43,7 +43,7 @@ http {
         }
 
         location /static { 
-            root static;
+            alias static;
         }
         location /loaderio-933b610b316e7b9c7bf409839db1d611.txt { 
             alias loaderio-933b610b316e7b9c7bf409839db1d611.txt;

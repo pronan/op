@@ -1,14 +1,15 @@
 local urls = require"app.urls"
-local _middlewares = require"app.settings".MIDDLEWARES
+local map = require"utils.base".map
 local match = ngx.re.match
 local uri = ngx.var.uri
+
 local MIDDLEWARES = map(function(k)
     if type(k) == 'string' then
         return require(k)
     else
         return k
     end
-end, _middlewares)
+end, require"app.settings".MIDDLEWARES)
 
 for regex, func in pairs(urls) do
     local kwargs, err = match(uri, regex)

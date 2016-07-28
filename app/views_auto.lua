@@ -1,5 +1,4 @@
 local query = require"resty.model".RawQuery
-local render = require"resty.render"
 local response = require"resty.response"
 local User = require"app.models".User
 local forms = require"app.forms"
@@ -65,7 +64,7 @@ function m.edituser(req, kwargs)
     return response.Template("app/form.html", {form=form})
 end
 function m.logout(req, kwargs)
-    req.cookie.session = nil
+    req.cookies.session = nil
     return response.Redirect("/")
 end
 function m.error(req, kwargs)
@@ -75,7 +74,7 @@ function m.profile(req, kwargs)
     return response.Template('profile.html', {})
 end
 function m.content(req, kwargs)
-    req.cookie.sess = nil
+    req.cookies.sess = nil
     return response.Plain('ok')
 end
 function m.editor(req, kwargs)
