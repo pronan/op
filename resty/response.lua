@@ -10,8 +10,10 @@ local function render(path, context)
             context[k] = v
         end
     end
-    context.req = ngx.req
-    context.user = ngx.req.user
+    local req = ngx.req
+    context.req = req
+    context.user = req.user
+    context.messages = req.messages
     return compile(path)(context)
 end
 

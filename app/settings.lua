@@ -26,24 +26,11 @@ M.DATABASES ={
     }
 }
 
-M.OAUTH2 = {
-    qq = {
-        client_id = '101337042', 
-        client_secret = '46310704a4a3295844bf397dd7a3807f', 
-        redirect_uri = 'http://www.httper.cn/oauth2/qq',  
-
-    }, 
-    github = {
-        id = '35350283921fce581eb6', 
-        key = '75f3157ee95cd436b37ce484b9733beedcfcad66',
-        redirect_uri = 'http://www.httper.cn/oauth2/git',  
-    }, 
-}
 M.MIDDLEWARES = {
     "middlewares.post", 
     "middlewares.cookie", 
     "middlewares.session", 
-    --"middlewares.messages", 
+    "middlewares.messages", 
     "middlewares.auth", 
 }
 
