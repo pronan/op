@@ -35,6 +35,7 @@ local function decrypt_session(value)
     return value
 end
 local function SessionProxy(data)
+    loger('session:', data)
     local meta = {modified = false, __index = data}
     meta.__newindex = function(t, k, v) 
         data[k] = v  
