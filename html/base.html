@@ -43,6 +43,9 @@
       {% end %}
     </ul>
     {% end %}
+    {% if message then %}
+      <div class="alert alert-success" role="alert" style="text-align:center">{{message}}</div>
+    {% end %}
     <div id='main'>{* blocks.main *}</div>
 
     <nav class="navbar navbar-default">

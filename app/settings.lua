@@ -31,6 +31,7 @@ M.MIDDLEWARES = {
     "middlewares.cookie", 
     "middlewares.session", 
     "middlewares.messages", 
+    "middlewares.message", 
     "middlewares.auth", 
 }
 

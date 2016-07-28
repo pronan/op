@@ -66,7 +66,8 @@ function m.edituser(req, kwargs)
 end
 function m.logout(req, kwargs)
     req.session.user = nil
-    req.session.messages = {'您已退出'}
+    --req.session.messages = {'您已退出'}
+    req.cookies.message = '您已退出, baby.'
     return response.Redirect("/")
 end
 function m.error(req, kwargs)

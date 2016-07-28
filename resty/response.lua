@@ -14,6 +14,7 @@ local function render(path, context)
     context.req = req
     context.user = req.user
     context.messages = req.messages
+    context.message = req.message
     return compile(path)(context)
 end
 
