@@ -31,7 +31,7 @@ function m.login(req, kwargs)
         form = forms.LoginForm{data=req.POST}
         if form:is_valid() then
             req.session.user=form.user
-            req.cookies.messages = {'登陆成功'}
+            req.session.messages = {'登陆成功'}
             return response.Redirect('/profile')
         end
     else
@@ -64,7 +64,8 @@ function m.edituser(req, kwargs)
     return response.Template("app/form.html", {form=form})
 end
 function m.logout(req, kwargs)
-    req.cookies.session = nil
+    req.session.user = nil
+    req.session.messages = {'您已退出'}
     return response.Redirect("/")
 end
 function m.error(req, kwargs)
@@ -74,7 +75,7 @@ function m.profile(req, kwargs)
     return response.Template('profile.html', {})
 end
 function m.content(req, kwargs)
-    req.cookies.sess = nil
+    req.session.messages = {'hello messages!'}
     return response.Plain('ok')
 end
 function m.editor(req, kwargs)
