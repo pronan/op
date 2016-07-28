@@ -35,7 +35,6 @@ local function decrypt_session(value)
     return value
 end
 local function SessionProxy(data)
-    loger('session:', data)
     local meta = {modified = false, __index = data}
     meta.__newindex = function(t, k, v) 
         data[k] = v  
@@ -47,11 +46,15 @@ local function before(req, kwargs)
     req.session = SessionProxy(decrypt_session(req.cookies.session))
 end
 local function after(req, kwargs)
-    --test
     local proxy = getmetatable(req.session)
     if proxy.modified then
-        req.cookies.session = {value=encrypt_session(proxy.__index), path=SESSION_PATH, 
-            max_age=SESSION_EXPIRE_TIME, expires=http_time(time()+SESSION_EXPIRE_TIME)}
+        local data = proxy.__index
+        if next(data) == nil then
+            req.cookies.session = nil
+        else
+            req.cookies.session = {value=encrypt_session(data), path=SESSION_PATH, 
+                max_age=SESSION_EXPIRE_TIME, expires=http_time(time()+SESSION_EXPIRE_TIME)}
+        end
     end
 end
 
