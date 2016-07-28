@@ -1,11 +1,10 @@
 local function before(req, kwargs)
-    assert(not req.messages)
-    req.messages = req.session.messages
+    req.messages = req.cookie.messages
 end
 
 local function after(req, kwargs)
     if req.messages then
-        req.session.messages = nil
+        req.cookie.messages = nil
     end
 end
 return { before=before, after=after}

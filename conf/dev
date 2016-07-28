@@ -33,25 +33,17 @@ http {
             resolver 8.8.8.8;
             content_by_lua_file app/main.lua;
         }
+
         location = /test {
             content_by_lua_file app/test/main.lua;
         }
 
         location = /favicon.ico {
-            root html/static/images;
+            root static/images;
         }
 
-        location /css { 
-            root html/static;
-        }
-        location /js { 
-            root html/static;
-        }
-        location /images { 
-            root html/static;
-        }
-        location /files { 
-            root html/static;
+        location /static { 
+            root static;
         }
         location /loaderio-933b610b316e7b9c7bf409839db1d611.txt { 
             alias loaderio-933b610b316e7b9c7bf409839db1d611.txt;
