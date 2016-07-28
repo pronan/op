@@ -15,6 +15,7 @@ function m.register(req, kwargs)
             local cd=form.cleaned_data
             local user=User{username=cd.username, password=cd.password}:save()
             req.session.user=user
+            req.session.messages = {'恭喜您, 注册成功!'}
             return response.Redirect('/profile')
         end
     else
@@ -31,7 +32,7 @@ function m.login(req, kwargs)
         form = forms.LoginForm{data=req.POST}
         if form:is_valid() then
             req.session.user=form.user
-            req.session.messages = {'登陆成功'}
+            req.session.messages = {'欢迎您, '..form.user.username}
             return response.Redirect('/profile')
         end
     else
