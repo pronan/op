@@ -31,7 +31,7 @@ http {
         include mime.types;
 
         location / {
-            resolver 233.5.5.5;
+            resolver 223.5.5.5;
             content_by_lua_block {
                 require"main"()
             }

@@ -1,6 +1,7 @@
 local urls = require"urls"
 local map = require"utils".map
 local settings = require"settings"
+local ErrorResponse = require"resty.response".Error
 local match = ngx.re.match
 local MIDDLEWARES = settings.MIDDLEWARES
 local MIDDLEWARES_REVERSED = settings.MIDDLEWARES_REVERSED
@@ -40,7 +41,8 @@ return function()
 
             if not response then
                 ngx.log(ngx.ERR, err)
-                return ngx.exit(500)
+                --return ngx.exit(500)
+                return ErrorResponse(err):exec()
             else
                 return response:exec()
             end
