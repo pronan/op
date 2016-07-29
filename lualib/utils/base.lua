@@ -4,21 +4,13 @@ end
 local function copy(old)
     local res = {}
     for i, v in pairs(old) do
-        if type(v) == "table" and v ~= old then
-            res[i] = copy(v)
-        else
-            res[i] = v
-        end
+        res[i] = v
     end
     return res
 end
 local function update(self, other)
     for i, v in pairs(other) do
-        if type(v) == "table" then
-            self[i] = copy(v)
-        else
-            self[i] = v
-        end
+        self[i] = v
     end
     return self
 end

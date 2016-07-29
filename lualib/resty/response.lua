@@ -3,24 +3,10 @@ local encode = require "cjson.safe".encode
 
 local GLOBAL_CONTEXT = {pjl='大肥白嫩'}
 
-local function render(path, context)
-    context=context or {}
-    for k, v in pairs(GLOBAL_CONTEXT) do
-        if context[k] == nil then
-            context[k] = v
-        end
-    end
-    local req = ngx.req
-    context.req = req
-    context.user = req.user
-    context.messages = req.messages
-    --context.message = req.message
-    return compile(path)(context)
-end
 
 local update = require"utils".update
 
-local function render2(path, context)
+local function render(path, context)
     local res = {}
     update(res, GLOBAL_CONTEXT)
     local req = ngx.req
