@@ -11,6 +11,6 @@
 </head>
 <body>
 <h1>{{message}}</h1>
-<h2><a href="{*ngx.var.uri*}">返回</a></h2>
+<h2><a href="{*req.get_headers().referer*}">返回</a></h2>
 </body>
 </html>
