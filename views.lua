@@ -43,7 +43,7 @@ function m.inspect(kw)
     sprint_table(ngx.ctx)
 end
 function m.global(request, kwargs)
-    return response.Plain(repr(gmt(_G).__index))
+    return response.Plain(repr(getmetatable(_G).__index))
 end
 function m.models(req,kw)
     local name=kw.name or 'users'
@@ -64,11 +64,11 @@ function m.session(request, kwargs)
     -- cookies:set{key='c', value='3'}
     -- cookies:set{key='d', value='4'}
     session.ui = 123
-    return repr(gmt(request.session).data)
+    return repr(getmetatable(request.session).data)
 end
 function m.read_session(request, kwargs)
     local x = 1
-    return repr(gmt(request.session).data)
+    return repr(getmetatable(request.session).data)
 end
 function m.check(request, kwargs)
     --local session = require "resty.session".open()
@@ -80,12 +80,12 @@ function m.check(request, kwargs)
     --ngx.header['Set-Cookie'] = 
     res.cookies = headers["Cookie"]
     res.session = session
-    res.c = gmt(ngx.var)
+    res.c = getmetatable(ngx.var)
     return repr(res)
 end
 function m.read_session(request, kwargs)
     local x = 1
-    return repr(gmt(request.session).data)
+    return repr(getmetatable(request.session).data)
 end
 local oauth2 = {
     github = require"resty.oauth".github.login_redirect_uri, 
