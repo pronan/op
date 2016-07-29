@@ -44,7 +44,6 @@ local function before(req, kwargs)
     req.session = SessionProxy(decrypt_session(req.cookies.session))
 end
 local function after(req, kwargs)
-    loger('SESSION_EXPIRES:', SESSION_EXPIRES)
     local proxy = getmetatable(req.session)
     if proxy.modified then
         local data = proxy.__index
