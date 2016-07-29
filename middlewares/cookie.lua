@@ -3,11 +3,8 @@ local cookie_bake = require"resty.cookie".bake
 -- expire time set
 local time          = ngx.time
 local http_time     = ngx.http_time
-local simple_time_parser  =  require"utils.base".simple_time_parser
-local settings = require"app.settings"
-local COOKIE_EXPIRE_TIME = simple_time_parser(settings.COOKIE_EXPIRE_TIME or '30d')
-local COOKIE_PATH = '/'
--- expire time set
+local COOKIE_PATH = require"settings".COOKIE.path
+local COOKIE_EXPIRES = require"settings".COOKIE.expires
 
 local function before(req, kwargs)
     req.cookies = cookie_new()
@@ -18,13 +15,14 @@ local function after(req, kwargs)
     for k, v in pairs(req.cookies) do
         -- assume type(v) is string or table
         if type(v) == 'string' then
-            v = {key=k, value=v, path=COOKIE_PATH, max_age=COOKIE_EXPIRE_TIME, 
-                expires=http_time(time()+COOKIE_EXPIRE_TIME)}  
+            v = {key=k, value=v, path=COOKIE_PATH, max_age=COOKIE_EXPIRES, 
+                expires=http_time(time()+COOKIE_EXPIRES)}  
         elseif v.key == nil then
             v.key = k  
         end
         cookies[#cookies+1] = cookie_bake(v)
     end
+    -- assume no cookie has been set before
     ngx.header['Set-Cookie'] = cookies 
 end
 

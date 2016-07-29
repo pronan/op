@@ -1,4 +1,4 @@
-local DATABASES = require"app.settings".DATABASES
+local DATABASES = require"settings".DATABASES
 local copy = require"utils.base".copy
 local update = require"utils.base".update
 local extend = require"utils.base".extend

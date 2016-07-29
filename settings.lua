@@ -1,5 +1,8 @@
 
 local M = {}
+M.APPS = {
+    
+}
 
 M.DATABASES ={
     default = {
@@ -31,10 +34,13 @@ M.MIDDLEWARES = {
     "middlewares.cookie", 
     "middlewares.session", 
     "middlewares.messages", 
-    "middlewares.message", 
     "middlewares.auth", 
 }
 
-M.SESSION_EXPIRE_TIME = '30d' -- should be no less than the value of directive `encrypted_session_expires`
+-- value will be normalized by init.lua
+M.COOKIE  = {expires = '30d', path = '/'}
+-- SESSION.expires should be no less than the value of directive `encrypted_session_expires`
+M.SESSION = {expires = '30d', path = '/'}
+ 
 
 return M

@@ -1,7 +1,8 @@
 local query = require"resty.model".RawQuery
 local response = require"resty.response"
-local User = require"app.models".User
-local forms = require"app.forms"
+local User = require"models".User
+local forms = require"forms"
+
 
 local m={}
 function m.register(req, kwargs)
@@ -78,7 +79,7 @@ function m.profile(req, kwargs)
 end
 function m.content(req, kwargs)
     req.session.messages = {'hello messages!'}
-    return response.Plain('ok')
+    return response.Plain(package.path)
 end
 function m.editor(req, kwargs)
     return response.Template("editor.html", {sidebar = 'Profile'})
@@ -139,7 +140,7 @@ jasygl.cn ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAA
 end
 
 function m.sql(kwargs)
-    local u = require"app.models".User
+    local u = require"models".User
     -- for i,v in ipairs(-u:where{id=1}) do
     --     v.name = 'wwwwwwwwwwwww'
     --     v:save()
@@ -194,7 +195,7 @@ function m.sql(kwargs)
 end
 function m.json(kwargs)
     ngx.header.content_type = 'application/json';
-    local u = require"app.models".User
+    local u = require"models".User
     local users = u:where{name='yao'}:to_sql()
     say(encode{res=users}) 
 end

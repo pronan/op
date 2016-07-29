@@ -1,7 +1,7 @@
 local Form = require"resty.form"
 local Field = require"resty.field".BootstrapFields
 local validator = require"resty.validator"
-local User = require"app.models".User
+local User = require"models".User
 
 local M = {}
 M.UserForm = Form:create{
@@ -51,11 +51,11 @@ M.BlogForm = Form:create{
 }
 M.TestForm = Form:create{
     fields = {
-        title = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致'},    
+        title = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致', required=false},    
         --content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  
         --class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
         --sex = Field.RadioField{"性别", choices={'男','女'}},   
-        content = Field.FileField{'内容', upload_to='html/static/files/', help_text='请上传公告文档'}, 
+        content = Field.FileField{'内容', upload_to='static/files/', help_text='请上传公告文档', required=false}, 
     }, 
     
 }

@@ -1,6 +1,6 @@
 local query = require"resty.model".RawQuery
 local response = require"resty.response"
-local User = require"app.models".User
+local User = require"models".User
 
 local m={}
 

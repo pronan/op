@@ -29,6 +29,18 @@ function m.extend(self, other)
     end
     return self
 end
+function m.list(func)
+    local res = {}
+    while true do
+        local e = func()
+        if e ~= nil then
+            res[#res+1] = e
+        else
+            break
+        end
+    end
+    return res
+end
 local function default_map(...)
     return {...}
 end

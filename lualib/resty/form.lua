@@ -67,7 +67,7 @@ function M.render(self)
         local field = self.fields[name]
         local errors_string = ''
         if self.errors and self.errors[name] then
-            errors_string = table.concat(helper.map(function(k)
+            errors_string = table.concat(utils.map(function(k)
                 return'<li>'..k..'</li>'end, self.errors[name]), "\n" )
             errors_string = string.format(self.error_template, errors_string)
         end

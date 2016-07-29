@@ -1,5 +1,5 @@
-local views = require"app.views"
-local views_auto = require"app.views_auto"
+local views = require"views"
+local views_auto = require"views_auto"
 local sub = string.sub
 
 local urlpatterns = {}

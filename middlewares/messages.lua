@@ -1,5 +1,3 @@
-local decode = require"cjson.safe".decode
-
 local function before(req, kwargs)
     req.messages = req.session.messages
 end

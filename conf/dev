@@ -5,13 +5,13 @@ pid logs/nginx.pid;
 events {worker_connections  1024;}
 
 http {
+    #lua_code_cache off;
     default_type  "text/html; charset=utf-8";
     #access_log  off;
     sendfile        on;
     keepalive_timeout  65;
-    lua_code_cache off;
     #autoindex on;
-    init_by_lua_file app/init.lua;
+    init_by_lua_file init.lua;
 
     client_body_temp_path temp/client_body_temp;
     fastcgi_temp_path temp/fastcgi_temp;
@@ -31,11 +31,11 @@ http {
 
         location / {
             resolver 8.8.8.8;
-            content_by_lua_file app/main.lua;
+            content_by_lua 'require"main"()';
         }
 
         location = /test {
-            content_by_lua_file app/test/main.lua;
+            content_by_lua_file test/main.lua;
         }
 
         location = /favicon.ico {

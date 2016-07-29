@@ -1,11 +1,9 @@
 local json = require "cjson.safe"
 local tonumber = tonumber
-local settings = require"app.settings"
 local time         = ngx.time
 local http_time    = ngx.http_time
-local simple_time_parser  =  require"utils.base".simple_time_parser
-local SESSION_EXPIRE_TIME = simple_time_parser(settings.SESSION_EXPIRE_TIME or '30d')
-local SESSION_PATH = '/'
+local SESSION_PATH = require"settings".SESSION.path
+local SESSION_EXPIRES = require"settings".SESSION.expires
 
 local encrypt_callbacks = {
     json.encode, 
@@ -53,7 +51,7 @@ local function after(req, kwargs)
             req.cookies.session = nil
         else
             req.cookies.session = {value=encrypt_session(data), path=SESSION_PATH, 
-                max_age=SESSION_EXPIRE_TIME, expires=http_time(time()+SESSION_EXPIRE_TIME)}
+                max_age=SESSION_EXPIRES, expires=http_time(time()+SESSION_EXPIRES)}
         end
     end
 end
