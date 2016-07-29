@@ -1,14 +1,9 @@
 local urls = require"urls"
 local map = require"utils".map
+local settings = require"settings"
 local match = ngx.re.match
-local MIDDLEWARES = map(function(k)
-    if type(k) == 'string' then
-        return require(k)
-    else
-        return k
-    end
-end, require"settings".MIDDLEWARES)
-
+local MIDDLEWARES = settings.MIDDLEWARES
+local MIDDLEWARES_REVERSED = settings.MIDDLEWARES_REVERSED
 
 return function()
     local uri = ngx.var.uri
@@ -31,8 +26,7 @@ return function()
 
             local response, err = func(req, kwargs)
 
-            for i=#MIDDLEWARES, 1, -1 do
-                local ware = MIDDLEWARES[i]
+            for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then
                     local err, ok = ware.after(req, kwargs)
                     if err then
