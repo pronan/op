@@ -9,8 +9,10 @@ local function caller(t, opts)
 end
 
 local qq = setmetatable({
-        client_id = '1105574772', 
-        client_secret = 'n6CwihTrv68bJkcz', 
+        -- client_id = '1105574772', 
+        -- client_secret = 'n6CwihTrv68bJkcz', 
+        client_id = '101337042', 
+        client_secret = '46310704a4a3295844bf397dd7a3807f', 
         redirect_uri = 'http://www.httper.cn/oauth2/qq',  
         authorize_uri = 'https://graph.qq.com/oauth2.0/authorize', 
         token_uri = 'https://graph.qq.com/oauth2.0/token', 
