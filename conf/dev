@@ -30,12 +30,14 @@ http {
         include mime.types;
 
         location / {
-            resolver 8.8.8.8;
-            content_by_lua 'require"main"()';
+            resolver 233.5.5.5;
+            content_by_lua_block {
+                require"main"()
+            }
         }
 
-        location = /test {
-            content_by_lua_file test/main.lua;
+        location = /exec {
+            content_by_lua_file exec.lua;
         }
 
         location = /favicon.ico {
