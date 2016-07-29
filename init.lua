@@ -15,7 +15,7 @@ for k,v in pairs(settings) do
 		        m = require(m)
 		    end
 		    MIDDLEWARES[i] = m
-		    MIDDLEWARES_REVERSED[len-i] = m
+		    MIDDLEWARES_REVERSED[len-i+1] = m
     	end
     	settings.MIDDLEWARES = MIDDLEWARES
     	settings.MIDDLEWARES_REVERSED = MIDDLEWARES_REVERSED
