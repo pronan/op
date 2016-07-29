@@ -1,8 +1,7 @@
-local m = {}
-function m.caller(t, opts) 
+local function caller(t, opts) 
     return t:new(opts):initialize() 
 end
-function m.copy(old)
+local function copy(old)
     local res = {}
     for i, v in pairs(old) do
         if type(v) == "table" and v ~= old then
@@ -13,7 +12,7 @@ function m.copy(old)
     end
     return res
 end
-function m.update(self, other)
+local function update(self, other)
     for i, v in pairs(other) do
         if type(v) == "table" then
             self[i] = copy(v)
@@ -23,13 +22,13 @@ function m.update(self, other)
     end
     return self
 end
-function m.extend(self, other)
+local function extend(self, other)
     for i, v in ipairs(other) do
         self[#self+1] = v
     end
     return self
 end
-function m.list(func)
+local function list(func)
     local res = {}
     while true do
         local e = func()
@@ -44,14 +43,14 @@ end
 local function default_map(...)
     return {...}
 end
-function m.map(func, tbl)
+local function map(func, tbl)
     local res = {}
     for i=1, #tbl do
         res[i] = func(tbl[i])
     end
     return res
 end
-function m.filter(func, seq)
+local function filter(func, seq)
     local res = {}
     for i, v in ipairs(seq) do
         if func(v)  == true then
@@ -60,7 +59,7 @@ function m.filter(func, seq)
     end
     return res
 end
-function m.xmap(func, ...)
+local function xmap(func, ...)
     func = func or default_map
     local res = {}
     local seqs = {...}
@@ -73,7 +72,7 @@ function m.xmap(func, ...)
     end
     return res
 end
-function m.zfill(s, n, c) 
+local function zfill(s, n, c) 
     local len = string.len(s)
     n = n or len
     c = c or ' '
@@ -84,7 +83,7 @@ function m.zfill(s, n, c)
 end
 
 local dd = {s=1, m=60, h=3600, d=3600*24, w=3600*24*7, M=3600*24*30, y=3600*24*365}
-function m.simple_time_parser(t)
+local function simple_time_parser(t)
     if type(t) == 'string' then
         return tonumber(string.sub(t,1,-2)) * dd[string.sub(t,-1,-1)]
     elseif type(t) == 'number' then
@@ -93,4 +92,7 @@ function m.simple_time_parser(t)
         assert(false)
     end
 end
-return m
+return {
+    caller = caller, extend=extend, update=update, list=list, copy=copy, 
+    map = map, xmap=xmap, zfill=zfill, simple_time_parser=simple_time_parser, 
+}

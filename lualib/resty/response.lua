@@ -14,8 +14,23 @@ local function render(path, context)
     context.req = req
     context.user = req.user
     context.messages = req.messages
-    context.message = req.message
+    --context.message = req.message
     return compile(path)(context)
+end
+
+local update = require"utils".update
+
+local function render2(path, context)
+    local res = {}
+    update(res, GLOBAL_CONTEXT)
+    local req = ngx.req
+    res.req = req
+    res.user = req.user
+    res.messages = req.messages
+    if context then
+        update(res, context)
+    end
+    return compile(path)(res)
 end
 
 local M = {}
