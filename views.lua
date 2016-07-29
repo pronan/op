@@ -19,6 +19,16 @@ function m.models(req,kw)
     end
     return response.Template('users.html', {users=res})
 end
+local oauth2 = {
+    github = require"resty.oauth".github.login_redirect_uri, 
+    qq = require"resty.oauth".qq.login_redirect_uri, 
+}
+function m.oauth(req, kwargs)
+    if req.user then
+        return response.Redirect('/profile')
+    end
+    return response.Redirect(oauth2[kwargs.name or 'qq'])
+end
 function m.qq(request, kwargs)
     local qq = require"resty.oauth".qq()
     local code = request.GET.code
