@@ -59,6 +59,9 @@ function qq.get_access_token(self, code)
         client_id=self.client_id, client_secret=self.client_secret, 
         code=code, redirect_uri=self.redirect_uri}
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
+    if not res then
+        return nil, err
+    end
     local body = decode_args(res.body)
     return body.access_token
 end
@@ -66,6 +69,9 @@ end
 function qq.get_openid(self, access_token)
     local uri = self.me_uri..'?access_token='..access_token
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
+    if not res then
+        return nil, err
+    end
     local openid = match(res.body, [["openid":"(.+?)"]])[1]
     --log('openid', openid)
     return openid
@@ -94,6 +100,9 @@ function qq.get_user_info(self, openid, access_token)
     local uri = self.user_info_uri..'?'..encode_args{openid=openid, 
         access_token=access_token, oauth_consumer_key=self.client_id}
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
+    if not res then
+        return nil, err
+    end
     local info = decode(res.body)
     return {username=info.nickname, avatar=info.figureurl_qq_2, openid=openid}
 end
@@ -128,6 +137,9 @@ function github.get_access_token(self, code)
         client_id=self.client_id, client_secret=self.client_secret, 
         code=code, redirect_uri=self.redirect_uri}
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
+    if not res then
+        return nil, err
+    end
     local body = decode_args(res.body)
     return body.access_token
 end
@@ -214,6 +226,9 @@ end
 function github.get_user_info(self, access_token)
     local uri = self.me_uri..'?access_token='..access_token
     local res, err = self.client:request_uri(uri, {ssl_verify = false})
+    if not res then
+        return nil, err
+    end
     local info = decode(res.body)
     return {username=info.name, avatar=info.avatar_url, openid=tostring(info.id)}
 end

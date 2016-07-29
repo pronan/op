@@ -49,7 +49,7 @@ function m.models(req,kw)
     local name=kw.name or 'users'
     local res, err = query("select * from "..name)
     if not res then
-        return nil, err
+        return response.Error(err)
     end
     return response.Template('users.html', {users=res})
 end
@@ -100,11 +100,20 @@ end
 function m.qq(request, kwargs)
     local qq = require"resty.oauth".qq()
     local code = request.GET.code
-    local token = qq:get_access_token(code)
-    local openid = qq:get_openid(token)
+    local token, err = qq:get_access_token(code)
+    if not token then
+        return response.Error(err)
+    end
+    local openid, err = qq:get_openid(token)
+    if not openid then
+        return response.Error(err)
+    end
     local user = User:get{openid=openid}
     if not user then
-        local data = qq:get_user_info(openid, token)
+        local data, err = qq:get_user_info(openid, token)
+        if not data then
+            return response.Error(err)
+        end
         user = User:create(data)
     end
     request.session.user = user
@@ -114,8 +123,14 @@ end
 function m.github(request, kwargs)
     local qq = require"resty.oauth".github()
     local code = request.GET.code
-    local token = qq:get_access_token(code)
-    local res = qq:get_user_info(token)
+    local token, err = qq:get_access_token(code)
+    if not token then
+        return response.Error(err)
+    end
+    local res, err = qq:get_user_info(token)
+    if not res then
+        return response.Error(err)
+    end
     user = User:get{openid=res.openid}
     if not user then
         user = User:create(res)
