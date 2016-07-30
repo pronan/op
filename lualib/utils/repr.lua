@@ -1,11 +1,9 @@
-
 local zfill = require"utils.base".zfill
+local sorted = require"utils.base".sorted
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
 local MAX_DEEPTH = 20
 local MAX_LENGTH = 10
-
-local m = {}
 
 local function ok(num)
     local res = ''
@@ -27,19 +25,7 @@ local function simple(k)
         return '"'..tostring(k)..'"'
     end
 end   
-function m.sorted(t, func)
-    local keys = {}
-    for k,v in pairs(t) do
-        keys[#keys+1] = k
-    end
-    table.sort(keys, func)
-    local i = 1
-    return function ()
-        key = keys[i]
-        i = i+1
-        return key, t[key]
-    end
-end
+
 local function _repr(obj, ind, deep, already)
     local label = type(obj)
     if label == 'table' then
@@ -77,7 +63,7 @@ local function _repr(obj, ind, deep, already)
             end
             normalize[k] = v --string.format('\n%s%s: %s,', indent, k, v)
         end 
-        for k,v in m.sorted(normalize) do
+        for k,v in sorted(normalize) do
             res[#res+1] = string.format('\n%s%s: %s,', indent, zfill(k, max_key_len), v)
         end
         return table.concat(res)..'\n'..ok(string.len(indent)-2)..'}'         
@@ -86,7 +72,7 @@ local function _repr(obj, ind, deep, already)
     end
 end
 
-function m.repr(obj)
+local function repr(obj)
     if type(obj)  == 'table' then
         return '{\\\\'..tostring(obj).._repr(obj, '', 1, {})
     else
@@ -98,12 +84,12 @@ local delimiter = ''
 for i=1, 50 do
     delimiter = delimiter..'*'
 end
-function m.loger(...)
+local function loger(...)
     local res = {}
     for i,v in ipairs({...}) do
-        res[i] = m.repr(v)
+        res[i] = repr(v)
     end
-    ngx_log(ngx_ERR,string.format('\n%s\n%s\n%s', delimiter,  table.concat( res, " " ), delimiter))
+    ngx_log(ngx_ERR,string.format('\n%s\n%s\n%s', delimiter, table.concat(res, " "), delimiter))
 end
 
-return m
+return {repr=repr, loger=loger}

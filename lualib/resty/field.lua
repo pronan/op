@@ -109,7 +109,8 @@ function CharField.to_lua(self, value)
     end
     value = tostring(value)
     if self.strip then
-        value = string.gsub(value, '^%s*(.-)%s*$', '%1')
+        --value = string.gsub(value, '^%s*(.-)%s*$', '%1')
+        value = gsub(value, '^\\s*(.+)\\s*$', '$1','jo')
     end
     return value
 end

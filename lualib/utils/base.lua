@@ -1,6 +1,19 @@
 local function caller(t, opts) 
     return t:new(opts):initialize() 
 end
+local function sorted(t, func)
+    local keys = {}
+    for k,v in pairs(t) do
+        keys[#keys+1] = k
+    end
+    table.sort(keys, func)
+    local i = 1
+    return function ()
+        key = keys[i]
+        i = i+1
+        return key, t[key]
+    end
+end
 local function copy(old)
     local res = {}
     for i, v in pairs(old) do
@@ -87,4 +100,5 @@ end
 return {
     caller = caller, extend=extend, update=update, list=list, copy=copy, 
     map = map, xmap=xmap, zfill=zfill, simple_time_parser=simple_time_parser, 
+    sorted=sorted,
 }

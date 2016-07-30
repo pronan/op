@@ -12,7 +12,8 @@ http {
     keepalive_timeout  65;
     #autoindex on;
     init_by_lua_file init.lua;
-
+    lua_package_path './lualib/?.lua;./lualib/?/init.lua;;';
+    
     client_body_temp_path temp/client_body_temp;
     fastcgi_temp_path temp/fastcgi_temp;
     proxy_temp_path temp/proxy_temp;

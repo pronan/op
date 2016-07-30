@@ -3,6 +3,8 @@ local copy = require"utils.base".copy
 local update = require"utils.base".update
 local extend = require"utils.base".extend
 local caller = require"utils.base".caller
+local ngx_log = ngx.log
+local ngx_ERR = ngx.ERR
 
 local function execer(t) return t:exec() end
 
@@ -46,7 +48,7 @@ local function RawQuery(statement, using)
     local database = DATABASES[using or 'default']
     local db, err = require(database.engine):new()
     if not db then
-        return db, err
+        return nil, err
     end
     db:set_timeout(database.timeout) 
     res, err, errno, sqlstate = db:connect{database = database.database,
@@ -60,7 +62,7 @@ local function RawQuery(statement, using)
     if res ~= nil then
         local ok, err = db:set_keepalive(database.max_idle_timeout, database.pool_size)
         if not ok then
-            ngx.log(ngx.ERR, 'fail to set_keepalive')
+            ngx_log(ngx_ERR, 'fail to set_keepalive')
         end
     end
     return res, err, errno, sqlstate
