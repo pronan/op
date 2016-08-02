@@ -8,6 +8,9 @@ local ngx_ERR = ngx.ERR
 
 local function execer(t) return t:exec() end
 
+local CONNECT_TABLE = {database = database.database,
+        host = database.host, port = database.port,
+        user = database.user, password = database.password,}
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(kwargs)
     -- turn a hash table such as {age=23, id__in={1, 2, 3}} to a string array:
@@ -51,10 +54,7 @@ local function RawQuery(statement, using)
         return nil, err
     end
     db:set_timeout(database.timeout) 
-    res, err, errno, sqlstate = db:connect{database = database.database,
-        host = database.host, port = database.port,
-        user = database.user, password = database.password,
-    }
+    res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
     if not res then
         return res, err, errno, sqlstate
     end
@@ -102,7 +102,6 @@ function Row.delete(self)
 end
 
 local QueryManager = setmetatable({}, {__call = caller})
-Row.QueryManager = QueryManager --avoid circular require
 local sql_method_names = {select=extend, group=extend, order=extend,
     create=update, update=update, where=update, having=update, delete=update,}
 -- add methods by a loop    
@@ -304,6 +303,23 @@ function Model.new(self, opts)
     self.__index = self
     self.__call = model_caller
     return setmetatable(opts, self)
+end
+function Model._resolve_fields(self)
+    local fields = self.fields
+    if self.field_order == nil then
+        local fo = {}
+        for name,v in pairs(fields) do
+            fo[#fo+1] = name
+        end
+        self.field_order = fo
+    end
+    for name, field_maker in pairs(fields) do
+        fields[name] = field_maker{name=name}
+    end
+    return self
+end
+function Model.create(self, init)
+    return self:new(init):_resolve_fields()
 end
 function Model._get_table_create_string(self)
     if not self._table_create_string then
