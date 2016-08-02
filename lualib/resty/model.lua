@@ -8,9 +8,6 @@ local ngx_ERR = ngx.ERR
 
 local function execer(t) return t:exec() end
 
-local CONNECT_TABLE = {database = database.database,
-        host = database.host, port = database.port,
-        user = database.user, password = database.password,}
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(kwargs)
     -- turn a hash table such as {age=23, id__in={1, 2, 3}} to a string array:
@@ -54,7 +51,9 @@ local function RawQuery(statement, using)
         return nil, err
     end
     db:set_timeout(database.timeout) 
-    res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
+    res, err, errno, sqlstate = db:connect({database = database.database,
+        host = database.host, port = database.port,
+        user = database.user, password = database.password,})
     if not res then
         return res, err, errno, sqlstate
     end
@@ -95,9 +94,9 @@ end
 function Row.save(self)
     local valid_attrs = {}
     for name, field in pairs(self.fields) do
-        valid_attrs[name] = self[name]
+        valid_attrs[name] = rawget(self, name)
     end
-    if self.created then
+    if self._created then
         local create_columns, create_values = _get_create_args(valid_attrs)
         self._res, self._err = RawQuery(string.format('INSERT INTO %s (%s) VALUES (%s);', 
             self.table_name, create_columns, create_values))
@@ -295,7 +294,7 @@ end
 
 local Model = {}
 local function model_caller(self, attrs)
-    return Row{table_name=self.table_name,fields=self.fields,created=true}(attrs)
+    return Row{table_name=self.table_name,fields=self.fields,_created=true}(attrs)
 end
 function Model.new(self, opts)
     opts = opts or {}
