@@ -93,17 +93,30 @@ function Row.initialize(self)
 end
 function Row.save(self)
     local valid_attrs = {}
+    local all_errors = {}
+    local errors;
     for name, field in pairs(self.fields) do
-        valid_attrs[name] = rawget(self, name)
+        local value = rawget(self, name)
+        if value ~= nil then
+            value, errors = field:clean(value)
+            if errors then
+                extend(all_errors, errors)
+            else
+                valid_attrs[name] = value
+            end
+        end
     end
-    if self._created then
+    if next(all_errors) then
+        return nil, all_errors
+    end
+    if rawget(self, 'id') then
+        self._res, self._err = RawQuery(string.format('UPDATE %s SET %s WHERE id=%s;', 
+            self.table_name, table.concat(parse_filter_args(valid_attrs), ", "), self.id))
+    else
         local create_columns, create_values = _get_create_args(valid_attrs)
         self._res, self._err = RawQuery(string.format('INSERT INTO %s (%s) VALUES (%s);', 
             self.table_name, create_columns, create_values))
         self.id = self._res.id
-    else
-        self._res, self._err = RawQuery(string.format('UPDATE %s SET %s WHERE id=%s;', 
-            self.table_name, table.concat(parse_filter_args(valid_attrs), ", "), self.id))
     end
     return self
 end
@@ -294,7 +307,7 @@ end
 
 local Model = {}
 local function model_caller(self, attrs)
-    return Row{table_name=self.table_name,fields=self.fields,_created=true}(attrs)
+    return Row{table_name=self.table_name,fields=self.fields}(attrs)
 end
 function Model.new(self, opts)
     opts = opts or {}
