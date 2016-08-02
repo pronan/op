@@ -5,19 +5,19 @@ local _M = {}
 
 _M.User = Model:make{table_name='users', 
     fields = {
-        id = Field.IntegerField{'ID', min=1}, 
-        username = Field.CharField{'用户名', maxlength=50},
-        avatar = Field.CharField{'头像', maxlength=100},  
-        openid = Field.CharField{'OPENID', maxlength=50}, 
-        password = Field.PasswordField{'密码', maxlength=50}, 
+        id = Field.IntegerField{min=1}, 
+        username = Field.CharField{maxlength=50},
+        avatar = Field.CharField{maxlength=100},  
+        openid = Field.CharField{maxlength=50}, 
+        password = Field.PasswordField{maxlength=50}, 
     }, 
 }
 
-_M.Blog = Model:new{table_name='blogs', 
+_M.Blog = Model:make{table_name='blogs', 
     fields = {
-        {name = 'id' }, 
-        {name = 'title'}, 
-        {name = 'content'}, 
+        id = Field.IntegerField{min=1}, 
+        title = Field.CharField{maxlength=50},
+        content = Field.TextField{maxlength=500},
     }, 
 }
 
