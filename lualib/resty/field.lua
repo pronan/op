@@ -134,11 +134,7 @@ function IntegerField.initialize(self)
     return self
 end
 function IntegerField.to_lua(self, value)
-    local value, err = tonumber(value)
-    if not value then
-        return nil, err
-    end
-    return value
+    return tonumber(value)
 end
 function IntegerField.render(self, value, attrs)
     attrs.max = self.max

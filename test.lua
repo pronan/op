@@ -121,49 +121,48 @@ local function print_line(text, err)
     end
 end
 
-return function()
+
     ngx.say('<html><head><style>th,td{border:1px solid #ccc;}table{border-collapse:collapse;}</style></head><body>')
-    -- for i,v in ipairs(statements) do
-    --     local statement, check_error = unpack(v)
-    --     local res, err, errno, sqlstate = statement:exec()
-    --     if res~=nil then --sql returned normally
-    --         err = check_error(res)
-    --         if err then
-    --             print_line(statement:to_sql(), 1)
-    --             print_line(err, 1)
-    --         else
-    --             print_line(statement:to_sql())           
-    --         end
-    --         print_results(res)  
-    --     else --something wrong with sql
-    --         print_line(statement:to_sql(), 1)
-    --         print_line(err, 1)
-    --     end
-    --     ngx.say('<br/>')
-    -- end
-    -- --update test
-    -- local statement=Sale:where'id<3'
-    -- for i,v in ipairs(statement:exec()) do
-    --     v.blablabla = 123 --attribute that is not in fields
-    --     v.price=10+i
-    --     v:save()
-    -- end
-    -- for i,v in ipairs(statement:exec()) do
-    --     assert(v.price==10+i, 'price update should take effect')
-    -- end
-    -- print_line(statement:to_sql())
-    -- print_results(statement:exec())
+    for i,v in ipairs(statements) do
+        local statement, check_error = unpack(v)
+        local res, err, errno, sqlstate = statement:exec()
+        if res~=nil then --sql returned normally
+            err = check_error(res)
+            if err then
+                print_line(statement:to_sql(), 1)
+                print_line(err, 1)
+            else
+                print_line(statement:to_sql())           
+            end
+            print_results(res)  
+        else --something wrong with sql
+            print_line(statement:to_sql(), 1)
+            print_line(err, 1)
+        end
+        ngx.say('<br/>')
+    end
+    --update test
+    local statement=Sale:where'id<3'
+    for i,v in ipairs(statement:exec()) do
+        v.blablabla = 123 --attribute that is not in fields
+        v.price=10+i
+        v:save()
+    end
+    for i,v in ipairs(statement:exec()) do
+        assert(v.price==10+i, 'price update should take effect')
+    end
+    print_line(statement:to_sql())
+    print_results(statement:exec())
 
-    -- --create test
-    -- v = Sale:create{name='newcomer', catagory='fruit', time='2016-03-29 23:12:00', price=12, weight=15}
-    -- local res = Sale:all()
-    -- assert(res[#res].name==v.name, 'the name of the last element should be newcomer')
+    --create test
+    v = Sale:create{name='newcomer', catagory='fruit', time='2016-03-29 23:12:00', price=12, weight=15}
+    local res = Sale:all()
+    assert(res[#res].name==v.name, 'the name of the last element should be newcomer')
 
-    -- --delete test
-    -- local v = Sale:get'id = 1'
-    -- v:delete()
-    -- assert(#Sale:where"id=1":exec()==0, 'id=1 item should not exists')
+    --delete test
+    local v = Sale:get'id = 1'
+    v:delete()
+    assert(#Sale:where"id=1":exec()==0, 'id=1 item should not exists')
 
     ngx.say('<h1>all test passed!</h1>')
     ngx.say('</body></html>')
-end

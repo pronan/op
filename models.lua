@@ -5,7 +5,7 @@ local _M = {}
 
 _M.User = Model:create{table_name='users', 
     fields = {
-        id = Field.IntegerField{'ID', maxlength=20}, 
+        id = Field.IntegerField{'ID', min=1}, 
         username = Field.CharField{'用户名', maxlength=50},
         avatar = Field.CharField{'头像', maxlength=100},  
         openid = Field.CharField{'OPENID', maxlength=50}, 
