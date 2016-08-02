@@ -1,8 +1,9 @@
 local encode = require"cjson".encode
 local Model = require"resty.model".Model
 local Query = require"resty.model".RawQuery
+local Field = require"resty.field"
 
-local Sale = Model:create{table_name='sales', 
+local Sale = Model:make{table_name='sales', 
     fields = {
         id = Field.IntegerField{'ID', min=1}, 
         name = Field.CharField{'名称', maxlength=50},
@@ -158,7 +159,12 @@ end
     v = Sale:create{name='newcomer', catagory='fruit', time='2016-03-29 23:12:00', price=12, weight=15}
     local res = Sale:all()
     assert(res[#res].name==v.name, 'the name of the last element should be newcomer')
-
+    loger(v)
+    v.catagory='wwwww'
+    v:save()
+    v=Sale:get{name='newcomer'}
+    assert(v.catagory=='wwwww', 'the catagory of the last element should be wwwww')
+    loger(v)
     --delete test
     local v = Sale:get'id = 1'
     v:delete()
