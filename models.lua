@@ -3,7 +3,7 @@ local Field = require"resty.field"
 
 local _M = {}
 
-_M.User = Model:create{table_name='users', 
+_M.User = Model:make{table_name='users', 
     fields = {
         id = Field.IntegerField{'ID', min=1}, 
         username = Field.CharField{'用户名', maxlength=50},

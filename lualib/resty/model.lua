@@ -316,7 +316,7 @@ function Model._resolve_fields(self)
     end
     return self
 end
-function Model.create(self, init)
+function Model.make(self, init)
     return self:new(init):_resolve_fields()
 end
 function Model._get_table_create_string(self)
