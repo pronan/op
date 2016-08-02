@@ -81,13 +81,11 @@ function Row.initialize(self)
 end
 function Row.save(self)
     local valid_attrs = {}
-    for i, field in ipairs(self.fields) do
-        local value = self[field.name]
-        if value ~= nil then
-            valid_attrs[field.name] = value
-        end
+    for name, field in pairs(self.fields) do
+        valid_attrs[name] = self[name]
     end
     if self.created then
+         = RawQuery(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
         self._res, self._err = self.QueryManager{table_name=self.table_name,
             fields=self.fields}:create(valid_attrs):exec()
         self.id = self._res.id
@@ -98,7 +96,7 @@ function Row.save(self)
     return self
 end
 function Row.delete(self)
-    return self.QueryManager{table_name=self.table_name, fields=self.fields}:delete{id=self.id}:exec()
+    return RawQuery(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
 end
 
 local QueryManager = setmetatable({}, {__call = caller})
