@@ -122,6 +122,32 @@ function CharField.render(self, value, attrs)
 end
 BootstrapFields.CharField = CharField:new{attrs={class='form-control'}}
 
+local IntegerField = Field:new{template='<input %s />', type='number'}
+function IntegerField.initialize(self)
+    Field.initialize(self) -- getmetatable(self).initialize(self)
+    if self.max then
+        table.insert(self.validators, validator.max(self.max))
+    end
+    if self.min then
+        table.insert(self.validators, validator.min(self.min))
+    end
+    return self
+end
+function IntegerField.to_lua(self, value)
+    local value, err = tonumber(value)
+    if not value then
+        return nil, err
+    end
+    return value
+end
+function IntegerField.render(self, value, attrs)
+    attrs.max = self.max
+    attrs.min = self.min
+    attrs.value = value
+    attrs.type = self.type
+    return string.format(self.template, table_to_html_attrs(attrs))
+end
+
 local PasswordField = CharField:new{type='password'}
 BootstrapFields.PasswordField = CharField:new{type='password', attrs={class='form-control'}}
 
@@ -273,6 +299,7 @@ BootstrapFields.FileField = FileField:new{attrs={class='form-control'}}
 
 return{
     CharField = CharField, 
+    IntegerField = IntegerField, 
     TextField = TextField, 
     RadioField = RadioField,
     OptionField = OptionField,

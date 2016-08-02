@@ -67,7 +67,20 @@ local function RawQuery(statement, using)
     end
     return res, err, errno, sqlstate
 end
-
+local function _get_insert_args(t)
+    local cols = {}
+    local vals = {}
+    for k,v in pairs(t) do
+        cols[#cols+1] = k
+        if type(v) == 'string' then
+            v = string.format([['%s']], v)
+        else
+            v = tostring(v)
+        end
+        vals[#vals+1] = v
+    end
+    return table.concat( cols, ", "), table.concat( vals, ", ")
+end
 local Row = setmetatable({}, {__call = caller})
 function Row.new(self, opts)
     -- opts should be something like {table_name='foo', fields={...},}
@@ -85,13 +98,13 @@ function Row.save(self)
         valid_attrs[name] = self[name]
     end
     if self.created then
-         = RawQuery(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
-        self._res, self._err = self.QueryManager{table_name=self.table_name,
-            fields=self.fields}:create(valid_attrs):exec()
+        local create_columns, create_values = _get_create_args(valid_attrs)
+        self._res, self._err = RawQuery(string.format('INSERT INTO %s (%s) VALUES (%s);', 
+            self.table_name, create_columns, create_values))
         self.id = self._res.id
     else
-        self._res, self._err = self.QueryManager{table_name=self.table_name, 
-            fields=self.fields}:update(valid_attrs):where{id=self.id}:exec()
+        self._res, self._err = RawQuery(string.format('UPDATE %s SET %s WHERE id=%s;', 
+            self.table_name, table.concat(parse_filter_args(valid_attrs), ", "), self.id))
     end
     return self
 end
@@ -196,20 +209,8 @@ function QueryManager.to_sql_delete(self)
     return string.format('DELETE FROM %s%s;', self.table_name, where_args)
 end
 function QueryManager.get_create_args(self)
-    local cols = {}
-    local vals = {}
-    for k,v in pairs(self._create) do
-        cols[#cols+1] = k
-        if type(v) == 'string' then
-            v = string.format([['%s']], v)
-        else
-            v = tostring(v)
-        end
-        vals[#vals+1] = v
-    end
-    return table.concat( cols, ", "), table.concat( vals, ", ")
+    return _get_insert_args(self._create)
 end
-
 function QueryManager.get_update_args(self)
     if next(self._update)~=nil then 
         return table.concat(parse_filter_args(self._update), ", ")
