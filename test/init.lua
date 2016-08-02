@@ -9,5 +9,9 @@ return function (  )
 			end
 		end
 	end
-	ngx.print(repr(errors))
+	if next(errors) then
+		ngx.print(repr(errors))
+	else
+		ngx.print('all test are passed!')
+	end
 end

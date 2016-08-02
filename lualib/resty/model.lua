@@ -149,7 +149,7 @@ function QueryManager.initialize(self)
     for method_name, _ in pairs(sql_method_names) do
         self['_'..method_name] = {}
     end
-    self.Row = Row{table_name=self.table_name, fields=self.fields}
+    self.Row = Row:new{table_name=self.table_name, fields=self.fields}
     return self
 end
     -- insert_id   0   number --0代表是update 或 delete
@@ -180,13 +180,10 @@ function QueryManager.exec(self)
         end
     elseif (next(self._group) == nil and self._group_string == nil and
             next(self._having) == nil and self._having_string == nil ) then
-        -- wrapp the result only for non-aggregation query.
-        local wrapped_res = {} 
-        --local _meta = {table_name=self.table_name, fields=self.fields}
         for i, attrs in ipairs(res) do
-            wrapped_res[i] = self.Row(attrs)
+            res[i] = self.Row(attrs)
         end
-        return wrapped_res
+        return res
     else
         return res
     end
