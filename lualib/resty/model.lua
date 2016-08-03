@@ -42,7 +42,7 @@ local function parse_filter_args(kwargs)
     end
     return conditions
 end
-
+local get_query_function = require"resty.sql"
 -- local function RawQuery(statement, using)
 --     local res, err, errno, sqlstate;
 --     local database = DATABASES[using or 'default']
@@ -67,7 +67,7 @@ end
 --     return res, err, errno, sqlstate
 -- end
 
-local RawQuery = require"resty.query"()
+local RawQuery = get_query_function
 
 local function _get_insert_args(t)
     local cols = {}
@@ -83,16 +83,12 @@ local function _get_insert_args(t)
     end
     return table.concat( cols, ", "), table.concat( vals, ", ")
 end
-local Row = setmetatable({}, {__call = caller})
+local Row = {}
 function Row.new(self, opts)
-    -- opts should be something like {table_name='foo', fields={...},}
+    -- opts should be something like {table_name='foo', fields={...}, _query=function()...end}
     opts = opts or {}
     self.__index = self
-    self.__call = caller
     return setmetatable(opts, self)
-end
-function Row.initialize(self)
-    return self
 end
 function Row.save(self)
     local valid_attrs = {}
@@ -113,18 +109,18 @@ function Row.save(self)
         return nil, all_errors
     end
     if rawget(self, 'id') then
-        self._res, self._err = RawQuery(string.format('UPDATE %s SET %s WHERE id=%s;', 
+        self._res, self._err = self._query(string.format('UPDATE %s SET %s WHERE id=%s;', 
             self.table_name, table.concat(parse_filter_args(valid_attrs), ", "), self.id))
     else
         local create_columns, create_values = _get_create_args(valid_attrs)
-        self._res, self._err = RawQuery(string.format('INSERT INTO %s (%s) VALUES (%s);', 
+        self._res, self._err = self._query(string.format('INSERT INTO %s (%s) VALUES (%s);', 
             self.table_name, create_columns, create_values))
         self.id = self._res.id
     end
     return self
 end
 function Row.delete(self)
-    return RawQuery(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
+    return self._query(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
 end
 
 local QueryManager = setmetatable({}, {__call = caller})
@@ -152,7 +148,9 @@ function QueryManager.initialize(self)
     for method_name, _ in pairs(sql_method_names) do
         self['_'..method_name] = {}
     end
-    self.Row = Row:new{table_name=self.table_name, fields=self.fields}
+    local _query = ngx.req.query
+    self.Row = Row:new{table_name=self.table_name, fields=self.fields, _query=_query}
+    self._query = _query
     return self
 end
     -- insert_id   0   number --0代表是update 或 delete
@@ -170,21 +168,21 @@ function QueryManager.exec(self)
     if not statement then
         return nil, err
     end
-    local res, err = RawQuery(statement)
+    local res, err = self._query(statement)
     if not res then
         return nil, err
     end
     local altered = res.insert_id
     if altered ~= nil then -- update or delete or insert
         if altered > 0 then --insert
-            return self.Row(update({id = altered}, self._create))
+            return self.Row:new(update({id = altered}, self._create))
         else --update or delete
             return res
         end
     elseif (next(self._group) == nil and self._group_string == nil and
             next(self._having) == nil and self._having_string == nil ) then
         for i, attrs in ipairs(res) do
-            res[i] = self.Row(attrs)
+            res[i] = self.Row:new(attrs)
         end
         return res
     else
@@ -302,12 +300,12 @@ function QueryManager.exec_raw(self)
     if not statement then
         return nil, err
     end
-    return RawQuery(statement)
+    return self._query(statement)
 end
 
 local Model = {}
 local function model_caller(self, attrs)
-    return Row{table_name=self.table_name,fields=self.fields}(attrs)
+    return Row:new{table_name=self.table_name,fields=self.fields, _query=ngx.req.query}:new(attrs)
 end
 function Model.new(self, opts)
     opts = opts or {}
@@ -333,8 +331,8 @@ function Model.make(self, init)
     return self:new(init):_resolve_fields()
 end
 function Model._proxy_sql(self, method, params)
-    local query = QueryManager{table_name=self.table_name, fields=self.fields}
-    return query[method](query, params)
+    local qm = QueryManager{table_name=self.table_name, fields=self.fields}
+    return qm[method](qm, params)
 end
 -- define methods by a loop, `create` will be override
 for method_name, func in pairs(sql_method_names) do

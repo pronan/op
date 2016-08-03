@@ -60,11 +60,11 @@ local Sale = Model:make{table_name='sales',
     }, 
 }
 M[#M+1]=function ()
-    local res, err = Query("drop table if exists sales")
+    local res, err = Query()("drop table if exists sales")
     if not res then
         return err
     end
-    res, err = Query([[create table sales(
+    res, err = Query()([[create table sales(
         id       serial primary key,
         name     varchar(50), 
         catagory varchar(15), 
@@ -75,10 +75,7 @@ M[#M+1]=function ()
         return err
     end
     for i,v in ipairs(data) do
-        res, err = Query(string.format(
-            [[insert into sales(name, catagory, price, weight, time) values ('%s','%s', %s, %s, '%s');]],
-            unpack(v)
-        ))
+        res, err = Sale:create{name=v[1], catagory=v[2], price=v[3], weight=v[4], time=v[5]}
         if not res then
             return err
         end

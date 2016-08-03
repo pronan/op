@@ -6,14 +6,6 @@ local IDLE_TIMEOUT = 10000
 local POOL_SIZE = 10
 
 local M = {}
-M.__gc = function(self)
-    if self.db then
-        local ok, err = self.db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
-        if not ok then
-            ngx.log(ngx.ERR, 'fail to set set_keepalive, '..err)
-        end
-    end
-end
 M.__call = function(self, statement, rows) 
     local db, err, res, errno, sqlstate;
     --any reusable db? create one if none
@@ -38,4 +30,23 @@ M.__call = function(self, statement, rows)
     return res, err, errno, sqlstate
 end
 
-return function() return setmetatable({}, M) end
+local function before(req, kwargs)
+    req.query = setmetatable({}, M)
+end
+ -- {\\table: 0x001bbb50
+ --               "file": "wyj.JPG",  -- or ''
+ --               "name": "avatar",
+ --               "size": 40509,
+ --               "temp": "\s8rk.n",
+ --               "type": "image/jpeg",
+ --             },
+local function after(req, kwargs)
+    local db = req.query.db
+    if db then
+        local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
+        if not ok then
+            ngx.log(ngx.ERR, 'fail to set set_keepalive, '..err)
+        end
+    end
+end
+return { before=before, after=after}
