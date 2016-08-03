@@ -1,4 +1,5 @@
 local client = require"resty.mysql"
+
 local CONNECT_ARGS = {host = "127.0.0.1", port = 3306, 
         database = "test", user = 'root', password = '', }
 local TIMEOUT = 1000
@@ -7,6 +8,8 @@ local POOL_SIZE = 800
 
 local M = {}
 M.__index = M
+M.__gc = function(self) self:set_keepalive() end
+
 function M.new(self)
     local db, err = client:new()
     if not db then
@@ -25,5 +28,6 @@ end
 function M.query(self, statement, num)
     return self.db:query(statement, num)
 end
+
 
 return M

@@ -43,29 +43,32 @@ local function parse_filter_args(kwargs)
     return conditions
 end
 
-local function RawQuery(statement, using)
-    local res, err, errno, sqlstate;
-    local database = DATABASES[using or 'default']
-    local db, err = require(database.engine):new()
-    if not db then
-        return nil, err
-    end
-    db:set_timeout(database.timeout) 
-    res, err, errno, sqlstate = db:connect({database = database.database,
-        host = database.host, port = database.port,
-        user = database.user, password = database.password,})
-    if not res then
-        return res, err, errno, sqlstate
-    end
-    res, err, errno, sqlstate =  db:query(statement)
-    if res ~= nil then
-        local ok, err = db:set_keepalive(database.max_idle_timeout, database.pool_size)
-        if not ok then
-            ngx_log(ngx_ERR, 'fail to set_keepalive')
-        end
-    end
-    return res, err, errno, sqlstate
-end
+-- local function RawQuery(statement, using)
+--     local res, err, errno, sqlstate;
+--     local database = DATABASES[using or 'default']
+--     local db, err = require(database.engine):new()
+--     if not db then
+--         return nil, err
+--     end
+--     db:set_timeout(database.timeout) 
+--     res, err, errno, sqlstate = db:connect({database = database.database,
+--         host = database.host, port = database.port,
+--         user = database.user, password = database.password,})
+--     if not res then
+--         return res, err, errno, sqlstate
+--     end
+--     res, err, errno, sqlstate =  db:query(statement)
+--     if res ~= nil then
+--         local ok, err = db:set_keepalive(database.max_idle_timeout, database.pool_size)
+--         if not ok then
+--             ngx_log(ngx_ERR, 'fail to set_keepalive')
+--         end
+--     end
+--     return res, err, errno, sqlstate
+-- end
+
+local RawQuery = require"resty.query"()
+
 local function _get_insert_args(t)
     local cols = {}
     local vals = {}
