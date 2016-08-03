@@ -35,7 +35,7 @@ M.MIDDLEWARES = {
     "middlewares.session", 
     "middlewares.messages", 
     "middlewares.auth", 
-    "middlewares.query", 
+    --"middlewares.query", 
 }
 
 -- value will be normalized by init.lua

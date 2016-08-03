@@ -60,11 +60,11 @@ local Sale = Model:make{table_name='sales',
     }, 
 }
 M[#M+1]=function ()
-    local res, err = Query()("drop table if exists sales")
+    local res, err = Query("drop table if exists sales")
     if not res then
         return err
     end
-    res, err = Query()([[create table sales(
+    res, err = Query([[create table sales(
         id       serial primary key,
         name     varchar(50), 
         catagory varchar(15), 

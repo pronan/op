@@ -8,6 +8,34 @@ local ngx_ERR = ngx.ERR
 
 local function execer(t) return t:exec() end
 
+local client = require"resty.mysql"
+
+local CONNECT_TABLE = {host = "127.0.0.1", port = 3306, 
+        database = "test", user = 'root', password = '', }
+local CONNECT_TIMEOUT = 1000
+local IDLE_TIMEOUT = 10000
+local POOL_SIZE = 800
+
+local function RawQuery(statement, rows)
+    local db, err = client:new()
+    if not db then
+        return nil, err
+    end
+    db:set_timeout(CONNECT_TIMEOUT) 
+    res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
+    if not res then
+        return res, err, errno, sqlstate
+    end
+    res, err, errno, sqlstate =  db:query(statement, rows)
+    if res ~= nil then
+        local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
+        if not ok then
+            return nil, err
+        end
+    end
+    return res, err, errno, sqlstate
+end
+
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(kwargs)
     -- turn a hash table such as {age=23, id__in={1, 2, 3}} to a string array:
@@ -42,32 +70,6 @@ local function parse_filter_args(kwargs)
     end
     return conditions
 end
-local get_query_function = require"resty.sql"
--- local function RawQuery(statement, using)
---     local res, err, errno, sqlstate;
---     local database = DATABASES[using or 'default']
---     local db, err = require(database.engine):new()
---     if not db then
---         return nil, err
---     end
---     db:set_timeout(database.timeout) 
---     res, err, errno, sqlstate = db:connect({database = database.database,
---         host = database.host, port = database.port,
---         user = database.user, password = database.password,})
---     if not res then
---         return res, err, errno, sqlstate
---     end
---     res, err, errno, sqlstate =  db:query(statement)
---     if res ~= nil then
---         local ok, err = db:set_keepalive(database.max_idle_timeout, database.pool_size)
---         if not ok then
---             ngx_log(ngx_ERR, 'fail to set_keepalive')
---         end
---     end
---     return res, err, errno, sqlstate
--- end
-
-local RawQuery = get_query_function
 
 local function _get_insert_args(t)
     local cols = {}
@@ -85,7 +87,7 @@ local function _get_insert_args(t)
 end
 local Row = {}
 function Row.new(self, opts)
-    -- opts should be something like {table_name='foo', fields={...}, _query=function()...end}
+    -- opts should be something like {table_name='foo', fields={...}}
     opts = opts or {}
     self.__index = self
     return setmetatable(opts, self)
@@ -109,18 +111,18 @@ function Row.save(self)
         return nil, all_errors
     end
     if rawget(self, 'id') then
-        self._res, self._err = self._query(string.format('UPDATE %s SET %s WHERE id=%s;', 
+        self._res, self._err = RawQuery(string.format('UPDATE %s SET %s WHERE id=%s;', 
             self.table_name, table.concat(parse_filter_args(valid_attrs), ", "), self.id))
     else
         local create_columns, create_values = _get_create_args(valid_attrs)
-        self._res, self._err = self._query(string.format('INSERT INTO %s (%s) VALUES (%s);', 
+        self._res, self._err = RawQuery(string.format('INSERT INTO %s (%s) VALUES (%s);', 
             self.table_name, create_columns, create_values))
         self.id = self._res.id
     end
     return self
 end
 function Row.delete(self)
-    return self._query(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
+    return RawQuery(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
 end
 
 local QueryManager = setmetatable({}, {__call = caller})
@@ -148,9 +150,7 @@ function QueryManager.initialize(self)
     for method_name, _ in pairs(sql_method_names) do
         self['_'..method_name] = {}
     end
-    local _query = ngx.req.query
-    self.Row = Row:new{table_name=self.table_name, fields=self.fields, _query=_query}
-    self._query = _query
+    self.Row = Row:new{table_name=self.table_name, fields=self.fields}
     return self
 end
     -- insert_id   0   number --0代表是update 或 delete
@@ -168,7 +168,7 @@ function QueryManager.exec(self)
     if not statement then
         return nil, err
     end
-    local res, err = self._query(statement)
+    local res, err = RawQuery(statement)
     if not res then
         return nil, err
     end
@@ -300,7 +300,7 @@ function QueryManager.exec_raw(self)
     if not statement then
         return nil, err
     end
-    return self._query(statement)
+    return RawQuery(statement)
 end
 
 local Model = {}
