@@ -11,7 +11,7 @@ http {
     sendfile        on;
     keepalive_timeout  65;
     lua_code_cache off;
-    lua_package_path './lualib/?.lua;./lualib/?/init.lua;;';
+    lua_package_path './?.lua;./?/init.lua;./lualib/?.lua;./lualib/?/init.lua;;';
     init_by_lua_file init.lua;
 
     client_body_temp_path temp/client_body_temp;
