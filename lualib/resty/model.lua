@@ -305,7 +305,7 @@ end
 
 local Model = {}
 local function model_caller(self, attrs)
-    return Row:new{table_name=self.table_name,fields=self.fields, _query=ngx.req.query}:new(attrs)
+    return Row:new{table_name=self.table_name,fields=self.fields}:new(attrs)
 end
 function Model.new(self, opts)
     opts = opts or {}
