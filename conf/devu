@@ -46,7 +46,7 @@ http {
         }
 
         location = /ok {
-            content_by_lua_block{ngx.print'mie, hahaha, pjl'}
+            content_by_lua_block{ngx.print'mie, hahaha, pjl.@@@'}
         }
 
         location = /favicon.ico {
@@ -64,7 +64,7 @@ http {
         location = /gitpush {
             content_by_lua_block{
                 os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
-                os.execute('/usr/local/openresty/nginx/sbin/nginx -p /root/op -c /root/op/conf/devu -s reload')
+                --os.execute('/usr/local/openresty/nginx/sbin/nginx -p /root/op -c /root/op/conf/devu -s reload')
             }
         }
     }
