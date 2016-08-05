@@ -45,6 +45,10 @@ http {
             content_by_lua_block{require"test"()}
         }
 
+        location = /ok {
+            content_by_lua_block{ngx.print'mie'}
+        }
+
         location = /favicon.ico {
             root static/images;
         }
@@ -60,6 +64,7 @@ http {
         location = /gitpush {
             content_by_lua_block{
                 os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
+
             }
         }
     }
