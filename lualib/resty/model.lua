@@ -8,33 +8,7 @@ local ngx_ERR = ngx.ERR
 
 local function execer(t) return t:exec() end
 
-local client = require"resty.mysql"
-
-local CONNECT_TABLE = {host = "127.0.0.1", port = 3306, 
-        database = "test", user = 'root', password = '', }
-local CONNECT_TIMEOUT = 1000
-local IDLE_TIMEOUT = 10000
-local POOL_SIZE = 800
-
-local function RawQuery(statement, rows)
-    local db, err = client:new()
-    if not db then
-        return nil, err
-    end
-    db:set_timeout(CONNECT_TIMEOUT) 
-    local res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
-    if not res then
-        return res, err, errno, sqlstate
-    end
-    res, err, errno, sqlstate =  db:query(statement, rows)
-    if res ~= nil then
-        local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
-        if not ok then
-            return nil, err
-        end
-    end
-    return res, err, errno, sqlstate
-end
+local RawQuery = require"resty.query".single
 
 local RELATIONS= {lt='<', lte='<=', gt='>', gte='>=', ne='<>', eq='=', ['in']='IN'}
 local function parse_filter_args(kwargs)
@@ -111,15 +85,15 @@ function Row.save(self)
         return nil, all_errors
     end
     if rawget(self, 'id') then
-        self._res, self._err = RawQuery(string.format('UPDATE %s SET %s WHERE id=%s;', 
+        return RawQuery(string.format('UPDATE %s SET %s WHERE id=%s;', 
             self.table_name, table.concat(parse_filter_args(valid_attrs), ", "), self.id))
     else
-        local create_columns, create_values = _get_create_args(valid_attrs)
-        self._res, self._err = RawQuery(string.format('INSERT INTO %s (%s) VALUES (%s);', 
+        local create_columns, create_values = _get_insert_args(valid_attrs)
+        local res, err = RawQuery(string.format('INSERT INTO %s (%s) VALUES (%s);', 
             self.table_name, create_columns, create_values))
-        self.id = self._res.id
+        self.id = res.id
+        return res, err
     end
-    return self
 end
 function Row.delete(self)
     return RawQuery(string.format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))

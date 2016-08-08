@@ -196,6 +196,12 @@ M[#M+1]=function(self)
     if #Sale:where"catagory = 'wwwww'":exec()~=0 then
         return 'delete clause doesnot work. '
     end
+    v = Sale{name='newcomer2', catagory='fruit', time='2016-03-29 23:12:00', price=12, weight=150}
+    v:save()
+    v = Sale:get{name='newcomer2'}
+    if v.weight~=150 then
+        return 'newcomer2s weight should be 150'..repr(v)
+    end
 end
 return M
 

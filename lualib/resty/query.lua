@@ -26,10 +26,7 @@ local function single(statement, rows)
     return res, err, errno, sqlstate
 end
 
-local function multiple(statements, results)
-    if type(statements) == 'table' then
-        statements = table.concat(statements, ";") 
-    end
+local function multiple(statements)
     local db, err = client:new()
     if not db then
         return nil, err
@@ -43,20 +40,28 @@ local function multiple(statements, results)
     if not bytes then
         return nil, "failed to send query: " .. err
     end
-    err = 'again'
-    local i = 1
-    while err == 'again' do
+
+    local i = 0
+    local over = false
+    return function()
+        if over then return end
+        i = i + 1
         res, err, errcode, sqlstate = db:read_result()
         if not res then
-            return nil, 'multiple sql bad result #'..i..err, errcode, sqlstate
+            -- according to official docs, further actions should stop if any error occurs
+            over = true
+            return nil, string.format('bad result #%s: %s', i, err), errcode, sqlstate
+        else
+            if err ~= 'again' then
+                over = true
+                local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
+                if not ok then
+                    return nil, err
+                end
+            end
+            return res
         end
-        results[#results+1] = res
     end
-    local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
-    if not ok then
-        return nil, err
-    end
-    return results
 end
 
 return {
