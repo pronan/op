@@ -6,47 +6,61 @@ local CONNECT_TIMEOUT = 1000
 local IDLE_TIMEOUT = 10000
 local POOL_SIZE = 800
 
-local function make_query_function()
-    local db, err, res, errno, sqlstate;
-    local function query(statement, rows, keepalive)
-        -- first check any db to be used, create one if none
-        if db == nil then 
-            db, err = client:new()
-            if not db then
-                return nil, err
-            end
-            db:set_timeout(CONNECT_TIMEOUT) 
-            res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
-            if not res then
-                db = nil
-                return nil, err, errno, sqlstate
-            end
-        end
-        -- send the statement
-        res, err, errno, sqlstate =  db:query(statement, rows)
-        if res then
-            -- legal result
-            if keepalive then
-                local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
-                if not ok then
-                    return nil, err
-                else
-                    -- put the db back to the pool successfully
-                    db = nil
-                    return res, err, errno, sqlstate
-                end
-            else
-                -- reserve the db for the next time
-                return res, err, errno, sqlstate
-            end
-        else
-            -- bad result, drop the db
-            db = nil
-            return nil, err, errno, sqlstate
+local function single(statement, rows)
+    local db, err = client:new()
+    if not db then
+        return nil, err
+    end
+    db:set_timeout(CONNECT_TIMEOUT) 
+    local res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
+    if not res then
+        return nil, err, errno, sqlstate
+    end
+    res, err, errno, sqlstate =  db:query(statement, rows)
+    if res ~= nil then
+        local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
+        if not ok then
+            return nil, err
         end
     end
-    return query
+    return res, err, errno, sqlstate
 end
 
-return make_query_function
+local function multiple(statements, results)
+    if type(statements) == 'table' then
+        statements = table.concat(statements, ";") 
+    end
+    local db, err = client:new()
+    if not db then
+        return nil, err
+    end
+    db:set_timeout(CONNECT_TIMEOUT) 
+    local res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
+    if not res then
+        return nil, err, errno, sqlstate
+    end
+    local bytes, err = db:send_query(statements)
+    if not bytes then
+        return nil, "failed to send query: " .. err
+    end
+    err = 'again'
+    local i = 1
+    while err == 'again' do
+        res, err, errcode, sqlstate = db:read_result()
+        if not res then
+            return nil, 'multiple sql bad result #'..i..err, errcode, sqlstate
+        end
+        results[#results+1] = res
+    end
+    local ok, err = db:set_keepalive(IDLE_TIMEOUT, POOL_SIZE)
+    if not ok then
+        return nil, err
+    end
+    return results
+end
+
+return {
+    single = single, 
+    multiple = multiple, 
+}
 

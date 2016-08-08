@@ -22,7 +22,7 @@ local function RawQuery(statement, rows)
         return nil, err
     end
     db:set_timeout(CONNECT_TIMEOUT) 
-    res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
+    local res, err, errno, sqlstate = db:connect(CONNECT_TABLE)
     if not res then
         return res, err, errno, sqlstate
     end
