@@ -46,7 +46,7 @@ http {
         }
 
         location = /ok {
-            content_by_lua_block{ngx.print'mie, hahaha, pjl.@@@ssss'}
+            content_by_lua_block{ngx.print'mie, hahaha, pjl.@@@ssss dfbn'}
         }
 
         location = /favicon.ico {
