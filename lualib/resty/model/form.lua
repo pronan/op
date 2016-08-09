@@ -23,15 +23,28 @@ function M.new(self, init)
 end
 function M._resolve_fields(self)
     local fields = self.fields
-    if self.field_order == nil then
-    	local fo = {}
-    	for name,v in pairs(fields) do
-    		fo[#fo+1] = name
-    	end
-    	self.field_order = fo
-    end
-    for name, field_maker in pairs(fields) do
-    	fields[name] = field_maker{name=name}
+    if fields[1]~=nil then -- plain form
+        if self.field_order == nil then
+            local fo = {}
+            for i,v in ipairs(fields) do
+                fo[i] = v.name
+            end
+            self.field_order = fo
+        end
+    else --auto form
+        if self.field_order == nil then
+        	local fo = {}
+        	for name, v in pairs(fields) do
+        		fo[#fo+1] = name
+        	end
+        	self.field_order = fo
+        end
+        local final_fields = {}
+        for name, field in pairs(fields) do
+            field.name = name
+        	final_fields[#final_fields+1] = field
+        end
+        self.fields = final_fields
     end
     return self
 end
@@ -45,8 +58,10 @@ function M.initialize(self)
     self.initial = self.initial or {}
     self.label_suffix = self.label_suffix or ''
     local fields = {}
-    for name, parent_field in pairs(self.fields) do
-    	fields[name] = parent_field:new()
+    -- make a child-copy of fields so we can safely dynamically overwrite 
+    -- some attributes of the field, e.g. `choices` of OptionField
+    for i, v in ipairs(self.fields) do 
+    	fields[#fields+1] = v:new()
     end
     self.fields = fields
     return self
@@ -61,24 +76,33 @@ function M.get_value(self, field)
     	return field.initial or self.initial[name] or field.default
     end
 end
+function M._get_field(self, name)
+    for i,v in ipairs(self.fields) do
+        if v.name == name then
+            return v
+        end
+    end
+end
 function M.render(self)
     local res = {}
     for i, name in ipairs(self.field_order) do
-        local field = self.fields[name]
-        local errors_string = ''
-        if self.errors and self.errors[name] then
-            errors_string = table.concat(utils.map(function(k)
-                return'<li>'..k..'</li>'end, self.errors[name]), "\n" )
-            errors_string = string.format(self.error_template, errors_string)
+        local field = self:_get_field(name)
+        if field then
+            local errors_string = ''
+            if self.errors and self.errors[name] then
+                errors_string = table.concat(utils.map(function(k)
+                    return'<li>'..k..'</li>'end, self.errors[name]), "\n" )
+                errors_string = string.format(self.error_template, errors_string)
+            end
+            local help_text_string = ''
+            if field.help_text then
+                help_text_string = string.format(self.help_template, string.gsub(field.help_text, '\n', '<br/>'))
+            end
+            local attrs = field:get_base_attrs()
+            res[#res+1] = string.format(self.template, field.label_html, 
+                field:render(self:get_value(field), attrs), 
+                errors_string, help_text_string)
         end
-        local help_text_string = ''
-        if field.help_text then
-            help_text_string = string.format(self.help_template, string.gsub(field.help_text, '\n', '<br/>'))
-        end
-        local attrs = field:get_base_attrs()
-        res[#res+1] = string.format(self.template, field.label_html, 
-            field:render(self:get_value(field), attrs), 
-            errors_string, help_text_string)
     end
     return table.concat( res, "\n")
 end
@@ -89,7 +113,8 @@ function M.get_errors(self)
     return self.errors
 end
 function M.is_valid(self)
-    return self.is_bound and not next(self:get_errors())
+    self:get_errors()
+    return self.is_bound and not self.has_error
 end
 function M._clean_fields(self)
     for i, name in ipairs(self.field_order) do
@@ -97,12 +122,14 @@ function M._clean_fields(self)
         local value = self.data[name] or self.files[name]
         local value, errors = field:clean(value)
         if errors then
+            self.has_error = true
             self.errors[name] = errors
         else
             self.cleaned_data[name] = value
             if self['clean_'..name] then
                 value, errors = self['clean_'..name](self,value)
                 if errors then
+                    self.has_error = true
                     self.errors[name] = errors
                 else
                     self.cleaned_data[name] = value
@@ -114,6 +141,7 @@ end
 function M._clean_form(self)
     local cleaned_data, errors = self:clean()
     if errors then
+        self.has_error = true
         self.errors['__all__'] = errors
     elseif cleaned_data then
         self.cleaned_data = cleaned_data

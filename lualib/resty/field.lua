@@ -15,12 +15,7 @@ local function table_to_html_attrs(tbl)
     return table.concat(res, " ")
 end
 local function caller(tbl, init) 
-    return function(attrs_from_form)
-        for k,v in pairs(attrs_from_form) do
-            init[k] = v
-        end
-        return tbl:new(init):initialize() 
-    end
+    return tbl:new(init):initialize() 
 end
 local BootstrapFields = {}
 local Field = {}

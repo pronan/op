@@ -1,5 +1,5 @@
 local client = require"resty.mysql"
-
+local string_format = string.format
 local CONNECT_TABLE = {host = "127.0.0.1", port = 3306, 
         database = "test", user = 'root', password = '', }
 local CONNECT_TIMEOUT = 1000
@@ -50,7 +50,7 @@ local function multiple(statements)
         if not res then
             -- according to official docs, further actions should stop if any error occurs
             over = true
-            return nil, string.format('bad result #%s: %s', i, err), errcode, sqlstate
+            return nil, string_format('bad result #%s: %s', i, err), errcode, sqlstate
         else
             if err ~= 'again' then
                 over = true
