@@ -23,12 +23,6 @@ local function extend(self, other)
     end
     return self
 end
-local function caller(t, opts) 
-    return t:new(opts):initialize() 
-end
-local function execer(t) 
-    return t:exec() 
-end
 local function _to_string(v)
     if type(v) == 'string' then
         return "'"..v.."'"
@@ -85,7 +79,12 @@ local function _get_insert_args(t)
     return table.concat(cols, ", "), table.concat(vals, ", ")
 end
 
-
+local function caller(t, opts) 
+    return t:new(opts):initialize() 
+end
+local function execer(t) 
+    return t:exec() 
+end
 local Manager = setmetatable({}, {__call = caller})
 function Manager.new(self, opts)
     opts = opts or {}
@@ -100,16 +99,14 @@ function Manager.initialize(self)
 end
 -- chain methods
 function M.create(self, params)
-    if type(params) == 'table' then
-        if self._create == nil then
-            self._create = {}
-        end
-        local res = self._create
-        for k, v in pairs(params) do
-            res[k] = v
-        end
-    else
-        self._create_string = params
+    -- because the strange design of sql INSERT clause
+    assert(type(params) == 'table', '`create` only accept table')
+    if self._create == nil then
+        self._create = {}
+    end
+    local res = self._create
+    for k, v in pairs(params) do
+        res[k] = v
     end
     return self
 end
@@ -124,6 +121,7 @@ function M.update(self, params)
             res[k] = v
         end
     else
+        -- age = 21, name = 'Tom'
         self._update_string = params
     end
     return self
@@ -257,6 +255,8 @@ function Manager.exec(self)
     end
 end
 function Manager.to_sql(self)
+    if self._update_string then
+
     if next(self._update)~=nil or self._update_string~=nil then
         return self:to_sql_update()
     elseif next(self._create)~=nil or self._create_string~=nil then
