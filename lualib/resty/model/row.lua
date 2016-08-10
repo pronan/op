@@ -44,15 +44,18 @@ function Row.save(self)
     else-- use the standard form for Postgresql
         local cols, vals = {}, {}
         for k, v in pairs(valid_attrs) do
-            cols[#cols] = k
+            cols[#cols+1] = k
             vals[#vals+1] = _to_string(v)
         end
-        local res, err = query(string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', ')))
+        local stm=string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', '))
+        local res, err = query(stm)
         --local res, err = query(string_format('INSERT INTO %s SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
         if res then
             self.id = res.insert_id
+            return self
+        else
+            return nil, err
         end
-        return res, err
     end
 end
 function Row.delete(self)

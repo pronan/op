@@ -1,4 +1,4 @@
-local q = require"resty.query"
+local multiple = require"resty.model.query".multiple
 
 local M = {}
 
@@ -8,7 +8,7 @@ M[#M+1]=function ()
 		'select * from users where id=2;', 
 		'select * from users where id=3;', 
 	}
-	local gen, err = q.multiple(table.concat( statements, "" ))
+	local gen, err = multiple(table.concat( statements, "" ))
 	if not gen then
 		return 'fail to get generator of resty.query.multiple'
 	end

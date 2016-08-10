@@ -72,7 +72,7 @@ function Manager.to_sql(self)
         -- use the standard form for Postgresql
         local cols, vals = {}, {}
         for k, v in pairs(self._create) do
-            cols[#cols] = k
+            cols[#cols+1] = k
             vals[#vals+1] = _to_string(v)
         end
         return string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', '))

@@ -1,7 +1,7 @@
 local encode = require"cjson".encode
-local Model = require"resty.model".Model
-local Query = require"resty.model".RawQuery
-local Field = require"resty.field"
+local Model = require"resty.model.model"
+local Query = require"resty.model.query".single
+local Field = require"resty.model.field"
 
 local M = {}
 local function sametable(a, b)
@@ -83,7 +83,7 @@ M[#M+1]=function ()
 end
 
 M[#M+1]=function( ... )
-    local a = -Sale:where{}
+    local a = Sale:all()
     local b = Sale:all()
     if not sametable(a, b) then
         return 'the table returned from `-Sale:where{}` doesnot equal the one from `Sale:all()`'

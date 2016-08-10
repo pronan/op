@@ -14,7 +14,11 @@ function m.register(req, kwargs)
         form = forms.UserForm{data=req.POST}
         if form:is_valid() then
             local cd=form.cleaned_data
-            local user=User{username=cd.username, password=cd.password}:save()
+            --local user=User(cd):save()
+            local user, err=User:create({id=1})
+            if not user then
+                return response.Error(err)
+            end
             req.session.user=user
             req.session.messages = {'恭喜您, 注册成功!'}
             return response.Redirect('/profile')

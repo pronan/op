@@ -8,13 +8,14 @@ local string_format = string.format
 local table_concat = table.concat
 
 local M = {}
-function M._to_string(v)
+local function _to_string(v)
     if type(v) == 'string' then
         return "'"..v.."'"
     else
         return tostring(v)
     end
 end
+M._to_string = _to_string
 function M._to_kwarg_string(tbl)
     -- convert table like {age=11, name='Tom'} to string `age=11, name='Tom'`
     local res = {}

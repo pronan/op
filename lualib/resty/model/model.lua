@@ -95,6 +95,6 @@ function Model.all(self)
 end
 function Model.create(self, params)
     -- special process for `create`
-    return self:_proxy_sql('create', params):exec()
+    return self.row_class:new(params):save()
 end
 return Model
