@@ -1,6 +1,8 @@
 -- Copyright (C) 2013-2016 Nan Xiang (Yibin), Lizhi Inc.
 -- dependency: `Row.save` method requires a field has a `clean` method 
 local query = require"resty.model.query".single
+local _to_string = require"resty.model"._to_string
+local _to_kwarg_string = require"resty.model"._to_kwarg_string
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -9,22 +11,6 @@ local tostring = tostring
 local type = type
 local string_format = string.format
 local table_concat = table.concat
-
-local function _to_string(v)
-    if type(v) == 'string' then
-        return "'"..v.."'"
-    else
-        return tostring(v)
-    end
-end
-local function _to_kwarg_string(tbl)
-    -- convert table like {age=11, name='Tom'} to string `age=11, name='Tom'`
-    local res = {}
-    for k, v in pairs(tbl) do
-        res[#res+1] = string_format('%s=%s', k, _to_string(v))
-    end
-    return table_concat(res, ", ")
-end
 
 local Row = {}
 function Row.new(self, init)
@@ -54,13 +40,18 @@ function Row.save(self)
         return nil, all_errors
     end
     if rawget(self, 'id') then
-        return query(string_format('UPDATE %s SET %s WHERE id=%s;', self.table_name, 
-            _to_kwarg_string(valid_attrs), self.id))
-    else
-        -- use the SET form of Mysql
-        local res, err = query(string_format('INSERT INTO %s SET %s;', self.table_name, 
-            _to_kwarg_string(valid_attrs)))
-        self.id = res.id
+        return query(string_format('UPDATE %s SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs), self.id))
+    else-- use the standard form for Postgresql
+        local cols, vals = {}, {}
+        for k, v in pairs(valid_attrs) do
+            cols[#cols] = k
+            vals[#vals+1] = _to_string(v)
+        end
+        local res, err = query(string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', '))
+        --local res, err = query(string_format('INSERT INTO %s SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
+        if res then
+            self.id = res.insert_id
+        end
         return res, err
     end
 end

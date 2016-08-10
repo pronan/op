@@ -1,5 +1,5 @@
-local Model = require"resty.model".Model
-local Field = require"resty.field"
+local Model = require"resty.model.model"
+local Field = require"resty.model.field"
 
 local _M = {}
 

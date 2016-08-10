@@ -6,23 +6,40 @@
     -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
     -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
 local validator = require"resty.validator"
+local rawget = rawget
+local setmetatable = setmetatable
+local ipairs = ipairs
+local tostring = tostring
+local type = type
+local pairs = pairs
+local assert = assert
+local string_format = string.format
+local string_sub = string.sub
+local table_concat = table.concat
+local table_insert = table.insert
+local os_rename = os.rename
+
 local gsub = ngx.re.gsub
-local function table_to_html_attrs(tbl)
+
+local function _to_html_attrs(tbl)
     local res = {}
     for k,v in pairs(tbl) do
-        res[#res+1] = string.format('%s="%s"', k, v)
+        res[#res+1] = string_format('%s="%s"', k, v)
     end
-    return table.concat(res, " ")
+    return table_concat(res, " ")
 end
 local function caller(tbl, init) 
-    return function(attrs_from_form)
-        for k,v in pairs(attrs_from_form) do
+    -- read attrs from model class or form class
+    -- currently mainly for auto setting field.label 
+    local function field_maker(attrs)
+        for k, v in pairs(attrs) do
             init[k] = v
         end
-        return tbl:new(init):initialize() 
+        return tbl:new(init):initialize()
     end
+    return field_maker 
 end
-local BootstrapFields = {}
+
 local Field = {}
 Field.id_prefix = 'id-'
 function Field.new(self, init)
@@ -34,8 +51,7 @@ end
 function Field.initialize(self)
     self.id = self.id_prefix..self.name
     self.label = self.label or self[1] or self.name
-    self.label_html = string.format('<label for="%s">%s%s</label>', self.id_prefix..self.name, 
-        self.label, self.label_suffix or '')
+    self.label_html = string_format('<label for="%s">%s%s</label>', self.id_prefix..self.name, self.label, self.label_suffix or '')
     if self.required == nil then
         self.required = true
     end
@@ -60,7 +76,6 @@ end
 function Field.to_lua(self, value)
     return value
 end
-
 function Field.clean(self, value)
     value = self:to_lua(value)
     -- validate
@@ -70,13 +85,15 @@ function Field.clean(self, value)
     end
     -- validators
     local errors = {}
+    local has_error;
     for i, validator in ipairs(self.validators) do
         err = validator(value)
         if err then
+            has_error = true
             errors[#errors+1] = err
         end
     end
-    if next(errors) then
+    if has_error then
         return nil, errors
     else
         return value
@@ -96,10 +113,10 @@ end
 
 local CharField = Field:new{template='<input %s />', type='text'}
 function CharField.initialize(self)
-    Field.initialize(self) -- getmetatable(self).initialize(self)
+    Field.initialize(self) 
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for CharField')
     self.strip = self.strip or true
-    table.insert(self.validators, validator.maxlen(self.maxlength))
+    table_insert(self.validators, validator.maxlen(self.maxlength))
     --self.errors = {}
     return self
 end
@@ -118,18 +135,17 @@ function CharField.render(self, value, attrs)
     attrs.maxlength = self.maxlength
     attrs.value = value
     attrs.type = self.type
-    return string.format(self.template, table_to_html_attrs(attrs))
+    return string_format(self.template, _to_html_attrs(attrs))
 end
-BootstrapFields.CharField = CharField:new{attrs={class='form-control'}}
 
 local IntegerField = Field:new{template='<input %s />', type='number'}
 function IntegerField.initialize(self)
     Field.initialize(self) -- getmetatable(self).initialize(self)
     if self.max then
-        table.insert(self.validators, validator.max(self.max))
+        table_insert(self.validators, validator.max(self.max))
     end
     if self.min then
-        table.insert(self.validators, validator.min(self.min))
+        table_insert(self.validators, validator.min(self.min))
     end
     return self
 end
@@ -141,17 +157,16 @@ function IntegerField.render(self, value, attrs)
     attrs.min = self.min
     attrs.value = value
     attrs.type = self.type
-    return string.format(self.template, table_to_html_attrs(attrs))
+    return string_format(self.template, _to_html_attrs(attrs))
 end
 
 local PasswordField = CharField:new{type='password'}
-BootstrapFields.PasswordField = CharField:new{type='password', attrs={class='form-control'}}
 
 local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=40, rows=6}}
 function TextField.initialize(self)
     Field.initialize(self)
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for TextField')
-    table.insert(self.validators, validator.maxlen(self.maxlength))
+    table_insert(self.validators, validator.maxlen(self.maxlength))
     return self
 end
 -- function TextField.validate(self, value)
@@ -160,15 +175,13 @@ end
 -- end
 function TextField.render(self, value, attrs)
     attrs.maxlength = self.maxlength
-    return string.format(self.template, table_to_html_attrs(attrs), value or '')
+    return string_format(self.template, _to_html_attrs(attrs), value or '')
 end
-BootstrapFields.TextField = TextField:new{attrs={cols=40, rows=6, class='form-control'}}
 -- <select id="id_model_name" name="model_name">
 --  <option value="hetong" selected="selected">劳动合同制</option>
 -- </select>
 
-local OptionField = Field:new{template='<select %s>%s</select>', 
-    choice_template='<option %s>%s</option>', }
+local OptionField = Field:new{template='<select %s>%s</select>', choice_template='<option %s>%s</option>', }
 function OptionField.initialize(self)
     Field.initialize(self)
     local choices = self.choices or assert(nil, 'choices is required for OptionField')
@@ -205,7 +218,7 @@ function OptionField.validate(self, value)
         end
     end
     if not valid then
-        return '无效选择项'
+        return 'invalid choice'
     end
 end
 function OptionField.render(self, value, attrs)
@@ -219,22 +232,16 @@ function OptionField.render(self, value, attrs)
         if value==db_val then
             inner_attrs.selected="selected"
         end
-        choices[#choices+1]=string.format(self.choice_template, 
-            table_to_html_attrs(inner_attrs),val)
+        choices[#choices+1]=string_format(self.choice_template, _to_html_attrs(inner_attrs),val)
     end
-    return string.format(self.template, table_to_html_attrs(attrs), 
-        table.concat(choices,'\n'))
+    return string_format(self.template, _to_html_attrs(attrs), table_concat(choices,'\n'))
 end
 -- <ul id="id-name">
 -- <li><label for="id-name-0"><input type="radio" value="-1" id="id-name-0" name="name" />拒绝</label></li>
 -- <li><label for="id-name-1"><input type="radio" value="0"  id="id-name-1" name="name" checked="checked" />复原</label></li>
 -- <li><label for="id-name-2"><input type="radio" value="1"  id="id-name-2" name="name" />通过</label></li>
 -- </ul>
-BootstrapFields.OptionField = OptionField:new{attrs={class='form-control'}}
-
-local RadioField = OptionField:new{template='<ul %s>%s</ul>', 
-    choice_template='<li><label %s><input %s />%s</label></li>', 
-}
+local RadioField = OptionField:new{template='<ul %s>%s</ul>',choice_template='<li><label %s><input %s />%s</label></li>',}
 function RadioField.render(self, value, attrs)
     local choices={}
     for i, choice in ipairs(self.choices) do
@@ -244,18 +251,15 @@ function RadioField.render(self, value, attrs)
         if value==db_val then
             inner_attrs.checked="checked"
         end
-        choices[#choices+1]=string.format(self.choice_template, 
-            table_to_html_attrs({['for']=inner_id}), 
-            table_to_html_attrs(inner_attrs),val)
+        choices[#choices+1]=string_format(self.choice_template, _to_html_attrs({['for']=inner_id}), _to_html_attrs(inner_attrs), val)
     end
-    return string.format(self.template, table_to_html_attrs(attrs), table.concat(choices,'\n'))
+    return string_format(self.template, _to_html_attrs(attrs), table_concat(choices,'\n'))
 end
-BootstrapFields.RadioField = RadioField:new{attrs={class='radio'}}
 
 local FileField = Field:new{template='<input %s />', type='file'}
 function FileField.render(self, value, attrs)
     attrs.type = self.type
-    return string.format(self.template, table_to_html_attrs(attrs))
+    return string_format(self.template, _to_html_attrs(attrs))
 end
 -- function FileField.to_lua(self, value)
 --     return value.temp
@@ -274,9 +278,9 @@ function FileField.validate(self, value)
     end 
 end
 function FileField.initialize(self)
-    Field.initialize(self) -- getmetatable(self).initialize(self)
+    Field.initialize(self) 
     self.upload_to = self.upload_to or assert(nil, 'upload_to is required for FileField')
-    local last_char = string.sub(self.upload_to, -1, -1)
+    local last_char = string_sub(self.upload_to, -1, -1)
     if last_char ~= '/' and last_char ~= '\\' then
         self.upload_to = self.upload_to..'/'
     end
@@ -288,10 +292,9 @@ function FileField.clean(self, value)
         return nil, errors
     end
     value.save_path = self.upload_to..value.file
-    os.rename(value.temp, value.save_path)
+    os_rename(value.temp, value.save_path)
     return value
 end
-BootstrapFields.FileField = FileField:new{attrs={class='form-control'}}
 
 return{
     CharField = CharField, 
@@ -301,5 +304,4 @@ return{
     OptionField = OptionField,
     PasswordField = PasswordField, 
     FileField = FileField, 
-    BootstrapFields = BootstrapFields, 
 }

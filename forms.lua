@@ -1,13 +1,13 @@
-local Form = require"resty.form"
-local Field = require"resty.field".BootstrapFields
-local validator = require"resty.validator"
+local Form = require"resty.model.form"
+local Field = require"resty.model.field"
+local validator = require"resty.model.validator"
 local User = require"models".User
 
 local M = {}
 M.UserForm = Form:create{
     fields = {
-        username = Field.CharField{"用户名", maxlength=20},    
-        password = Field.PasswordField{"密码", maxlength=28},    
+        username = Field.CharField{maxlength=20},    
+        password = Field.PasswordField{maxlength=28},    
     }, 
     
     clean_username = function(self,value)
@@ -21,8 +21,8 @@ M.UserForm = Form:create{
 }
 M.LoginForm = Form:create{
     fields = {
-        username = Field.CharField{"用户名", maxlength=20, validators={validator.minlen(6)}, },    
-        password = Field.PasswordField{"密码", maxlength=28, validators={validator.minlen(6)},},    
+        username = Field.CharField{maxlength=20, validators={validator.minlen(6)}, },    
+        password = Field.PasswordField{maxlength=28, validators={validator.minlen(6)},},    
     }, 
     
     clean_username = function(self, value)
@@ -44,8 +44,8 @@ M.LoginForm = Form:create{
 }
 M.BlogForm = Form:create{
     fields = {
-        title = Field.CharField{"标题", maxlength=50},    
-        content = Field.TextField{"内容", maxlength=520},    
+        title = Field.CharField{maxlength=50},    
+        content = Field.TextField{maxlength=520},    
     }, 
     
 }
@@ -55,7 +55,7 @@ M.TestForm = Form:create{
         --content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  
         --class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
         --sex = Field.RadioField{"性别", choices={'男','女'}},   
-        content = Field.FileField{'内容', upload_to='static/files/', help_text='请上传公告文档', required=false}, 
+        content = Field.FileField{upload_to='static/files/', help_text='请上传公告文档', required=false}, 
     }, 
     
 }
