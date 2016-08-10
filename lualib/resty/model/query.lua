@@ -1,4 +1,5 @@
 local client = require"resty.mysql"
+
 local string_format = string.format
 local CONNECT_TABLE = {host = "127.0.0.1", port = 3306, 
         database = "test", user = 'root', password = '', }
