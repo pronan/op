@@ -1,8 +1,8 @@
 -- Copyright (C) 2013-2016 Nan Xiang (Yibin), Lizhi Inc.
 -- dependency: `Row.save` method requires a field has a `clean` method 
 local query = require"resty.model.query".single
-local _to_string = require"resty.model"._to_string
-local _to_kwarg_string = require"resty.model"._to_kwarg_string
+local _to_string = require"resty.model.init"._to_string
+local _to_kwarg_string = require"resty.model.init"._to_kwarg_string
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -47,7 +47,7 @@ function Row.save(self)
             cols[#cols] = k
             vals[#vals+1] = _to_string(v)
         end
-        local res, err = query(string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', '))
+        local res, err = query(string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', ')))
         --local res, err = query(string_format('INSERT INTO %s SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
         if res then
             self.id = res.insert_id

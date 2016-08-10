@@ -121,7 +121,7 @@ function M.is_valid(self)
 end
 function M._clean_fields(self)
     for i, name in ipairs(self.field_order) do
-        local field = self.fields[name]
+        local field = self:_get_field(name)
         local value = self.data[name] or self.files[name]
         local value, errors = field:clean(value)
         if errors then

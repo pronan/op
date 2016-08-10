@@ -1,7 +1,7 @@
 local query = require"resty.model.query".single
 local Row = require"resty.model.row"
 local Manager = require"resty.model.manager" 
-local _to_and = require"resty.model"._to_and
+local _to_and = require"resty.model.init"._to_and
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -71,7 +71,7 @@ function Model.get(self, params)
     -- special process for `get`, params cannot be empty table
     if type(params) == 'table' then
         params = _to_and(params)
-    else
+    end
     local res, err = query(string_format('SELECT * FROM %s WHERE %s LIMIT 1;', self.table_name, params))
     if not res then
         return nil, err

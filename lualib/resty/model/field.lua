@@ -5,7 +5,7 @@
     -- 'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
     -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
     -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
-local validator = require"resty.validator"
+local validator = require"resty.model.validator"
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs

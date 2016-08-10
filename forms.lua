@@ -1,13 +1,15 @@
 local Form = require"resty.model.form"
+local BootsForm = require"resty.model.bootstrap_form"
 local Field = require"resty.model.field"
+local BootsField = require"resty.model.bootstrap_field"
 local validator = require"resty.model.validator"
 local User = require"models".User
 
 local M = {}
-M.UserForm = Form:create{
+M.UserForm = BootsForm:create{
     fields = {
-        username = Field.CharField{maxlength=20},    
-        password = Field.PasswordField{maxlength=28},    
+        username = BootsField.CharField{maxlength=20},    
+        password = BootsField.PasswordField{maxlength=28},    
     }, 
     
     clean_username = function(self,value)
