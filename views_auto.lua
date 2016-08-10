@@ -15,7 +15,7 @@ function m.register(req, kwargs)
         if form:is_valid() then
             local cd=form.cleaned_data
             --local user=User(cd):save()
-            local user, err=User:create({id=1})
+            local user, err=User:create(cd)
             if not user then
                 return response.Error(err)
             end
