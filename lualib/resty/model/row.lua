@@ -17,6 +17,15 @@ local function _to_string(v)
         return tostring(v)
     end
 end
+local function _to_kwarg_string(tbl)
+    -- convert table like {age=11, name='Tom'} to string `age=11, name='Tom'`
+    local res = {}
+    for k, v in pairs(tbl) do
+        res[#res+1] = string_format('%s=%s', k, _to_string(v))
+    end
+    return table_concat(res, ", ")
+end
+
 local Row = {}
 function Row.new(self, init)
     init = init or {}
@@ -45,21 +54,12 @@ function Row.save(self)
         return nil, all_errors
     end
     if rawget(self, 'id') then
-        local dd = {}
-        for k,v in pairs(valid_attrs) do
-            dd[#dd+1] = string_format('%s=%s', k, _to_string(v))
-        end
         return query(string_format('UPDATE %s SET %s WHERE id=%s;', self.table_name, 
-            table_concat(dd, ", "), self.id))
+            _to_kwarg_string(valid_attrs), self.id))
     else
-        local cols = {}
-        local vals = {}
-        for k,v in pairs(valid_attrs) do
-            cols[#cols+1] = k
-            vals[#vals+1] = _to_string(v)
-        end
-        local res, err = query(string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, 
-            table_concat(cols, ", "), table_concat(vals, ", ") ))
+        -- use the SET form of Mysql
+        local res, err = query(string_format('INSERT INTO %s SET %s;', self.table_name, 
+            _to_kwarg_string(valid_attrs)))
         self.id = res.id
         return res, err
     end
