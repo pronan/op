@@ -28,33 +28,36 @@ local function _to_html_attrs(tbl)
     end
     return table_concat(res, " ")
 end
-local function caller(tbl, init) 
+local function ClassCaller(cls, attrs)
+    return cls:maker(attrs)
+end
+local Field = setmetatable({id_prefix = 'id-',required = true}, {__call=ClassCaller})
+
+function Field.new(self, attrs)
+    attrs = attrs or {}
+    self.__index = self
+    self.__call = ClassCaller
+    return setmetatable(attrs, self)
+end
+function Field.maker(cls, attrs)
     -- read attrs from model class or form class
     -- currently mainly for auto setting field.label 
-    local function field_maker(attrs)
-        for k, v in pairs(attrs) do
-            init[k] = v
+    local function field_maker(extern_attrs)
+        for k, v in pairs(extern_attrs) do
+            attrs[k] = v
         end
-        return tbl:new(init):initialize()
+        return cls:init(attrs)
     end
     return field_maker 
 end
-
-local Field = {}
-Field.id_prefix = 'id-'
-function Field.new(self, init)
-    init = init or {}
-    self.__index = self
-    self.__call = caller
-    return setmetatable(init, self)
-end
-function Field.initialize(self)
+function Field.init(cls, attrs)
+    local self = cls:new(attrs)
     self.id = self.id_prefix..self.name
     self.label = self.label or self[1] or self.name
     self.label_html = string_format('<label for="%s">%s%s</label>', self.id_prefix..self.name, self.label, self.label_suffix or '')
-    if self.required == nil then
-        self.required = true
-    end
+    -- if self.required == nil then
+    --     self.required = true
+    -- end
     --self.initial = self.initial or ''
     --self.help_text = self.help_text or ''
     --self.label_suffix = self.label_suffix or ''
@@ -112,10 +115,12 @@ end
 --逻辑值 <input checked="checked" id="id_enable" name="enable" type="checkbox" />
 
 local CharField = Field:new{template='<input %s />', type='text'}
-function CharField.initialize(self)
-    Field.initialize(self) 
+function CharField.init(cls, attrs)
+    local self = Field.init(cls, attrs) 
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for CharField')
-    self.strip = self.strip or true
+    if self.strip == nil then
+        self.strip = true
+    end
     table_insert(self.validators, validator.maxlen(self.maxlength))
     --self.errors = {}
     return self
@@ -138,9 +143,11 @@ function CharField.render(self, value, attrs)
     return string_format(self.template, _to_html_attrs(attrs))
 end
 
+local PasswordField = CharField:new{type='password'}
+
 local IntegerField = Field:new{template='<input %s />', type='number'}
-function IntegerField.initialize(self)
-    Field.initialize(self) -- getmetatable(self).initialize(self)
+function IntegerField.init(cls, attrs)
+    local self = Field.init(cls, attrs) 
     if self.max then
         table_insert(self.validators, validator.max(self.max))
     end
@@ -160,11 +167,9 @@ function IntegerField.render(self, value, attrs)
     return string_format(self.template, _to_html_attrs(attrs))
 end
 
-local PasswordField = CharField:new{type='password'}
-
 local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=40, rows=6}}
-function TextField.initialize(self)
-    Field.initialize(self)
+function TextField.init(cls, attrs)
+    local self = Field.init(cls, attrs)
     self.maxlength = self.maxlength or assert(nil, 'maxlength is required for TextField')
     table_insert(self.validators, validator.maxlen(self.maxlength))
     return self
@@ -182,8 +187,8 @@ end
 -- </select>
 
 local OptionField = Field:new{template='<select %s>%s</select>', choice_template='<option %s>%s</option>', }
-function OptionField.initialize(self)
-    Field.initialize(self)
+function OptionField.init(cls, attrs)
+    local self = Field.init(cls, attrs)
     local choices = self.choices or assert(nil, 'choices is required for OptionField')
     local first=choices[1]
     if not first then
@@ -277,8 +282,8 @@ function FileField.validate(self, value)
         return 'this field is required.'
     end 
 end
-function FileField.initialize(self)
-    Field.initialize(self) 
+function FileField.init(cls, attrs)
+    local self = Field.init(cls, attrs)
     self.upload_to = self.upload_to or assert(nil, 'upload_to is required for FileField')
     local last_char = string_sub(self.upload_to, -1, -1)
     if last_char ~= '/' and last_char ~= '\\' then

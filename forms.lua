@@ -6,10 +6,11 @@ local validator = require"resty.model.validator"
 local User = require"models".User
 
 local M = {}
-M.UserForm = BootsForm{
+-- UserForm inherits Form directly, so both `Form:class{...}` and `Form{...}` can be used.
+M.UserForm = Form:class{
     fields = {
-        username = BootsField.CharField{maxlength=20},    
-        password = BootsField.PasswordField{maxlength=28},    
+        username = Field.CharField{maxlength=20},    
+        password = Field.PasswordField{maxlength=28},    
     }, 
     field_order = {'username', 'password'}, 
     clean_username = function(self,value)
@@ -21,10 +22,13 @@ M.UserForm = BootsForm{
     end, 
     
 }
-M.LoginForm = Form{
+-- LoginForm inherits BootsForm which inherits Form via `new` method, which means 
+-- getmetatable(BootsForm).__call is InstanceCaller rather than ClassCaller. So the 
+-- fields can't be resolved with `BootsForm{...}`. We should use `class` method instead.
+M.LoginForm = BootsForm:class{
     fields = {
-        username = Field.CharField{maxlength=20, validators={validator.minlen(6)}, },    
-        password = Field.PasswordField{maxlength=28, validators={validator.minlen(6)},},    
+        username = BootsField.CharField{maxlength=20, validators={validator.minlen(6)}, required=false},    
+        password = BootsField.PasswordField{maxlength=28, validators={validator.minlen(6)},},    
     }, 
     field_order = {'username', 'password'}, 
     clean_username = function(self, value)

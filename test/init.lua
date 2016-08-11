@@ -1,5 +1,4 @@
-local TEST_PACKAGES = {'model', 'cookie', 'query'}
-local TEST_PACKAGES = {'transaction'}
+local TEST_PACKAGES = {'model', 'cookie', 'query','transaction'}
 
 return function (  )
 	ngx.header['Content-Type'] = "text/plain; charset=utf-8"

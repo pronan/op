@@ -8,23 +8,32 @@ local string_format = string.format
 local table_concat = table.concat
 
 local function ClassCaller(cls, attrs)
-    return cls:new(init):_resolve_fields()
+    return cls:new(attrs):_resolve_fields()
 end
-local function InstanceCaller(self, attrs)
-    return self:new(attrs):initialize() 
+local function InstanceCaller(cls, attrs)
+    return cls:init(attrs)
 end
-local M = setmetatable({}, {__call = ClassCaller})
-M.row_template = [[<div> %s %s %s %s </div>]]
-M.error_template = [[<ul class="error">%s</ul>]]
-M.help_template = [[<p class="help">%s</p>]]
-function M.new(self, init)
-    init = init or {}
+
+local Form = setmetatable({}, {__call=ClassCaller})
+Form.row_template = [[<div> %s %s %s %s </div>]]
+Form.error_template = [[<ul class="error">%s</ul>]]
+Form.help_template = [[<p class="help">%s</p>]]
+
+function Form.new(self, attrs)
+    attrs = attrs or {}
     self.__index = self
     self.__call = InstanceCaller
-    return setmetatable(init, self)
+    return setmetatable(attrs, self)
 end
-function M._resolve_fields(self)
+function Form.class(cls, subclass)
+    return cls:new(subclass):_resolve_fields()
+end
+function Form._resolve_fields(self)
+    -- for sugar: the hash table form of field defination
     local fields = self.fields
+    if not fields then -- no fields to resolve, just return
+        return self
+    end
     if fields[1]~=nil then -- array form
         if self.field_order == nil then
             local fo = {}
@@ -49,22 +58,23 @@ function M._resolve_fields(self)
     end
     return self
 end
-function M.initialize(self)
+function Form.init(cls, attrs)
+    local self = cls:new(attrs)
     self.is_bound = self.data or self.files
     self.data = self.data or {}
     self.files = self.files or {}
     self.initial = self.initial or {}
     self.label_suffix = self.label_suffix or ''
-    local fields = {}
     -- make a child-copy of fields so we can safely dynamically overwrite 
     -- some attributes of the field, e.g. `choices` of OptionField
+    local fields = {}
     for i, v in ipairs(self.fields) do 
     	fields[#fields+1] = v:new()
     end
     self.fields = fields
     return self
 end
-function M.get_value(self, field)
+function Form.get_value(self, field)
 	local name = field.name
     if self.is_bound then
     	return self.data[name] -- or self.files[name]
@@ -74,14 +84,14 @@ function M.get_value(self, field)
     	return field.initial or self.initial[name] or field.default
     end
 end
-function M._get_field(self, name)
+function Form._get_field(self, name)
     for i,v in ipairs(self.fields) do
         if v.name == name then
             return v
         end
     end
 end
-function M.render(self)
+function Form.render(self)
     local res = {}
     local has_error = self.has_error
     for i, name in ipairs(self.field_order) do
@@ -108,17 +118,17 @@ function M.render(self)
     end
     return table_concat(res, "\n")
 end
-function M.get_errors(self)
+function Form.get_errors(self)
     if not self.errors then
         self:full_clean()
     end
     return self.errors
 end
-function M.is_valid(self)
+function Form.is_valid(self)
     self:get_errors()
     return self.is_bound and not self.has_error
 end
-function M._clean_fields(self)
+function Form._clean_fields(self)
     for i, name in ipairs(self.field_order) do
         local field = self:_get_field(name)
         local value = self.data[name] or self.files[name]
@@ -141,7 +151,7 @@ function M._clean_fields(self)
         end
     end
 end
-function M._clean_form(self)
+function Form._clean_form(self)
     local cleaned_data, errors = self:clean()
     if errors then
         self.has_error = true
@@ -150,16 +160,16 @@ function M._clean_form(self)
         self.cleaned_data = cleaned_data
     end
 end
-function M.clean(self)
+function Form.clean(self)
     return self.cleaned_data
 end
-function M.full_clean(self)
+function Form.full_clean(self)
     self.errors = {}
     self.cleaned_data = {}
     self:_clean_fields()
     self:_clean_form()
 end
-function M.save(self)
+function Form.save(self)
     -- local res = {}
 end
-return M
+return Form

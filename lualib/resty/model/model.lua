@@ -16,8 +16,8 @@ local ngx_ERR = ngx.ERR
 local function ClassCaller(cls, attrs)
     return cls:new(attrs):_resolve_fields():_resolve_row()
 end
-local function InstanceCaller(self, attrs)
-    return self.row_class:new(attrs)
+local function InstanceCaller(cls, attrs)
+    return cls.row_class:new(attrs)
 end
 
 local Model = setmetatable({}, {__call = ClassCaller})
@@ -28,12 +28,22 @@ function Model.new(self, opts)
     self.__call = InstanceCaller
     return setmetatable(opts, self)
 end
+function Model.class(cls, attrs)
+    return cls:new(attrs):_resolve_fields():_resolve_row()
+end
+function Model.init(cls, attrs)
+    return cls.row_class:new(attrs)
+end
 function Model._resolve_row(self)
     self.row_class = Row:new{table_name=self.table_name, fields=self.fields}
     return self
 end
 function Model._resolve_fields(self)
+    -- for sugar: the hash table form of field defination
     local fields = self.fields
+    if not fields then -- no fields to resolve, just return
+        return self
+    end
     if fields[1]~=nil then -- array form
         if self.field_order == nil then
             local fo = {}

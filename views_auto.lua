@@ -65,7 +65,7 @@ function m.edituser(req, kwargs)
             return response.Plain(repr(form))
         end
     else
-        form = forms.UserForm{instance=User:get{id=2}}
+        form = forms.UserForm{instance=User:get{id=6}}
     end
     return response.Template("app/form.html", {form=form})
 end

@@ -3,7 +3,7 @@ local match = ngx.re.match
 local M = {}
 
 function M.maxlen(max, message)
-    message = message or 'length cannot be bigger than'..max
+    message = message or 'length cannot be bigger than '..max
     return function ( value )
         if #value > max then
             return message
@@ -11,7 +11,7 @@ function M.maxlen(max, message)
     end
 end
 function M.minlen(min, message)
-    message = message or 'length cannot be smaller than'..min
+    message = message or 'length cannot be smaller than '..min
     return function ( value )
         if #value < min then
             return message
@@ -19,7 +19,7 @@ function M.minlen(min, message)
     end
 end
 function M.max(max, message)
-    message = message or 'no bigger than'..max
+    message = message or 'no bigger than '..max
     return function ( value )
         if value > max then
             return message
@@ -27,7 +27,7 @@ function M.max(max, message)
     end
 end
 function M.min(min, message)
-    message = message or 'no smaller than'..min
+    message = message or 'no smaller than '..min
     return function ( value )
         if value < min then
             return message

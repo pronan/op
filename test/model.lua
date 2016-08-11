@@ -49,7 +49,7 @@ local data = {
     {'grape',  'fruit',     5, 20, '2016/3/14 23:00'}, 
     {'tomato', 'vegetable', 8, 200,'2016/3/24 23:12'}, 
 }
-local Sale = Model:make{table_name='sales', 
+local Sale = Model:class{table_name='sales', 
     fields = {
         id = Field.IntegerField{ min=1}, 
         name = Field.CharField{ maxlength=50},

@@ -3,7 +3,7 @@ local Field = require"resty.model.field"
 
 local _M = {}
 
-_M.User = Model{table_name='users', 
+_M.User = Model:class{table_name='users', 
     fields = {
         id = Field.IntegerField{min=1}, 
         username = Field.CharField{maxlength=50},
@@ -13,7 +13,7 @@ _M.User = Model{table_name='users',
     }, 
 }
 
-_M.Blog = Model{table_name='blogs', 
+_M.Blog = Model:class{table_name='blogs', 
     fields = {
         id = Field.IntegerField{min=1}, 
         title = Field.CharField{maxlength=50},

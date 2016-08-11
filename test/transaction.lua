@@ -72,7 +72,6 @@ M[#M+1]=function ()
         if not res then 
             return err
         end
-        loger(res)
     end
 end
 
