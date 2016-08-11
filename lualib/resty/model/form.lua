@@ -7,22 +7,21 @@ local pairs = pairs
 local string_format = string.format
 local table_concat = table.concat
 
-local function caller(t, opts) 
-    return t:new(opts):initialize() 
+local function ClassCaller(cls, attrs)
+    return cls:new(init):_resolve_fields()
 end
-
-local M = {}
+local function InstanceCaller(self, attrs)
+    return self:new(attrs):initialize() 
+end
+local M = setmetatable({}, {__call = ClassCaller})
 M.row_template = [[<div> %s %s %s %s </div>]]
 M.error_template = [[<ul class="error">%s</ul>]]
 M.help_template = [[<p class="help">%s</p>]]
 function M.new(self, init)
     init = init or {}
     self.__index = self
-    self.__call = caller
+    self.__call = InstanceCaller
     return setmetatable(init, self)
-end
-function M.create(self, init)
-    return self:new(init):_resolve_fields()
 end
 function M._resolve_fields(self)
     local fields = self.fields

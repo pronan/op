@@ -6,7 +6,7 @@ local validator = require"resty.model.validator"
 local User = require"models".User
 
 local M = {}
-M.UserForm = BootsForm:create{
+M.UserForm = BootsForm{
     fields = {
         username = BootsField.CharField{maxlength=20},    
         password = BootsField.PasswordField{maxlength=28},    
@@ -21,7 +21,7 @@ M.UserForm = BootsForm:create{
     end, 
     
 }
-M.LoginForm = Form:create{
+M.LoginForm = Form{
     fields = {
         username = Field.CharField{maxlength=20, validators={validator.minlen(6)}, },    
         password = Field.PasswordField{maxlength=28, validators={validator.minlen(6)},},    
@@ -44,14 +44,14 @@ M.LoginForm = Form:create{
         return value
     end, 
 }
-M.BlogForm = Form:create{
+M.BlogForm = Form{
     fields = {
         title = Field.CharField{maxlength=50},    
         content = Field.TextField{maxlength=520},    
     }, 
     
 }
-M.TestForm = Form:create{
+M.TestForm = Form{
     fields = {
         title = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致', required=false},    
         --content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  

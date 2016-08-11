@@ -13,19 +13,19 @@ local table_concat = table.concat
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
 
-local function ModelCaller(cls, attrs)
+local function ClassCaller(cls, attrs)
     return cls:new(attrs):_resolve_fields():_resolve_row()
 end
-local function ModelInstanceCaller(self, attrs)
+local function InstanceCaller(self, attrs)
     return self.row_class:new(attrs)
 end
 
-local Model = setmetatable({}, {__call = ModelCaller})
+local Model = setmetatable({}, {__call = ClassCaller})
 
 function Model.new(self, opts)
     opts = opts or {}
     self.__index = self
-    self.__call = ModelInstanceCaller
+    self.__call = InstanceCaller
     return setmetatable(opts, self)
 end
 function Model._resolve_row(self)
