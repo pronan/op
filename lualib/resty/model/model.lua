@@ -13,14 +13,19 @@ local table_concat = table.concat
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
 
-local Model = {}
-local function model_caller(self, attrs)
+local function ModelCaller(cls, attrs)
+    return cls:new(attrs):_resolve_fields():_resolve_row()
+end
+local function ModelInstanceCaller(self, attrs)
     return self.row_class:new(attrs)
 end
+
+local Model = setmetatable({}, {__call = ModelCaller})
+
 function Model.new(self, opts)
     opts = opts or {}
     self.__index = self
-    self.__call = model_caller
+    self.__call = ModelInstanceCaller
     return setmetatable(opts, self)
 end
 function Model._resolve_row(self)
@@ -52,9 +57,6 @@ function Model._resolve_fields(self)
         self.fields = final_fields
     end
     return self
-end
-function Model.make(self, init)
-    return self:new(init):_resolve_fields():_resolve_row()
 end
 function Model._proxy_sql(self, method, params)
     local proxy = Manager:new{table_name=self.table_name, fields=self.fields}

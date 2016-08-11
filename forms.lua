@@ -11,7 +11,7 @@ M.UserForm = BootsForm:create{
         username = BootsField.CharField{maxlength=20},    
         password = BootsField.PasswordField{maxlength=28},    
     }, 
-    
+    field_order = {'username', 'password'}, 
     clean_username = function(self,value)
         local user = User:get{username=value}
         if user then
@@ -26,7 +26,7 @@ M.LoginForm = Form:create{
         username = Field.CharField{maxlength=20, validators={validator.minlen(6)}, },    
         password = Field.PasswordField{maxlength=28, validators={validator.minlen(6)},},    
     }, 
-    
+    field_order = {'username', 'password'}, 
     clean_username = function(self, value)
         local user = User:get{username=value}
         if not user then
