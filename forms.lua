@@ -1,13 +1,13 @@
-local Form = require"resty.model.form"
-local BootsForm = require"resty.model.bootstrap_form"
-local Field = require"resty.model.field"
-local BootsField = require"resty.model.bootstrap_field"
-local validator = require"resty.model.validator"
+local Form = require"resty.mvc.form"
+local BootsForm = require"resty.mvc.bootstrap_form"
+local Field = require"resty.mvc.field"
+local BootsField = require"resty.mvc.bootstrap_field"
+local validator = require"resty.mvc.validator"
 local User = require"models".User
 
 local M = {}
 -- UserForm inherits Form directly, so both `Form:class{...}` and `Form{...}` can be used.
-M.UserForm = Form:class{
+M.UserForm = Form{
     fields = {
         username = Field.CharField{maxlength=20},    
         password = Field.PasswordField{maxlength=28},    

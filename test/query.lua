@@ -1,4 +1,4 @@
-local multiple = require"resty.model.query".multiple
+local multiple = require"resty.mvc.query".multiple
 
 local M = {}
 

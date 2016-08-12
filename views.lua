@@ -1,4 +1,4 @@
-local query = require"resty.model.query".single
+local query = require"resty.mvc.query".single
 local response = require"resty.response"
 local json = require "cjson.safe"
 local User = require"models".User

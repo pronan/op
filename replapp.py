@@ -2,14 +2,14 @@ import re
 import os
 
 
-def replace():
-    for old, new in [('sfzh','sfzh')]:
+def replace(go=False):
+    for old, new in [('resty.model','resty.mvc')]:
         arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
                 change = False
                 p = os.path.join(root,filespath)
-                if p[-3:] in ['pyc']:
+                if p[-4:] not in ['.lua','conf']:
                     continue
                 with open(p,encoding='u8') as f:
                     s = f.read()
@@ -18,11 +18,13 @@ def replace():
 
                 if change:
                     print(p)
-                    open(p,'w',encoding='u8').write(s.replace(old, new))
+                    if go:
+                        open(p,'w',encoding='u8').write(s.replace(old, new))
+                        print('changed')
                     
 
 def search():
-    for old in ['app.',]:
+    for old in ['resty.model','resty.mvc']:
         arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
@@ -34,7 +36,7 @@ def search():
                     if old in s:
                         print(p)
 
-search()
+replace(1)
 
 
     

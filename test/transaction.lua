@@ -1,7 +1,7 @@
-local mq = require"resty.model.query".multiple
-local q = require"resty.model.query".single
-local Model = require"resty.model.model"
-local Field = require"resty.model.field"
+local mq = require"resty.mvc.query".multiple
+local q = require"resty.mvc.query".single
+local Model = require"resty.mvc.model"
+local Field = require"resty.mvc.field"
 
 local Cat = Model{
     table_name = 'cats', 
