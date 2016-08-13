@@ -86,8 +86,8 @@ function M.w_repr(obj, ind, deep, already)
     if meta == nil then
         return M.solo_repr(obj, ind, deep, already)
     else
-        return string.format('%s\n%smeta table:\n%s%s', 
-            M.solo_repr(obj, ind, deep, already), ind, ind, 
+        return string.format('%s\n%s\\\\**meta table of %s:**\n%s%s', 
+            M.solo_repr(obj, ind, deep, already), ind, tostring(obj), ind, 
             M.solo_repr(meta, ind, deep, already))
     end
 end
