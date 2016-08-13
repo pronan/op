@@ -12,10 +12,12 @@ local function render(path, context)
     local req = ngx.req
     res.req = req
     res.user = req.user
+    loger('in render, user:', req.user)
     res.messages = req.messages
     if context then
         update(res, context)
     end
+    loger('in render, context:', res)
     return compile(path)(res)
 end
 

@@ -7,6 +7,7 @@ local MIDDLEWARES = settings.MIDDLEWARES
 local MIDDLEWARES_REVERSED = settings.MIDDLEWARES_REVERSED
 
 return function()
+    loger('req id:', tostring(ngx.req))
     local uri = ngx.var.uri
     for regex, func in pairs(urls) do
         local kwargs, err = match(uri, regex)
