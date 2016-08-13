@@ -71,4 +71,23 @@ function m.github(request, kwargs)
     return response.Redirect('/profile')
     --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n user:%s', repr(qq), code, token, repr(user)))
 end
+function m.log(request, kw)
+    local n = tonumber(kw.n) or 50
+    local f, err  = io.lines("logs/error.log", "*l") 
+    if not f then
+        return nil, err
+    end
+    
+    local res = {}
+    for e in f do
+        res[#res+1] = e
+    end
+    local len = #res
+    for i, e in ipairs(res) do
+        if len-i<n then
+            ngx.print(e)
+        end
+    end
+    return response.Plain('')
+end
 return m
