@@ -4,10 +4,7 @@ local encode = require "cjson.safe".encode
 local GLOBAL_CONTEXT = {pjl='大肥白嫩'}
 
 
-local update = require"utils".update
-
 local function render(request, path, context)
-    local res = setmetatable({}, GLOBAL_CONTEXT)
     for k,v in pairs(GLOBAL_CONTEXT) do
         res[k] = v
     end

@@ -44,9 +44,9 @@ local function before(request, kwargs)
     request.session = SessionProxy(decrypt_session(request.cookies.session))
 end
 local function after(request, kwargs)
-    local proxy = getmetatable(request.session)
-    if proxy.modified then
-        local data = proxy.__index
+    local meta = getmetatable(request.session)
+    if meta.modified then
+        local data = meta.__index
         if next(data) == nil then
             request.cookies.session = nil
         else
