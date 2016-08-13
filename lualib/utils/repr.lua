@@ -72,7 +72,7 @@ local function _repr(obj, ind, deep, already)
     end
 end
 
-local function _repr(obj, already)
+local function solo_repr(obj, already)
     if type(obj)  == 'table' then
         return '{\\\\'..tostring(obj).._repr(obj, '', 1, already)
     else
@@ -84,9 +84,9 @@ local function repr(obj)
     local already = {}
     local meta = getmetatable(obj)
     if meta == nil then
-        return _repr(obj, already)
+        return solo_repr(obj, already)
     else
-        return string.format('%s\nmeta table:\n%s', _repr(obj, already), _repr(meta, already))
+        return string.format('%s\nmeta table:\n%s', solo_repr(obj, already), solo_repr(meta, already))
     end
 end
 
