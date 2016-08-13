@@ -54,6 +54,7 @@ return function()
                 --return ngx.exit(500)
                 return ErrorResponse(err):exec()
             else
+                loger(response)
                 return response:exec()
             end
         end
