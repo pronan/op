@@ -26,8 +26,8 @@ local function simple(k)
     end
 end   
 
-local M = setmetatable({}, {__call=function(t, obj)return t.f_repr(obj)end})
-local function M._repr(obj, ind, deep, already)
+local M = setmetatable({}, {__call= function(t, obj) return t.f_repr(obj)end })
+function M._repr(obj, ind, deep, already)
     local label = type(obj)
     if label == 'table' then
         local res = {}
@@ -73,7 +73,7 @@ local function M._repr(obj, ind, deep, already)
     end
 end
 
-local function M.solo_repr(obj, ind, deep, already)
+function M.solo_repr(obj, ind, deep, already)
     if type(obj)  == 'table' then
         return '{\\\\'..tostring(obj)..M._repr(obj,  ind, deep, already)
     else
@@ -81,7 +81,7 @@ local function M.solo_repr(obj, ind, deep, already)
     end
 end
 
-local function M.w_repr(obj, ind, deep, already)
+function M.w_repr(obj, ind, deep, already)
     local meta = getmetatable(obj)
     if meta == nil then
         return M.solo_repr(obj, ind, deep, already)
@@ -92,7 +92,7 @@ local function M.w_repr(obj, ind, deep, already)
     end
 end
 
-local function M.f_repr(obj)
+function M.f_repr(obj)
     return M.w_repr(obj, '', 1, {})
 end
 
