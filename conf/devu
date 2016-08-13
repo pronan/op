@@ -6,11 +6,12 @@ user root;
 events {worker_connections  10240;}
 
 http {
-    default_type  "text/html; charset=utf-8";
     #access_log  off;
-    sendfile        on;
-    keepalive_timeout  65;
     #lua_code_cache off;
+
+    default_type  "text/html; charset=utf-8";
+    sendfile        on;
+    keepalive_timeout  75; 
     lua_package_path './?.lua;./?/init.lua;./lualib/?.lua;./lualib/?/init.lua;;';
     init_by_lua_file init.lua;
 
@@ -26,7 +27,7 @@ http {
 
     server {
         listen       80;
-        server_name  ygfwd.cn www.ygfwd.cn wdksw.com www.wdksw.com httper.cn www.httper.cn 120.25.103.213;
+        server_name  tcpip.vip;
         root html;
         include mime.types;
 
@@ -63,8 +64,8 @@ http {
 
         location = /gitpush {
             content_by_lua_block{
-                os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
-                --os.execute('/usr/local/openresty/nginx/sbin/nginx -p /root/op -c /root/op/conf/devu -s reload')
+                os.execute('git --git-dir=~/op/.git --work-tree=~/op pull')
+                --os.execute('/usr/local/openresty/nginx/sbin/nginx -p ~/op -c ~/op/conf/devu -s reload')
             }
         }
     }
