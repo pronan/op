@@ -24,7 +24,7 @@
             <li{% if navbar=='guide' then%} class="active"{% end %}><a href="/guide">指南</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            {%if user then%}
+            {%if user~=nil then%}
             <li{% if navbar=='profile' then%} class="active"{% end %}>
             <a href="/profile"><img width="32" height="32" src="{{user.avatar}}" />{{user.username}}的账号</a></li>
             <li{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
