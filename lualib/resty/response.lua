@@ -5,6 +5,7 @@ local GLOBAL_CONTEXT = {pjl='大肥白嫩'}
 
 
 local function render(request, path, context)
+    local res = {}
     for k,v in pairs(GLOBAL_CONTEXT) do
         res[k] = v
     end
