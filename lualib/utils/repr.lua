@@ -56,7 +56,7 @@ local function _repr(obj, ind, deep, already)
                 elseif deep > MAX_DEEPTH then
                     v = simple('*exceed max deepth*')
                 else
-                    v = '{\\\\'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
+                    v = '{\\\\'..tostring(v)..w_repr(v, indent..ok(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)
@@ -72,23 +72,29 @@ local function _repr(obj, ind, deep, already)
     end
 end
 
-local function solo_repr(obj, already)
+local function solo_repr(obj, ind, deep, already)
     if type(obj)  == 'table' then
-        return '{\\\\'..tostring(obj).._repr(obj, '', 1, already)
+        return '{\\\\'..tostring(obj).._repr(obj,  ind, deep, already)
     else
         return simple(obj)
     end
 end
 
-local function repr(obj)
-    local already = {}
+local function w_repr(obj, ind, deep, already)
     local meta = getmetatable(obj)
     if meta == nil then
-        return solo_repr(obj, already)
+        return solo_repr(obj, ind, deep, already)
     else
-        return string.format('%s\nmeta table:\n%s', solo_repr(obj, already), solo_repr(meta, already))
+        return string.format('%s\nmeta table:\n%s', 
+            solo_repr(obj, ind, deep, already), 
+            solo_repr(meta, ind, deep, already))
     end
 end
+
+local function repr(obj)
+    return w_repr(obj, '', 1, {})
+end
+
 
 local delimiter = ''
 for i=1, 50 do
