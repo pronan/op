@@ -97,8 +97,11 @@ local function simple_time_parser(t)
         assert(false)
     end
 end
+local function debugger(e) 
+    return debug.traceback()..e 
+end
 return {
     caller = caller, extend=extend, update=update, list=list, copy=copy, 
     map = map, xmap=xmap, zfill=zfill, simple_time_parser=simple_time_parser, 
-    sorted=sorted,
+    sorted=sorted, debugger=debugger, 
 }

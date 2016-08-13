@@ -34,8 +34,9 @@ http {
         location / {
             resolver 223.5.5.5;
             content_by_lua_block {
-                local ok, err = xpcall(require"main", function(e) return debug.traceback()..e end)
+                local ok, err = xpcall(require"main", require"resty.utils.base".debugger)
                 if not ok then
+                    ngx.header['Content-Type'] = "text/plain; charset=utf-8"
                     ngx.say(err)
                 end
             }
