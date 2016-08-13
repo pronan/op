@@ -29,13 +29,13 @@ return function()
                     end
                 end
             end
-            -- local response, err = func(request, kwargs)
-            local unexpected_error, response, err = catch_error(func, request, kwargs)
+            local response, err = func(request, kwargs)
+            -- local unexpected_error, response, err = catch_error(func, request, kwargs)
             
-            if unexpected_error then
-                ngx.log(ngx.ERR, repr(response))
-                return ErrorResponse(response):exec()
-            end
+            -- if unexpected_error then
+            --     ngx.log(ngx.ERR, repr(response))
+            --     return ErrorResponse(response):exec()
+            -- end
 
             for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then
