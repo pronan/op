@@ -29,14 +29,14 @@ return function()
                     end
                 end
             end
-            --local response, err = func(request, kwargs)
-            local unexpected_error, response, err = catch_error(func, request, kwargs)
-            loger('unexpected_error:', type(unexpected_error), unexpected_error)
-            if unexpected_error then
-                loger('type:', type(response))
-                loger(response)
-                return ErrorResponse(response):exec()
-            end
+            local response, err = func(request, kwargs)
+            -- local unexpected_error, response, err = catch_error(func, request, kwargs)
+            -- loger('unexpected_error:', type(unexpected_error), unexpected_error)
+            -- if unexpected_error then
+            --     loger('type:', type(response))
+            --     loger(response)
+            --     return ErrorResponse(response):exec()
+            -- end
 
             for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then

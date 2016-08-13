@@ -34,7 +34,10 @@ http {
         location / {
             resolver 223.5.5.5;
             content_by_lua_block {
-                require"main"()
+                local ok, err = xpcall(require"main", function(e) return debug.traceback()..e end)
+                if not ok then
+                    ngx.say(err)
+                end
             }
         }
 
