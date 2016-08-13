@@ -26,7 +26,8 @@ local function simple(k)
     end
 end   
 
-local function _repr(obj, ind, deep, already)
+local M = setmetatable({}, {__call=function(t, obj)return t.f_repr(obj)end})
+local function M._repr(obj, ind, deep, already)
     local label = type(obj)
     if label == 'table' then
         local res = {}
@@ -56,7 +57,7 @@ local function _repr(obj, ind, deep, already)
                 elseif deep > MAX_DEEPTH then
                     v = simple('*exceed max deepth*')
                 else
-                    v = '{\\\\'..tostring(v)..w_repr(v, indent..ok(max_key_len+3), deep+1, already)
+                    v = '{\\\\'..tostring(v)..M.w_repr(v, indent..ok(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)
@@ -72,27 +73,27 @@ local function _repr(obj, ind, deep, already)
     end
 end
 
-local function solo_repr(obj, ind, deep, already)
+local function M.solo_repr(obj, ind, deep, already)
     if type(obj)  == 'table' then
-        return '{\\\\'..tostring(obj).._repr(obj,  ind, deep, already)
+        return '{\\\\'..tostring(obj)..M._repr(obj,  ind, deep, already)
     else
         return simple(obj)
     end
 end
 
-local function w_repr(obj, ind, deep, already)
+local function M.w_repr(obj, ind, deep, already)
     local meta = getmetatable(obj)
     if meta == nil then
-        return solo_repr(obj, ind, deep, already)
+        return M.solo_repr(obj, ind, deep, already)
     else
         return string.format('%s\nmeta table:\n%s', 
-            solo_repr(obj, ind, deep, already), 
-            solo_repr(meta, ind, deep, already))
+            M.solo_repr(obj, ind, deep, already), 
+            M.solo_repr(meta, ind, deep, already))
     end
 end
 
-local function repr(obj)
-    return w_repr(obj, '', 1, {})
+local function M.f_repr(obj)
+    return M.w_repr(obj, '', 1, {})
 end
 
 
@@ -108,4 +109,4 @@ local function loger(...)
     ngx_log(ngx_ERR,string.format('\n%s\n%s\n%s', delimiter, table.concat(res, " "), delimiter))
 end
 
-return {repr=repr, loger=loger}
+return {repr=M, loger=loger}
