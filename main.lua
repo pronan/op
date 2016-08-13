@@ -7,11 +7,7 @@ local MIDDLEWARES = settings.MIDDLEWARES
 local MIDDLEWARES_REVERSED = settings.MIDDLEWARES_REVERSED
 
 local request_meta = {__index = ngx.req}
-local function catch_error(f, ...)
-    return xpcall(f, function(e)  
-        return debug.traceback()..e 
-    end, ...)
-end
+
 return function()
     local uri = ngx.var.uri
     for regex, func in pairs(urls) do
@@ -29,14 +25,13 @@ return function()
                     end
                 end
             end
-            local response, err = func(request, kwargs)
-            -- local unexpected_error, response, err = catch_error(func, request, kwargs)
-            -- loger('unexpected_error:', type(unexpected_error), unexpected_error)
-            -- if unexpected_error then
-            --     loger('type:', type(response))
-            --     loger(response)
-            --     return ErrorResponse(response):exec()
-            -- end
+            -- local response, err = func(request, kwargs)
+            local unexpected_error, response, err = xpcall(func, require"utils.base".debugger, request, kwargs)
+            loger('unexpected_error:', type(unexpected_error), unexpected_error)
+            if unexpected_error then
+                loger('response:', type(response), response)
+                return ErrorResponse(response):exec()
+            end
 
             for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then
