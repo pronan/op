@@ -53,17 +53,17 @@ function m.qq(request, kwargs)
     --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n openid:%s, \nuser:%s', repr(qq), code, token, openid, repr(user)))
 end
 function m.github(request, kwargs)
-    local qq = require"resty.oauth".github()
+    local github = require"resty.oauth".github()
     local code = request.GET.code
-    local token, err = qq:get_access_token(code)
+    local token, err = github:get_access_token(code)
     if not token then
         return nil, err
     end
-    local res, err = qq:get_user_info(token)
+    local res, err = github:get_user_info(token)
     if not res then
         return nil, err
     end
-    user = User:get{openid=res.openid}
+    local user = User:get{openid=res.openid}
     if not user then
         user = User:create(res)
     end
