@@ -25,14 +25,7 @@ return function()
                     end
                 end
             end
-            -- local response, err = func(request, kwargs)
-            local unexpected_error, response, err = xpcall(func, require"utils.base".debugger, request, kwargs)
-            loger('unexpected_error:', type(unexpected_error), unexpected_error)
-            if unexpected_error then
-                loger('response:', type(response), response)
-                return ErrorResponse(response):exec()
-            end
-
+            local response, err = func(request, kwargs)
             for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then
                     local err, ok = ware.after(request, kwargs)
