@@ -67,7 +67,7 @@ http {
                 local decode = require"cjson.safe".decode
                 ngx.req.read_body()
                 local data = ngx.req.get_post_args()
-                loger('data:', decode(data))
+                loger('data:', data.commits)
                 os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
             }
         }
