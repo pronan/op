@@ -47,7 +47,7 @@ http {
         }
 
         location = /ok {
-            content_by_lua_block{ngx.print'Hello!'}
+            content_by_lua_block{ngx.print'Hello, smart!'}
         }
 
         location = /favicon.ico {
