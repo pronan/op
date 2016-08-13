@@ -33,10 +33,10 @@ return function()
             local unexpected_error, response, err = catch_error(func, request, kwargs)
             
             if unexpected_error then
-                ngx.log(ngx.ERR, response)
+                ngx.log(ngx.ERR, repr(response))
                 return ErrorResponse(response):exec()
             end
-            
+
             for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then
                     local err, ok = ware.after(request, kwargs)
