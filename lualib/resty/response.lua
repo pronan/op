@@ -13,7 +13,6 @@ local function render(request, path, context)
     end
     res.request = request
     res.user = request.user
-    loger('in render, user:', request.user)
     res.messages = request.messages
     if context then
         for k,v in pairs(context) do
