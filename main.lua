@@ -6,12 +6,13 @@ local match = ngx.re.match
 local MIDDLEWARES = settings.MIDDLEWARES
 local MIDDLEWARES_REVERSED = settings.MIDDLEWARES_REVERSED
 
+local request_meta = {__index = ngx.req}
 return function()
     loger('req id:', tostring(ngx.req))
     local uri = ngx.var.uri
     for regex, func in pairs(urls) do
         local kwargs, err = match(uri, regex)
-        local req = ngx.req
+        local req = setmetatable({}, request_meta)
         if kwargs then
 
             for i, ware in ipairs(MIDDLEWARES) do
