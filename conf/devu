@@ -68,7 +68,7 @@ http {
                 local decode = require"cjson.safe".decode
                 local data = ngx.req.get_post_args()
                 local payload = decode(data.payload)
-                if payload.commits.message=='production' then
+                if payload.commits[1].message=='production' then
                     os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
                 end
             }
