@@ -47,7 +47,7 @@ http {
         }
 
         location = /ok {
-            content_by_lua_block{ngx.print'Hello, smart!'}
+            content_by_lua_block{ngx.print'Hello, smarter!'}
         }
 
         location = /favicon.ico {
@@ -64,9 +64,10 @@ http {
 
         location = /gitpush {
             content_by_lua_block{
+                local decode = require"cjson.safe".decode
                 ngx.req.read_body()
                 local data = ngx.req.get_post_args()
-                loger('data:', data)
+                loger('data:', decode(data))
                 os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
             }
         }
