@@ -66,8 +66,8 @@ http {
             content_by_lua_block{
                 ngx.req.read_body()
                 local data = req.get_post_args()
-                loger(data)
-                os.execute('git --git-dir=~/op/.git --work-tree=~/op pull')
+                loger('data:', data)
+                os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
             }
         }
     }
