@@ -7,10 +7,10 @@ local User = require"models".User
 
 local M = {}
 -- UserForm inherits Form directly, so both `Form:class{...}` and `Form{...}` can be used.
-M.UserForm = Form{
+M.UserForm = BootsForm{
     fields = {
-        username = Field.CharField{maxlength=20},    
-        password = Field.PasswordField{maxlength=28},    
+        username = BootsField.CharField{maxlength=20},    
+        password = BootsField.PasswordField{maxlength=28},    
     }, 
     field_order = {'username', 'password'}, 
     clean_username = function(self,value)
