@@ -8,9 +8,9 @@ local update = require"utils".update
 
 local function render(request, path, context)
     local res = setmetatable({}, GLOBAL_CONTEXT)
-    -- for k,v in pairs(GLOBAL_CONTEXT) do
-    --     res[k] = v
-    -- end
+    for k,v in pairs(GLOBAL_CONTEXT) do
+        res[k] = v
+    end
     res.request = request
     res.user = request.user
     res.messages = request.messages
