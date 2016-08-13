@@ -1,7 +1,7 @@
 local compile = require"resty.template".compile
 local encode = require "cjson.safe".encode
 
-local GLOBAL_CONTEXT = {pjl='大肥白嫩'}
+local GLOBAL_CONTEXT = {pjl='yeal'}
 
 
 local function render(request, path, context)

@@ -32,7 +32,7 @@ local function decrypt_session(value)
     end
     return value
 end
-local function SessionProxy(data)
+local function proxy_session(data)
     local meta = {modified = false, __index = data}
     meta.__newindex = function(t, k, v) 
         data[k] = v  
@@ -41,7 +41,7 @@ local function SessionProxy(data)
     return setmetatable({}, meta)
 end
 local function before(request, kwargs)
-    request.session = SessionProxy(decrypt_session(request.cookies.session))
+    request.session = proxy_session(decrypt_session(request.cookies.session))
 end
 local function after(request, kwargs)
     local meta = getmetatable(request.session)

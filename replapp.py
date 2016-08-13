@@ -24,7 +24,7 @@ def replace(go=False):
                     
 
 def search():
-    for old in ['resty.model','resty.mvc']:
+    for old in ['jo']:
         arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
@@ -36,7 +36,7 @@ def search():
                     if old in s:
                         print(p)
 
-replace(1)
+search()
 
 
     

@@ -6,6 +6,7 @@ local User = require"models".User
 local m={}
 
 function m.home(request, kw)
+    a.x.y = 1
     return response.Template(request, 'home.html')
 end
 function m.global(request, kwargs)

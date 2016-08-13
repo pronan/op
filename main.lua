@@ -7,10 +7,15 @@ local MIDDLEWARES = settings.MIDDLEWARES
 local MIDDLEWARES_REVERSED = settings.MIDDLEWARES_REVERSED
 
 local request_meta = {__index = ngx.req}
+local function catch_error(f, ...)
+    return xpcall(f, function(e)  
+        return debug.traceback()..e 
+    end, ...)
+end
 return function()
     local uri = ngx.var.uri
     for regex, func in pairs(urls) do
-        local kwargs, err = match(uri, regex)
+        local kwargs, err = match(uri, regex, 'jo')
         local request = setmetatable({}, request_meta)
         if kwargs then
             for i, ware in ipairs(MIDDLEWARES) do
@@ -24,7 +29,14 @@ return function()
                     end
                 end
             end
-            local response, err = func(request, kwargs)
+            -- local response, err = func(request, kwargs)
+            local unexpected_error, response, err = catch_error(func, request, kwargs)
+            
+            if unexpected_error then
+                ngx.log(ngx.ERR, response)
+                return ErrorResponse(response):exec()
+            end
+            
             for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then
                     local err, ok = ware.after(request, kwargs)
@@ -36,6 +48,7 @@ return function()
                     end
                 end
             end
+
             if not response then
                 ngx.log(ngx.ERR, err)
                 --return ngx.exit(500)
