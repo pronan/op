@@ -47,7 +47,7 @@ http {
         }
 
         location = /ok {
-            content_by_lua_block{ngx.print'Hello, smarter!x'}
+            content_by_lua_block{ngx.print'Hello, smarter!xx'}
         }
 
         location = /favicon.ico {
@@ -64,13 +64,13 @@ http {
 
         location = /gitpush {
             content_by_lua_block{
-                local decode = require"cjson.safe".decode
                 ngx.req.read_body()
+                local decode = require"cjson.safe".decode
                 local data = ngx.req.get_post_args()
                 local payload = decode(data.payload)
-                loger('payload:', payload)
-                loger('commits:', payload.commits)
-                os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
+                if payload.commits.message=='production' then
+                    os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
+                end
             }
         }
     }
