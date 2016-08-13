@@ -5,26 +5,26 @@ local User = require"models".User
 
 local m={}
 
-function m.home(req, kw)
-    return response.Template('home.html')
+function m.home(request, kw)
+    return response.Template(request, 'home.html')
 end
 function m.global(request, kwargs)
     return response.Plain(repr(getmetatable(_G).__index))
 end
-function m.models(req,kw)
+function m.models(request,kw)
     local name=kw.name or 'users'
     local res, err = query("select * from "..name)
     if not res then
         return nil, err
     end
-    return response.Template('users.html', {users=res})
+    return response.Template(request, 'users.html', {users=res})
 end
 local oauth2 = {
     github = require"resty.oauth".github.login_redirect_uri, 
     qq = require"resty.oauth".qq.login_redirect_uri, 
 }
-function m.oauth(req, kwargs)
-    if req.user then
+function m.oauth(request, kwargs)
+    if request.user then
         return response.Redirect('/profile')
     end
     return response.Redirect(oauth2[kwargs.name or 'qq'])
