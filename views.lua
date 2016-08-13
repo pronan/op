@@ -83,11 +83,12 @@ function m.log(request, kw)
         res[#res+1] = e
     end
     local len = #res
+    local arr = {}
     for i, e in ipairs(res) do
         if len-i<n then
-            ngx.say(e)
+            arr[#arr+1] = e
         end
     end
-    return response.Plain('')
+    return response.Plain(table.concat( arr, "\n" ))
 end
 return m
