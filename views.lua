@@ -85,7 +85,7 @@ function m.log(request, kw)
     local len = #res
     for i, e in ipairs(res) do
         if len-i<n then
-            ngx.print(e)
+            ngx.say(e)
         end
     end
     return response.Plain('')
