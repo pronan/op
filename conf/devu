@@ -64,8 +64,10 @@ http {
 
         location = /gitpush {
             content_by_lua_block{
+                ngx.req.read_body()
+                local data = req.get_post_args()
+                loger(data)
                 os.execute('git --git-dir=~/op/.git --work-tree=~/op pull')
-                --os.execute('/usr/local/openresty/nginx/sbin/nginx -p ~/op -c ~/op/conf/devu -s reload')
             }
         }
     }
