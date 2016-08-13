@@ -96,7 +96,6 @@ local function M.f_repr(obj)
     return M.w_repr(obj, '', 1, {})
 end
 
-
 local delimiter = ''
 for i=1, 50 do
     delimiter = delimiter..'*'
