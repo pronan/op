@@ -9,7 +9,7 @@ function m.home(request, kw)
     return response.Template(request, 'home.html')
 end
 function m.global(request, kwargs)
-    return response.Plain(repr(getmetatable(_G).__index))
+    return response.Plain(repr(_G))
 end
 function m.models(request,kw)
     local name=kw.name or 'users'
