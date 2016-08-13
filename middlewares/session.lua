@@ -40,17 +40,17 @@ local function SessionProxy(data)
     end
     return setmetatable({}, meta)
 end
-local function before(req, kwargs)
-    req.session = SessionProxy(decrypt_session(req.cookies.session))
+local function before(request, kwargs)
+    request.session = SessionProxy(decrypt_session(request.cookies.session))
 end
-local function after(req, kwargs)
-    local proxy = getmetatable(req.session)
+local function after(request, kwargs)
+    local proxy = getmetatable(request.session)
     if proxy.modified then
         local data = proxy.__index
         if next(data) == nil then
-            req.cookies.session = nil
+            request.cookies.session = nil
         else
-            req.cookies.session = {value=encrypt_session(data), path=SESSION_PATH, 
+            request.cookies.session = {value=encrypt_session(data), path=SESSION_PATH, 
                 max_age=SESSION_EXPIRES, expires=http_time(time()+SESSION_EXPIRES)}
         end
     end

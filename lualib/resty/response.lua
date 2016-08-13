@@ -6,18 +6,20 @@ local GLOBAL_CONTEXT = {pjl='大肥白嫩'}
 
 local update = require"utils".update
 
-local function render(path, context)
+local function render(request, path, context)
     local res = {}
-    update(res, GLOBAL_CONTEXT)
-    local req = ngx.req
-    res.req = req
-    res.user = req.user
-    loger('in render, user:', req.user)
-    res.messages = req.messages
-    if context then
-        update(res, context)
+    for k,v in pairs(GLOBAL_CONTEXT) do
+        res[k] = v
     end
-    loger('in render, context:', res)
+    res.request = request
+    res.user = request.user
+    loger('in render, user:', request.user)
+    res.messages = request.messages
+    if context then
+        for k,v in pairs(context) do
+            res[k] = v
+        end
+    end
     return compile(path)(res)
 end
 
@@ -51,14 +53,14 @@ function Html.exec(self)
 end
 
 local TemplateMeta = M:new{}
-TemplateMeta.__call = function(tbl, path, context)
-    return tbl:new{path=path, context=context}
+TemplateMeta.__call = function(tbl, request, path, context)
+    return tbl:new{path=path, context=context, request=request}
 end
 
 local Template = TemplateMeta:new{}
 function Template.exec(self)
     ngx.header['Content-Type'] = "text/html; charset=utf-8"
-    return ngx.print(render(self.path, self.context))
+    return ngx.print(render(self.request, self.path, self.context))
 end
 
 local ErrorMeta = M:new{}

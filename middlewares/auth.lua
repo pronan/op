@@ -1,5 +1,5 @@
-local function before(req, kwargs)
-    req.user = req.session.user
+local function before(request, kwargs)
+    request.user = request.session.user
 end
 
 return { before = before}
