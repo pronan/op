@@ -71,7 +71,7 @@ end
 local Error = ErrorMeta:new{}
 function Error.exec(self)
     ngx.header['Content-Type'] = "text/html; charset=utf-8"
-    return ngx.print(render('error.html', {message=self.message}))
+    return ngx.print(compile('error.html')({message=self.message}))
 end
 
 local RedirectMeta = M:new{}
