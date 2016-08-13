@@ -65,7 +65,7 @@ http {
         location = /gitpush {
             content_by_lua_block{
                 ngx.req.read_body()
-                local data = req.get_post_args()
+                local data = ngx.req.get_post_args()
                 loger('data:', data)
                 os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
             }
