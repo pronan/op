@@ -10,6 +10,7 @@ local function before(request, kwargs)
     request.cookies = cookie_new()
 end
 
+
 local function after(request, kwargs)
     local cookies = {}
     for k, v in pairs(request.cookies) do
