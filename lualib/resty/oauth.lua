@@ -34,9 +34,11 @@ end
 function qq.get_login_redirect_uri(self, redi)
     if redi then
         redi = '?redirect_url='..redi
+    else
+        redi = ''
     end
     return self.authorize_uri..'?'..encode_args{response_type='code', 
-        client_id=self.client_id, redirect_uri=self.redirect_uri..(redi or '')}
+        client_id=self.client_id, redirect_uri=self.redirect_uri..redi}
 end
 qq.initialize(qq)
 -- {
@@ -133,9 +135,11 @@ end
 function github.get_login_redirect_uri(self, redi)
     if redi then
         redi = '?redirect_url='..redi
+    else
+        redi = ''
     end
     return self.authorize_uri..'?'..encode_args{response_type='code', 
-        client_id=self.client_id, redirect_uri=self.redirect_uri..(redi or'')}
+        client_id=self.client_id, redirect_uri=self.redirect_uri..redi}
 end
 github.login_redirect_uri = github:get_login_redirect_uri()
 function github.get_access_token(self, code)
