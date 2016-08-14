@@ -49,9 +49,9 @@ local oauth2 = {
 }
 function m.oauth(request, kwargs)
     if request.user then
-        return response.Redirect('/profile')
+        return response.Redirect('/')
     end
-    return response.Redirect(oauth2[kwargs.name or 'qq'])
+    return response.Redirect(require"resty.oauth"[kwargs.name]:get_login_redirect_uri(request.GET.redirect_url))
 end
 function m.qq(request, kwargs)
     local qq = require"resty.oauth".qq()

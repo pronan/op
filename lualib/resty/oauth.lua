@@ -127,9 +127,9 @@ function github.initialize(self)
     self.login_redirect_uri = self:get_login_redirect_uri()
     return self
 end
-function github.get_login_redirect_uri(self)
+function github.get_login_redirect_uri(self, redi)
     return self.authorize_uri..'?'..encode_args{response_type='code', 
-        client_id=self.client_id, redirect_uri=self.redirect_uri}
+        client_id=self.client_id, redirect_uri=self.redirect_uri..'?redirect_uri='..(redi or '/')}
 end
 github.login_redirect_uri = github:get_login_redirect_uri()
 function github.get_access_token(self, code)
