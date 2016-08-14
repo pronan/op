@@ -73,7 +73,7 @@ function m.qq(request, kwargs)
         user = User:create(data)
     end
     request.session.user = user
-    return response.Redirect(request.GET.redirect_url or request.get_headers().referer or '/')
+    return response.Redirect(request.GET.redirect_url or '/')
     --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n openid:%s, \nuser:%s', repr(qq), code, token, openid, repr(user)))
 end
 function m.github(request, kwargs)
