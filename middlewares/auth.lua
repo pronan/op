@@ -2,7 +2,10 @@ local User = require"models".User
 local row_class = require"resty.mvc.row":new{table_name=User.table_name, fields=User.fields}
 
 local function before(request, kwargs)
-    request.user = row_class:new(request.session.user)
+	local user = request.session.user
+	if user then
+    	request.user = row_class:new(user)
+   	end
 end
 
 return { before = before}
