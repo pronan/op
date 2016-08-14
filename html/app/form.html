@@ -83,7 +83,7 @@ var uploader = Qiniu.uploader({
                var res = JSON.parse(info);
                var uri = domain +'/'+ res.key; 
                $('#id-avatar').attr('value', uri);
-               $('<img src="'+uri+'"/>').insertBefore($('#id-avatar-qiniu'));
+               $('<img src="http://'+uri+'"/>').insertBefore($('#id-avatar-qiniu'));
         },
         'Error': function(up, err, errTip) {
                console.log(err, errTip)
