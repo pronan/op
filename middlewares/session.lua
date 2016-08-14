@@ -47,7 +47,6 @@ local function after(request, kwargs)
     local meta = getmetatable(request.session)
     if meta.modified then
         local data = meta.__index
-        loger('data:', data)
         if next(data) == nil then
             request.cookies.session = nil
         else

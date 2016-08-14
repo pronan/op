@@ -18,8 +18,8 @@ function m.user_update(request, kwargs)
             for k,v in pairs(form.cleaned_data) do
                 user[k] = v
             end
-            local user, err = user:save()
-            if not user then
+            local ret, err = user:save()
+            if not ret then
                 return response.Error(err)
             end
             request.session.user = user
