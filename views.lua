@@ -12,7 +12,7 @@ end
 function m.user_update(request, kwargs)
     local form;
     if request.get_method()=='POST' then
-        form = forms.UserEditForm{data=request.POST}
+        form = forms.UserEditForm{data=request.POST, request=request}
         if form:is_valid() then
             local user = request.user
             for k,v in pairs(form.cleaned_data) do
@@ -23,6 +23,8 @@ function m.user_update(request, kwargs)
                 return response.Error(err)
             end
             return response.Redirect('/profile')
+        else
+            loger(form.errors)
         end
     else
         form = forms.UserEditForm{instance=request.user}

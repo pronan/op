@@ -31,6 +31,9 @@ M.UserEditForm = BootsForm:class{
     }, 
     field_order = {'avatar', 'username', 'password'}, 
     clean_username = function(self,value)
+        if value == self.request.user.username then
+            return value
+        end
         local user = User:get{username=value}
         if user then
             return nil, {'用户名已存在.'}
