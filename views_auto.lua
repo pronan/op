@@ -37,25 +37,13 @@ function m.login(request, kwargs)
         form = forms.LoginForm{data=request.POST}
         if form:is_valid() then
             request.session.user=form.user
-            request.session.messages = {'欢迎您, '..form.user.username}
-            return response.Redirect('/profile')
+            request.session.messages = {'您已成功登录, '..user.username}
+            return response.Redirect(request.GET.redirect_url or request.get_headers().referer or '/')
         end
     else
         form = forms.LoginForm{}
     end
     return response.Template(request, "login.html", {form=form})
-end
-function m.form(request, kwargs)
-    local form;
-    if request.get_method()=='POST' then
-        form = forms.TestForm{data=request.POST, files=request.FILES}
-        if form:is_valid() then
-            return response.Plain(repr(form))
-        end
-    else
-        form = forms.TestForm{}
-    end
-    return response.Template(request, "app/form.html", {form=form})
 end
 function m.edituser(request, kwargs)
     local form;

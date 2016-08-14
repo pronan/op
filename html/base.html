@@ -24,7 +24,7 @@
             <li{% if navbar=='guide' then%} class="active"{% end %}><a href="/guide">指南</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            {%if user~=nil then%}
+            {%if user then%}
             <li{% if navbar=='profile' then%} class="active"{% end %}>
             <a href="/profile"><img width="32" height="32" src="{{user.avatar}}" />{{user.username}}的账号</a></li>
             <li{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
@@ -55,11 +55,8 @@
     </nav>
 
   </div>
-  <!--<script src="http://mat1.gtimg.com/www/asset/lib/jquery/jquery/jquery-1.11.1.min.js"></script>-->
-  <!--<script src="js/bootstrap.min.js"></script> -->
-  <!--<script src="http://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>-->
-  <script src="http://cdn.jarsj.cn/jquery-1.11.0.min.js"></script>
-  <script src="http://cdn.jarsj.cn/bootstrap.min.js"></script>
+   <script type="text/javascript" src="http://mat1.gtimg.com/www/asset/lib/jquery/jquery/jquery-1.11.1.min.js"></script>
+   <script type="text/javascript" src="http://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script> 
   {* blocks.page_js *}
 <!--     <script src="/js/ace.js" type="text/javascript" charset="utf-8"></script> -->
 <!--     <script>

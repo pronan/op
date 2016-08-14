@@ -2,11 +2,32 @@ local query = require"resty.mvc.query".single
 local response = require"resty.response"
 local json = require "cjson.safe"
 local User = require"models".User
+local forms = require"forms"
 
 local m={}
 
 function m.home(request, kw)
     return response.Template(request, 'home.html')
+end
+function m.user_update(request, kwargs)
+    local form;
+    if request.get_method()=='POST' then
+        form = forms.UserEditForm{data=request.POST}
+        if form:is_valid() then
+            local user = request.user
+            for k,v in pairs(form.cleaned_data) do
+                user[k] = v
+            end
+            local user, err = user:save()
+            if not user then
+                return response.Error(err)
+            end
+            return response.Redirect('/profile')
+        end
+    else
+        form = forms.UserEditForm{instance=request.user}
+    end
+    return response.Template(request, "app/form.html", {form=form})
 end
 function m.global(request, kwargs)
     return response.Plain(repr(_G))

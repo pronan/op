@@ -1,6 +1,18 @@
 local views = require"views"
 local views_auto = require"views_auto"
 local sub = string.sub
+local response = require"resty.response"
+
+local function login_require(func)
+    return function(request, kwargs)
+        if not request.user then
+            request.session.messages = {'请先登录再进行此操作'}
+            return response.Redirect('/login')
+        else
+            return func(request, kwargs)
+        end
+    end
+end
 
 local urlpatterns = {}
 local function url(regex,  func)
@@ -27,6 +39,7 @@ url('^/global$', views.global)
 url('^/session$', views.session)
 url('^/read_session$', views.read_session)
 url('^/check$', views.check)
+url('^/user/update$', login_require(views.user_update))
 
 url('^/oauth/(?<name>.+?)$', views.oauth)
 url('^/oauth2/qq$', views.qq)
