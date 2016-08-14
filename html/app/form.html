@@ -87,7 +87,7 @@ var uploader = Qiniu.uploader({
                $('<img src="http://'+uri+'"/>').insertBefore($('#id-avatar-qiniu'));
         },
         'Error': function(up, err, errTip) {
-               console.log(err, errTip)
+               console.log(JSON.stringify(err), errTip)
         },
         'UploadComplete': function() {
                //队列文件处理完毕后，处理相关的事情
