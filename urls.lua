@@ -7,7 +7,7 @@ local function login_require(func)
     return function(request, kwargs)
         if not request.user then
             request.session.messages = {'请先登录再进行此操作'}
-            return response.Redirect('/login')
+            return response.Redirect('/login?redirect_url='..ngx.var.uri)
         else
             return func(request, kwargs)
         end
