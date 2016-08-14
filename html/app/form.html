@@ -23,6 +23,7 @@ var uploader = Qiniu.uploader({
     domain: 'cdn.jarsj.cn', 
     uptoken : uptoken('tcpip', null, 3600), 
     max_file_size: '4mb', 
+    max_retries: 2,   
     // 在初始化时，uptoken，uptoken_url，uptoken_func三个参数中必须有一个被设置
     // 切如果提供了多个，其优先级为uptoken > uptoken_url > uptoken_func
     // 其中uptoken是直接提供上传凭证，uptoken_url是提供了获取上传凭证的地址，如果需要定制获取uptoken的过程则可以设置uptoken_func
@@ -41,7 +42,7 @@ var uploader = Qiniu.uploader({
                  // 上传区域DOM ID，默认是browser_button的父元素
                 // 最大文件体积限制
     //flash_swf_url: 'path/of/plupload/Moxie.swf',  //引入flash，相对路径
-    max_retries: 0,                     // 上传失败最大重试次数
+                      // 上传失败最大重试次数
     //dragdrop: true,                     // 开启可拖曳上传
     //drop_element: 'container',          // 拖曳上传区域元素的ID，拖曳文件或文件夹后可触发上传
     chunk_size: '4mb',                  // 分块上传时，每块的体积
