@@ -31,9 +31,9 @@ function qq.initialize(self)
     self.client = http:new()
     return self
 end
-function qq.get_login_redirect_uri(self)
+function qq.get_login_redirect_uri(self, redi)
     return self.authorize_uri..'?'..encode_args{response_type='code', 
-        client_id=self.client_id, redirect_uri=self.redirect_uri}
+        client_id=self.client_id, redirect_uri=self.redirect_uri..'?redirect_uri='..(redi or '/')}
 end
 qq.initialize(qq)
 -- {
