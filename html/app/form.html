@@ -1,8 +1,9 @@
 {% layout = "c0120.html" %}
 
 {-content-}
-<form id='qiniu_upload' method="post" action=""  enctype="multipart/form-data">
-<div> <label for="qiniu">头像</label> <input type="file" name="avatar" id="qiniu" />  <p class="help">请上传头像, 不超过4kb</p> </div>
+<form id='qiniu-form' method="post" action=""  enctype="multipart/form-data">
+<div> <label for="id-avatar-qiniu">头像</label> <input type="file" name="avatar-qiniu" id="id-avatar-qiniu" />  
+	<p class="help">请上传头像, 不超过4kb</p> </div>
   {*form:render()*}
   <button type="submit" class="btn btn-default">提交</button>
 </form>
@@ -15,16 +16,17 @@
 <script type="text/javascript" src='http://cdn.jarsj.cn/uptoken.js'></script>
 
 <script>
-function enable_qiniu_upload(button_id, scope, expires, domain, container, max_size, ){
-
-}
 var uploader = Qiniu.uploader({
     runtimes: 'html5,flash,html4',      // 上传模式，依次退化
-    browse_button: 'qiniu',         // 上传选择的点选按钮，必需
+    container: 'qiniu-form',
+    browse_button: 'id-avatar-qiniu',         // 上传选择的点选按钮，必需
+    domain: 'cdn.jarsj.cn', 
+    uptoken : uptoken('tcpip', null, 3600), 
+    max_file_size: '4mb', 
     // 在初始化时，uptoken，uptoken_url，uptoken_func三个参数中必须有一个被设置
     // 切如果提供了多个，其优先级为uptoken > uptoken_url > uptoken_func
     // 其中uptoken是直接提供上传凭证，uptoken_url是提供了获取上传凭证的地址，如果需要定制获取uptoken的过程则可以设置uptoken_func
-    uptoken : uptoken('tcpip', null, 3600), 
+    
     // uptoken_url: '/uptoken',         // Ajax请求uptoken的Url，强烈建议设置（服务端提供）
     // uptoken_func: function(file){    // 在需要获取uptoken时，该方法会被调用
     //    // do something
@@ -35,9 +37,9 @@ var uploader = Qiniu.uploader({
     // Ajax请求downToken的Url，私有空间时使用，JS-SDK将向该地址POST文件的key和domain，服务端返回的JSON必须包含url字段，url值为该文件的下载地址
     unique_names: true,              // 默认false，key为文件名。若开启该选项，JS-SDK会为每个文件自动生成key（文件名）
     save_key: true,                  // 默认false。若在服务端生成uptoken的上传策略中指定了sava_key，则开启，SDK在前端将不对key进行任何处理
-    domain: 'cdn.jarsj.cn',     // bucket域名，下载资源时用到，必需
-    container: 'qiniu_upload',             // 上传区域DOM ID，默认是browser_button的父元素
-    max_file_size: '4mb',             // 最大文件体积限制
+        // bucket域名，下载资源时用到，必需
+                 // 上传区域DOM ID，默认是browser_button的父元素
+                // 最大文件体积限制
     //flash_swf_url: 'path/of/plupload/Moxie.swf',  //引入flash，相对路径
     max_retries: 0,                     // 上传失败最大重试次数
     //dragdrop: true,                     // 开启可拖曳上传
@@ -79,8 +81,9 @@ var uploader = Qiniu.uploader({
                // 查看简单反馈
                var domain = up.getOption('domain');
                var res = JSON.parse(info);
-               var sourceLink = domain +'/'+ res.key; 
-               console.log('sourceLink:', sourceLink)
+               var uri = domain +'/'+ res.key; 
+               $('#id-avatar').attr('value', uri);
+               $('<img src="'+uri+'"/>').insertBefore($('#id-avatar-qiniu'));
         },
         'Error': function(up, err, errTip) {
                console.log(err, errTip)
