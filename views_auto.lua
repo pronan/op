@@ -37,7 +37,7 @@ function m.login(request, kwargs)
         form = forms.LoginForm{data=request.POST}
         if form:is_valid() then
             request.session.user=form.user
-            request.session.messages = {'您已成功登录, '..user.username}
+            request.session.messages = {'您已成功登录, '..form.user.username}
             return response.Redirect(request.GET.redirect_url or request.get_headers().referer or '/')
         end
     else
