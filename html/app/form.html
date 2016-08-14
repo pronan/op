@@ -82,7 +82,7 @@ var uploader = Qiniu.uploader({
                var domain = up.getOption('domain');
                var res = JSON.parse(info);
                var uri = domain +'/'+ res.key; 
-               $('#id-avatar').attr('value', uri);
+               $('#id-avatar').attr('value', "http://"+uri);
                $('<img src="http://'+uri+'"/>').insertBefore($('#id-avatar-qiniu'));
         },
         'Error': function(up, err, errTip) {

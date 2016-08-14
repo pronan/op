@@ -22,6 +22,7 @@ function m.user_update(request, kwargs)
             if not user then
                 return response.Error(err)
             end
+            request.session.user = user
             return response.Redirect('/profile')
         else
             loger(form.errors)
