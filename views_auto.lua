@@ -43,7 +43,13 @@ function m.login(request, kwargs)
     else
         form = forms.LoginForm{}
     end
-    return response.Template(request, "login.html", {form=form})
+    local redi = request.GET.redirect_url
+    if redi then
+        redi = '?redirect_url='..redi
+    else
+        redi = ''
+    end
+    return response.Template(request, "login.html", {form=form, redi=redi})
 end
 function m.edituser(request, kwargs)
     local form;
