@@ -310,4 +310,5 @@ return{
     OptionField = OptionField,
     PasswordField = PasswordField, 
     FileField = FileField, 
+    HiddenField = HiddenField, 
 }
