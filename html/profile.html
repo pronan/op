@@ -1,8 +1,11 @@
 {% layout = "c444.html" %}
 
 {-content-}
-欢迎您, {{user.username}}.
 {% if user then %}
-您的密码是{{user.password}}, 您的id是{{user.id}}
+	欢迎您, {{user.username}}.
+	您的密码是{{user.password}}, 您的id是{{user.id}}.
+	<a href="/user/update">编辑我的资料</a>
+{% else%}
+	欢迎您, 游客
 {% end%}
 {-content-}

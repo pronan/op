@@ -26,7 +26,8 @@ local function simple(k)
     end
 end   
 
-local function _repr(obj, ind, deep, already)
+local M = setmetatable({}, {__call= function(t, obj) return t.f_repr(obj)end })
+function M._repr(obj, ind, deep, already)
     local label = type(obj)
     if label == 'table' then
         local res = {}
@@ -56,7 +57,7 @@ local function _repr(obj, ind, deep, already)
                 elseif deep > MAX_DEEPTH then
                     v = simple('*exceed max deepth*')
                 else
-                    v = '{\\\\'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
+                    v = '{\\\\'..tostring(v)..M.w_repr(v, indent..ok(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)
@@ -72,12 +73,27 @@ local function _repr(obj, ind, deep, already)
     end
 end
 
-local function repr(obj)
+function M.solo_repr(obj, ind, deep, already)
     if type(obj)  == 'table' then
-        return '{\\\\'..tostring(obj).._repr(obj, '', 1, {})
+        return '{\\\\'..tostring(obj)..M._repr(obj,  ind, deep, already)
     else
         return simple(obj)
     end
+end
+
+function M.w_repr(obj, ind, deep, already)
+    local meta = getmetatable(obj)
+    if meta == nil then
+        return M.solo_repr(obj, ind, deep, already)
+    else
+        return string.format('%s\n%s\\\\**meta table of %s:**\n%s%s', 
+            M.solo_repr(obj, ind, deep, already), ind, tostring(obj), ind, 
+            M.solo_repr(meta, ind, deep, already))
+    end
+end
+
+function M.f_repr(obj)
+    return M.w_repr(obj, '', 1, {})
 end
 
 local delimiter = ''
@@ -92,4 +108,4 @@ local function loger(...)
     ngx_log(ngx_ERR,string.format('\n%s\n%s\n%s', delimiter, table.concat(res, " "), delimiter))
 end
 
-return {repr=repr, loger=loger}
+return {repr=M, loger=loger}

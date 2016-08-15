@@ -97,23 +97,27 @@ function Form.render(self)
     for i, name in ipairs(self.field_order) do
         local field = self:_get_field(name)
         if field then
-            local errors_string = ''
-            if has_error and self.errors[name] then
-                for i, message in ipairs(self.errors[name]) do
-                    errors_string = errors_string..'<li>'..message..'</li>'
+            if field.type == 'hidden' then
+                res[#res+1] = field:render(nil, field:get_base_attrs())
+            else
+                local errors_string = ''
+                if has_error and self.errors[name] then
+                    for i, message in ipairs(self.errors[name]) do
+                        errors_string = errors_string..'<li>'..message..'</li>'
+                    end
+                    errors_string = string_format(self.error_template, errors_string)
                 end
-                errors_string = string_format(self.error_template, errors_string)
+                local help_text_string = ''
+                if field.help_text then
+                    help_text_string = string_format(self.help_template, field.help_text)
+                end
+                local attrs = field:get_base_attrs()
+                res[#res+1] = string_format(
+                    self.row_template, 
+                    field.label_html, 
+                    field:render(self:get_value(field), attrs), 
+                    errors_string, help_text_string)
             end
-            local help_text_string = ''
-            if field.help_text then
-                help_text_string = string_format(self.help_template, field.help_text)
-            end
-            local attrs = field:get_base_attrs()
-            res[#res+1] = string_format(
-                self.row_template, 
-                field.label_html, 
-                field:render(self:get_value(field), attrs), 
-                errors_string, help_text_string)
         end
     end
     return table_concat(res, "\n")

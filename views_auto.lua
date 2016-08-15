@@ -5,13 +5,13 @@ local forms = require"forms"
 
 
 local m={}
-function m.register(req, kwargs)
-    if req.user then
+function m.register(request, kwargs)
+    if request.user then
         return response.Redirect('/profile')
     end
     local form;
-    if req.get_method()=='POST' then
-        form = forms.UserForm{data=req.POST}
+    if request.get_method()=='POST' then
+        form = forms.UserForm{data=request.POST}
         if form:is_valid() then
             local cd=form.cleaned_data
             --local user=User(cd):save()
@@ -19,80 +19,74 @@ function m.register(req, kwargs)
             if not user then
                 return response.Error(err)
             end
-            req.session.user=user
-            req.session.messages = {'恭喜您, 注册成功!'}
+            request.session.user=user
+            request.session.messages = {'恭喜您, 注册成功!'}
             return response.Redirect('/profile')
         end
     else
         form = forms.UserForm{}
     end
-    return response.Template("register.html", {form=form})
+    return response.Template(request, "register.html", {form=form})
 end
-function m.login(req, kwargs)
-    if req.user then
+function m.login(request, kwargs)
+    if request.user then
         return response.Redirect('/profile')
     end
     local form;
-    if req.get_method()=='POST' then
-        form = forms.LoginForm{data=req.POST}
+    if request.get_method()=='POST' then
+        form = forms.LoginForm{data=request.POST}
         if form:is_valid() then
-            req.session.user=form.user
-            req.session.messages = {'欢迎您, '..form.user.username}
-            return response.Redirect('/profile')
+            request.session.user=form.user
+            request.session.messages = {'您已成功登录, '..form.user.username}
+            return response.Redirect(request.GET.redirect_url or '/')
         end
     else
         form = forms.LoginForm{}
     end
-    return response.Template("login.html", {form=form})
-end
-function m.form(req, kwargs)
-    local form;
-    if req.get_method()=='POST' then
-        form = forms.TestForm{data=req.POST, files=req.FILES}
-        if form:is_valid() then
-            return response.Plain(repr(form))
-        end
+    local redi = request.GET.redirect_url
+    if redi then
+        redi = '?redirect_url='..redi
     else
-        form = forms.TestForm{}
+        redi = ''
     end
-    return response.Template("app/form.html", {form=form})
+    return response.Template(request, "login.html", {form=form, redi=redi})
 end
-function m.edituser(req, kwargs)
+function m.edituser(request, kwargs)
     local form;
-    if req.get_method()=='POST' then
-        form = forms.UserForm{data=req.POST}
+    if request.get_method()=='POST' then
+        form = forms.UserForm{data=request.POST}
         if form:is_valid() then
             return response.Plain(repr(form))
         end
     else
         form = forms.UserForm{instance=User:get{id=6}}
     end
-    return response.Template("app/form.html", {form=form})
+    return response.Template(request, "app/form.html", {form=form})
 end
-function m.logout(req, kwargs)
-    req.session.user = nil
-    req.session.messages = {'您已退出'}
-    --req.cookies.message = '您已退出, baby.'
+function m.logout(request, kwargs)
+    request.session.user = nil
+    request.session.messages = {'您已退出'}
+    --request.cookies.message = '您已退出, baby.'
     return response.Redirect("/")
 end
-function m.error(req, kwargs)
+function m.error(request, kwargs)
     return response.Error("你出错了")
 end
-function m.profile(req, kwargs)
-    return response.Template('profile.html', {})
+function m.profile(request, kwargs)
+    return response.Template(request, 'profile.html', {})
 end
-function m.content(req, kwargs)
-    req.session.messages = {'hello messages!'}
+function m.content(request, kwargs)
+    request.session.messages = {'hello messages!'}
     return response.Plain(package.path)
 end
-function m.editor(req, kwargs)
-    return response.Template("editor.html", {sidebar = 'Profile'})
+function m.editor(request, kwargs)
+    return response.Template(request, "editor.html", {sidebar = 'Profile'})
 end
-function m.pubkey(req, kwargs)
+function m.pubkey(request, kwargs)
     return response.Plain([[ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP1qeXu+VLnTZrd1FVNBHuwW/80mkCW3lxnPqc5g5G8tvC6JX5TcIrRHm2qet1CKBqZwFaMpCK8QqsdGcbiuuOm9YPoWkfEEX4ngEnL6HRH1fHCWvP1sUPO+yiKiPlXgjlQrgrghNULH3Y6azrw+VYL1Zihs6LZsm77r+hKa/mhe9FIBQQeSkmZpPff+SgVpTglE9Oi9bY8a/4kueAIrhlKq+4+0S8oX+fWJWuN0KwZV79wy7vmJ6KoL/OcRnqv7cWZXX5B3hCF9nK+j34stR62lu4vIYMrcsCMKJBjWRXHtdblEcWdxm3z579QVARtCDkTYAP0sTieshBV2My7Y8B 280145668@qq.com
 ]])
 end
-function m.key(req, kwargs)
+function m.key(request, kwargs)
     return response.Plain([[-----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAz9anl7vlS502a3dRVTQR7sFv/NJpAlt5cZz6nOYORvLbwuiV
 +U3CK0R5tqnrdQigamcBWjKQivEKrHRnG4rrjpvWD6FpHxBF+J4BJy+h0R9Xxwlr
@@ -122,7 +116,7 @@ T14kJpgJ3xTAM8kSPoRQB8qCUMOTxL25wsH0FRHtnIa7+fZVt+c=
 -----END RSA PRIVATE KEY-----
 ]])
 end
-function m.hosts(req, kwargs)
+function m.hosts(request, kwargs)
     return response.Plain([[wdksw.com,120.25.103.213 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFmH35GRkf/9o5w66q6WBuNKrM7e2EYBtL4s+TVDcggCQrk9ueiCgnTo9AbWtDIczjm8Jx53ohx4RE3p7gxy8s8=
 github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 jarsj.cn,120.24.244.38 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFmH35GRkf/9o5w66q6WBuNKrM7e2EYBtL4s+TVDcggCQrk9ueiCgnTo9AbWtDIczjm8Jx53ohx4RE3p7gxy8s8=
@@ -233,14 +227,14 @@ function m.init( kw )
         return response.Plain'table is created'
     end
 end
-function m.users( req, kw )
+function m.users( request, kw )
     local users, err = User:all()
     if err then
         return nil, err
     end
     return render('users.html', {users=users})
 end
-function m.r(req, kwargs)
+function m.r(request, kwargs)
     return response.Plain(ngx.encode_args{a=1, b=2}..repr(ngx.decode_args'access_token=5A7E1A50ED8FF900A58BDBD283C0AE3D&expires_in=7776000&refresh_token=AA851E53744FA5CE43A24722B4FB78D1'))
 end
 return m

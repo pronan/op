@@ -6,13 +6,14 @@ local http_time     = ngx.http_time
 local COOKIE_PATH = require"settings".COOKIE.path
 local COOKIE_EXPIRES = require"settings".COOKIE.expires
 
-local function before(req, kwargs)
-    req.cookies = cookie_new()
+local function before(request, kwargs)
+    request.cookies = cookie_new()
 end
 
-local function after(req, kwargs)
+
+local function after(request, kwargs)
     local cookies = {}
-    for k, v in pairs(req.cookies) do
+    for k, v in pairs(request.cookies) do
         -- assume type(v) is string or table
         if type(v) == 'string' then
             v = {key=k, value=v, path=COOKIE_PATH, max_age=COOKIE_EXPIRES, 

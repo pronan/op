@@ -7,13 +7,33 @@ local User = require"models".User
 
 local M = {}
 -- UserForm inherits Form directly, so both `Form:class{...}` and `Form{...}` can be used.
-M.UserForm = Form{
+M.UserForm = BootsForm:class{
     fields = {
-        username = Field.CharField{maxlength=20},    
-        password = Field.PasswordField{maxlength=28},    
+        username = BootsField.CharField{maxlength=20},    
+        password = BootsField.PasswordField{maxlength=28},    
     }, 
     field_order = {'username', 'password'}, 
     clean_username = function(self,value)
+        local user = User:get{username=value}
+        if user then
+            return nil, {'用户名已存在.'}
+        end
+        return value
+    end, 
+    
+}
+M.UserEditForm = BootsForm:class{
+    fields = {
+        avatar = Field.HiddenField{maxlength=100},  
+        username = BootsField.CharField{maxlength=20},    
+        password = BootsField.CharField{maxlength=28},   
+
+    }, 
+    field_order = {'avatar', 'username', 'password'}, 
+    clean_username = function(self,value)
+        if value == self.request.user.username then
+            return value
+        end
         local user = User:get{username=value}
         if user then
             return nil, {'用户名已存在.'}
@@ -57,11 +77,11 @@ M.BlogForm = Form{
 }
 M.TestForm = Form{
     fields = {
-        title = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致', required=false},    
+        name = Field.CharField{"姓名", maxlength=20, help_text='需户口本一致', required=false},    
         --content = Field.TextField{"内容", maxlength=20, help_text='不要乱填'},  
         --class = Field.OptionField{"阶级", choices={'工人','农民','其他'}},    
         --sex = Field.RadioField{"性别", choices={'男','女'}},   
-        content = Field.FileField{upload_to='static/files/', help_text='请上传公告文档', required=false}, 
+        avatar = Field.FileField{'头像', help_text='请上传头像, 不超过4kb', required=false, attrs={id='qiniu'}}, 
     }, 
     
 }

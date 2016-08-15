@@ -143,6 +143,7 @@ function CharField.render(self, value, attrs)
     return string_format(self.template, _to_html_attrs(attrs))
 end
 
+local HiddenField = CharField:new{type='hidden'}
 local PasswordField = CharField:new{type='password'}
 
 local IntegerField = Field:new{template='<input %s />', type='number'}
@@ -284,7 +285,7 @@ function FileField.validate(self, value)
 end
 function FileField.init(cls, attrs)
     local self = Field.init(cls, attrs)
-    self.upload_to = self.upload_to or assert(nil, 'upload_to is required for FileField')
+    self.upload_to = self.upload_to or 'static/files/' -- assert(nil, 'upload_to is required for FileField')
     local last_char = string_sub(self.upload_to, -1, -1)
     if last_char ~= '/' and last_char ~= '\\' then
         self.upload_to = self.upload_to..'/'
@@ -309,4 +310,5 @@ return{
     OptionField = OptionField,
     PasswordField = PasswordField, 
     FileField = FileField, 
+    HiddenField = HiddenField, 
 }
