@@ -98,7 +98,7 @@ function Form.render(self)
         local field = self:_get_field(name)
         if field then
             if field.type == 'hidden' then
-                res[#res+1] = field:render(nil, field:get_base_attrs())
+                res[#res+1] = field:render(self:get_value(field), field:get_base_attrs())
             else
                 local errors_string = ''
                 if has_error and self.errors[name] then
