@@ -13,16 +13,20 @@
 
 <script type="text/javascript" src='http://cdn.staticfile.org/Plupload/2.1.1/plupload.full.min.js'></script>
 <script type="text/javascript" src='http://cdn.staticfile.org/qiniu-js-sdk/1.0.14-beta/qiniu.min.js'></script>
-<script type="text/javascript" src='http://cdn.jarsj.cn/uptoken.js'></script>
-
+<script type="text/javascript" src='/static/js/CryptoJS.js'></script>
+<script type="text/javascript" src='/static/js/uploader.js'></script>
 <script>
 $(document).ready(function() {
+
 var uploader = Qiniu.uploader({
     runtimes: 'html5,flash,html4',      // 上传模式，依次退化
     container: 'qiniu-form',
     browse_button: 'id-avatar-qiniu',         // 上传选择的点选按钮，必需
     domain: 'cdn.jarsj.cn', 
-    uptoken : uptoken('tcpip', null, 3600), 
+    uptoken : get_uptoken({
+      scope    :'tcpip', 
+      deadline :Math.floor((new Date()).getTime()/1000)+3600, 
+    }), 
     max_file_size: '4mb', 
     max_retries: 2,   
     // 在初始化时，uptoken，uptoken_url，uptoken_func三个参数中必须有一个被设置
@@ -85,7 +89,8 @@ var uploader = Qiniu.uploader({
                var res = JSON.parse(info);
                var uri = domain +'/'+ res.key; 
                $('#id-avatar').attr('value', "http://"+uri);
-               $('<img src="http://'+uri+'"/>').insertBefore($('#id-avatar-qiniu'));
+               $('.qiniu_dynamic').remove();
+               $('<img class="qiniu_dynamic" src="http://'+uri+'"/>').insertBefore($('#id-avatar-qiniu'));
         },
         'Error': function(up, err, errTip) {
                console.log(JSON.stringify(err), errTip)
