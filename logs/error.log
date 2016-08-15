@@ -1,0 +1,240 @@
+2016/08/03 17:39:11 [alert] 9300#5460: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/03 17:39:11 [alert] 9456#9060: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/03 17:39:52 [error] 9456#7592: *1 lua entry thread aborted: runtime error: ./test\model.lua:8: bad argument #1 to 'pairs' (table expected, got nil)
+stack traceback:
+coroutine 0:
+	[C]: in function 'pairs'
+	./test\model.lua:8: in function 'sametable'
+	./test\model.lua:88: in function 'callback'
+	./test/init.lua:6: in function <./test/init.lua:1>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/03 17:39:52 [error] 9456#7592: *10 lua entry thread aborted: runtime error: ./test\model.lua:8: bad argument #1 to 'pairs' (table expected, got nil)
+stack traceback:
+coroutine 0:
+	[C]: in function 'pairs'
+	./test\model.lua:8: in function 'sametable'
+	./test\model.lua:88: in function 'callback'
+	./test/init.lua:6: in function <./test/init.lua:1>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/03 17:40:00 [error] 9456#7592: *17 lua entry thread aborted: runtime error: ./test\model.lua:8: bad argument #1 to 'pairs' (table expected, got nil)
+stack traceback:
+coroutine 0:
+	[C]: in function 'pairs'
+	./test\model.lua:8: in function 'sametable'
+	./test\model.lua:88: in function 'callback'
+	./test/init.lua:6: in function <./test/init.lua:1>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:07:29 [alert] 7868#6068: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/08 15:07:29 [alert] 7732#5012: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/08 15:07:53 [error] 7732#7980: *2 [lua] main.lua:43: Table 'test.test' doesn't exist, client: 127.0.0.1, server: localhost, request: "GET /m/test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:21:56 [error] 7732#7980: *32 lua entry thread aborted: runtime error: ./test\query.lua:15: bad argument #1 to 'ipairs' (table expected, got function)
+stack traceback:
+coroutine 0:
+	[C]: in function 'ipairs'
+	./test\query.lua:15: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:22:27 [error] 7732#7980: *33 lua entry thread aborted: runtime error: ./test\query.lua:17: attempt to concatenate local 'i' (a table value)
+stack traceback:
+coroutine 0:
+	./test\query.lua: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:22:57 [error] 7732#7980: *37 lua entry thread aborted: runtime error: C:\projects\openresty\lualib\resty\mysql.lua:767: attempt to concatenate field 'state' (a nil value)
+stack traceback:
+coroutine 0:
+	C:\projects\openresty\lualib\resty\mysql.lua: in function 'read_result'
+	./lualib/resty\query.lua:47: in function '(for generator)'
+	./test\query.lua:15: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:27:36 [error] 7732#7980: *40 [lua] repr.lua:92: loger(): 
+**************************************************
+1 {\\table: 0x017edd10
+  1: {\\table: 0x017edda8
+        "avatar"  : "userdata: NULL",
+        "id"      : "1",
+        "openid"  : "userdata: NULL",
+        "password": "111111",
+        "username": "ssss",
+      },
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:31:32 [error] 7732#7980: *48 lua entry thread aborted: runtime error: error loading module 'test.query' from file './test\query.lua':
+	./test\query.lua:24: 'then' expected near 's'
+stack traceback:
+coroutine 0:
+	[C]: ?
+	[C]: in function 'require'
+	./test/init.lua:7: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:31:54 [error] 7732#7980: *49 lua entry thread aborted: runtime error: ./test\query.lua:24: bad argument #2 to 'format' (no value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'format'
+	./test\query.lua:24: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 15:40:49 [error] 7732#7980: *61 lua entry thread aborted: runtime error: ./test\query.lua:26: attempt to index local 'u' (a nil value)
+stack traceback:
+coroutine 0:
+	./test\query.lua: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 16:46:43 [error] 7732#7980: *87 lua entry thread aborted: runtime error: ./lualib/resty\model.lua:89: attempt to call global 'query' (a nil value)
+stack traceback:
+coroutine 0:
+	./lualib/resty\model.lua: in function 'save'
+	./test\model.lua:170: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 17:01:21 [error] 7732#7980: *90 lua entry thread aborted: runtime error: ./lualib/resty\model.lua:89: attempt to call global 'query' (a nil value)
+stack traceback:
+coroutine 0:
+	./lualib/resty\model.lua: in function 'save'
+	./test\model.lua:170: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/08 17:20:28 [alert] 11112#4848: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/08 17:20:29 [alert] 11056#2624: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/08 17:24:06 [error] 11056#9852: *5 lua entry thread aborted: runtime error: ./lualib/resty\model.lua:91: attempt to call global '_get_indt_args' (a nil value)
+stack traceback:
+coroutine 0:
+	./lualib/resty\model.lua: in function 'save'
+	./test\model.lua:200: in function 'callback'
+	./test/init.lua:8: in function <./test/init.lua:3>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 09:47:32 [alert] 11664#8936: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/11 09:47:32 [alert] 8408#6964: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/11 10:49:17 [error] 8408#10376: *11 lua entry thread aborted: runtime error: ./lualib/resty\model\model.lua:98: attempt to index field 'row_class' (a nil value)
+stack traceback:
+coroutine 0:
+	./lualib/resty\model\model.lua: in function 'create'
+	./test\transaction.lua:6: in main chunk
+	[C]: in function 'require'
+	./test/init.lua:8: in function <./test/init.lua:4>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 10:51:04 [error] 8408#10376: *14 lua entry thread aborted: runtime error: ./test\transaction.lua:67: attempt to call global 'qm' (a nil value)
+stack traceback:
+coroutine 0:
+	./test\transaction.lua: in function 'callback'
+	./test/init.lua:9: in function <./test/init.lua:4>
+	content_by_lua(dev:45):1: in function <content_by_lua(dev:45):1>, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 10:52:04 [error] 8408#10376: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016e7328
+  "affected_rows": 0,
+  "insert_id": 0,
+  "server_status": 11,
+  "warning_count": 0,
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 10:52:04 [error] 8408#10376: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016c1c88
+  1: {\\table: 0x016c1d18
+        "id"  : "1",
+        "name": "cat1",
+        "rats": 1,
+      },
+  2: {\\table: 0x016c1de8
+        "id"  : "2",
+        "name": "cat2",
+        "rats": 2,
+      },
+  3: {\\table: 0x016c1eb8
+        "id"  : "3",
+        "name": "cat3",
+        "rats": 3,
+      },
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 10:52:04 [error] 8408#10376: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016eaee8
+  1: {\\table: 0x016eaf78
+        "cats": 1,
+        "id"  : "1",
+        "name": "human1",
+      },
+  2: {\\table: 0x016eb048
+        "cats": 2,
+        "id"  : "2",
+        "name": "human2",
+      },
+  3: {\\table: 0x016eb118
+        "cats": 3,
+        "id"  : "3",
+        "name": "human3",
+      },
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 10:52:04 [error] 8408#10376: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016ecd30
+  "affected_rows": 0,
+  "insert_id": 0,
+  "server_status": 2,
+  "warning_count": 0,
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 11:06:31 [error] 8408#10376: *20 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016e6f78
+  "affected_rows": 0,
+  "insert_id": 0,
+  "server_status": 11,
+  "warning_count": 0,
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 11:06:31 [error] 8408#10376: *20 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016c1c88
+  1: {\\table: 0x016c1d18
+        "id"  : "1",
+        "name": "cat1",
+        "rats": 1,
+      },
+  2: {\\table: 0x016c1de8
+        "id"  : "2",
+        "name": "cat2",
+        "rats": 2,
+      },
+  3: {\\table: 0x016c1eb8
+        "id"  : "3",
+        "name": "cat3",
+        "rats": 3,
+      },
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 11:06:31 [error] 8408#10376: *20 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016eab38
+  1: {\\table: 0x016eabc8
+        "cats": 1,
+        "id"  : "1",
+        "name": "human1",
+      },
+  2: {\\table: 0x016eac98
+        "cats": 2,
+        "id"  : "2",
+        "name": "human2",
+      },
+  3: {\\table: 0x016ead68
+        "cats": 3,
+        "id"  : "3",
+        "name": "human3",
+      },
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/11 11:06:31 [error] 8408#10376: *20 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x016ec980
+  "affected_rows": 0,
+  "insert_id": 0,
+  "server_status": 2,
+  "warning_count": 0,
+}
+**************************************************, client: 127.0.0.1, server: localhost, request: "GET /test HTTP/1.1", host: "localhost:8080"
+2016/08/12 11:42:15 [alert] 10816#10504: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/08/12 11:42:15 [alert] 9248#10556: lua_code_cache is off; this will hurt performance in ./conf/dev:8
