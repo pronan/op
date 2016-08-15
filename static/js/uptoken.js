@@ -19,3 +19,5 @@ function uptoken(bucket, key, expires, policy, strict_policy) {
     var token= b64_hmac_sha1(SECRET_KEY, data)
     return ACCESS_KEY+':'+token+':'+data
 }
+
+module.exports=uptoken

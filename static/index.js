@@ -1,0 +1,1 @@
+var get_upload=require("./js/uploader.js");
