@@ -1,6 +1,10 @@
 local compile = require"resty.template".compile
 local encode = require "cjson.safe".encode
-
+local DEBUG = require"settings".DEBUG
+local template_cache;
+if DEBUG then
+    template_cache = 'no-cache'
+end
 local GLOBAL_CONTEXT = {pjl='yeal'}
 
 
@@ -17,7 +21,7 @@ local function render(request, path, context)
             res[k] = v
         end
     end
-    return compile(path)(res)
+    return compile(path, template_cache)(res)
 end
 
 local M = {}

@@ -2,60 +2,60 @@
 <html lang='zh'>
 
 <head>
-  <link href="http://cdn.jarsj.cn/bootstrap.min.css" rel="stylesheet">
-  <link href="/static/css/custom.css" rel="stylesheet"> 
-  <meta property="qc:admins" content="24416211776044052636" />
+  {(jsblock)}
   {* blocks.page_css *}
   <title>{* blocks.title *}</title> 
 </head>
 
 <body>
-  <div class="container-fluid">
-    {* blocks.header *}
+<!--[if lt IE 9]>
+  <div class="browser-hint">
+您的浏览器太旧, 请使用
+  <div class="button">
+    <a href="http://sw.bos.baidu.com/sw-search-sp/software/fc14f1545b7/ChromeStandalone_51.0.2704.106_Setup.exe" target="_blank">谷歌浏览器(下载)</a>
+  </div>
+  </div>
+<![endif]-->
+<![if gte IE 9]>
+  <div class="container">
 
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="#"><img alt="Brand" src="/favicon.ico"></a>
-        </div>
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-          <ul class="nav navbar-nav">
-            <li{% if navbar=='home' then%} class="active"{% end %}><a href="/">首页</a></li>
-            <li{% if navbar=='guide' then%} class="active"{% end %}><a href="/guide">指南</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            {%if user then%}
-            <li{% if navbar=='profile' then%} class="active"{% end %}>
-            <a href="/profile"><img width="32" height="32" src="{{user.avatar}}" />{{user.username}}的账号</a></li>
-            <li{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
-            {%else%}
-            <li{% if navbar=='login' then%} class="active"{% end %}><a href="/login">登陆</a></li>
-            <li{% if navbar=='register' then%} class="active"{% end %}><a href="/register">注册</a></li>
-            {%end%}
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <div id="nav">
+      <ul class="navbar fl">
+          <li{% if navbar=='home' then%} class="active"{% end %}><a href="/">首页</a></li>
+          <li{% if navbar=='guide' then%} class="active"{% end %}><a href="/guide">指南</a></li>
+      </ul>
+      <ul class="navbar fr">
+          {%if user then%}
+          <li{% if navbar=='profile' then%} class="active"{% end %}>
+          <a href="/profile"><img width="32" height="32" src="{*user.avatar*}" />{{user.username}}的账号</a></li>
+          <li{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
+          {%else%}
+          <li{% if navbar=='login' then%} class="active"{% end %}><a href="/login">登陆</a></li>
+          <li{% if navbar=='register' then%} class="active"{% end %}><a href="/register">注册</a></li>
+          {%end%}
+      </ul>
+      <div class="clear"></div>
+    </div>
+
     {% if messages then %}
-    <ul class="list-group">
+    <ul class="">
       {% for i, message in ipairs(messages) do %}
-      <li class="list-group-item list-group-item-info">{{message}}</li>
+      <li class="">{{message}}</li>
       {% end %}
     </ul>
     {% end %}
-    {% if message then %}
-      <div class="alert alert-success" role="alert" style="text-align:center">{{message}}</div>
-    {% end %}
+
     <div id='main'>{* blocks.main *}</div>
 
-    <nav class="navbar navbar-default">
+    <nav id='footer' class="navbar navbar-default">
       <div class="container">
         © 2015-2016 宜宾江安力智网络科技 版权所有 ICP证： 蜀ICP备15007643号-2
       </div>
     </nav>
 
   </div>
-   <script type="text/javascript" src="http://mat1.gtimg.com/www/asset/lib/jquery/jquery/jquery-1.11.1.min.js"></script>
-   <script type="text/javascript" src="http://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script> 
+
+  <script type="text/javascript" src="/static/js/bundle.js"></script> 
   {* blocks.page_js *}
+</body>
 </html>
