@@ -1,10 +1,10 @@
 local function before(req, kwargs)
-    req.message = req.cookies.message
+    req.message = req.session.message
 end
 
 local function after(req, kwargs)
     if req.message then
-        req.cookies.message = nil
+        req.session.message = nil
     end
 end
 return { before=before, after=after}

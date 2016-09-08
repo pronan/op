@@ -1,8 +1,31 @@
-{% layout = "c444.html" %}
+{% layout = "layout/two.html" %}
+{-sidebar_percent-}3{-sidebar_percent-}
+{-content_percent-}7{-content_percent-}
+
+{-sidebar-}
+<div class='section'>
+    <div class='para'>
+    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。
+    </div>
+    
+    <div class='para'>
+      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。
+    </div>
+    <div class='para'>
+      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。
+    </div>
+    <div class='para'>
+      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。
+    </div>
+    <div class='para'>
+      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。
+    </div>
+</div>
+{-sidebar-}
 
 {-content-}
 <form method="post" action="">
   {*form:render()*}
-  <button type="submit" class="btn btn-default">注册</button>
+  <button type="submit">注册</button>
 </form>
 {-content-}

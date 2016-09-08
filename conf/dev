@@ -11,8 +11,9 @@ http {
     sendfile        on;
     keepalive_timeout  65;
     #autoindex on;
-    init_by_lua_file init.lua;
-    lua_package_path './?.lua;./?/init.lua;./lualib/?.lua;./lualib/?/init.lua;;';
+    init_by_lua_file app/init.lua;
+    init_worker_by_lua_file app/migrations.lua;
+    lua_package_path './?.lua;./?/init.lua;;';
     
     client_body_temp_path temp/client_body_temp;
     fastcgi_temp_path temp/fastcgi_temp;
@@ -33,7 +34,7 @@ http {
         location / {
             resolver 223.5.5.5;
             content_by_lua_block {
-                local ok, err = xpcall(require"main", require"utils.base".debugger)
+                local ok, err = xpcall(require"app.main", require"resty.utils.base".debugger)
                 if not ok then
                     ngx.header['Content-Type'] = "text/plain; charset=utf-8"
                     ngx.say(err)

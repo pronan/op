@@ -13,7 +13,7 @@ http {
     sendfile        on;
     keepalive_timeout  75; 
     lua_package_path './?.lua;./?/init.lua;./lualib/?.lua;./lualib/?/init.lua;;';
-    init_by_lua_file init.lua;
+    init_by_lua_file app/init.lua;
 
     client_body_temp_path temp/client_body_temp;
     fastcgi_temp_path temp/fastcgi_temp;
@@ -27,23 +27,19 @@ http {
 
     server {
         listen       80;
-        server_name  tcpip.vip;
+        server_name  wdksw.com *.wdksw.com;
         root html;
         include mime.types;
 
         location / {
             resolver 223.5.5.5;
             content_by_lua_block {
-                local ok, err = xpcall(require"main", require"utils.base".debugger)
+                local ok, err = xpcall(require"app.main", require"utils.base".debugger)
                 if not ok then
                     ngx.header['Content-Type'] = "text/plain; charset=utf-8"
                     ngx.say(err)
                 end
             }
-        }
-
-        location = /exec {
-            content_by_lua_file exec.lua;
         }
 
         location = /test {
@@ -55,15 +51,11 @@ http {
         }
 
         location = /favicon.ico {
-            root static/images;
+            alias static/images/favicon.ico;
         }
 
         location /static { 
             alias static;
-        }
-
-        location /loaderio-418a57bcfec2f6f3d842e20c67908df1.txt { 
-            alias loaderio-418a57bcfec2f6f3d842e20c67908df1.txt;
         }
 
         location = /gitpush {
@@ -73,7 +65,7 @@ http {
                 local data = ngx.req.get_post_args()
                 local payload = decode(data.payload)
                 if payload.commits[1].message=='production' then
-                    os.execute('git --git-dir=/home/ubuntu/op/.git --work-tree=/home/ubuntu/op pull')
+                    os.execute('git --git-dir=/root/wdksw/.git --work-tree=/root/wdksw pull')
                 end
             }
         }
