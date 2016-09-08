@@ -5,8 +5,8 @@ local Field = require"resty.mvc.field"
 
 
 local User = Model:class{table_name = "user", 
+    meta = {auto_create_time=false},
     fields = {
-        create_time = Field.DateTimeField{},
         update_time = Field.DateTimeField{},
         username = Field.CharField{maxlen=3},
         password = Field.CharField{maxlen=6},
