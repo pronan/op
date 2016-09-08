@@ -1,9 +1,9 @@
 local json = require "cjson.safe"
+local SESSION_PATH = require"app.settings".SESSION.path
+local SESSION_EXPIRES = require"app.settings".SESSION.expires
 local tonumber = tonumber
 local time         = ngx.time
 local http_time    = ngx.http_time
-local SESSION_PATH = require"settings".SESSION.path
-local SESSION_EXPIRES = require"settings".SESSION.expires
 
 local encrypt_callbacks = {
     json.encode, 

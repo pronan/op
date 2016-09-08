@@ -1,10 +1,10 @@
-{% layout = "c444.html" %}
+{% layout = "layout/c10.html" %}
 
 {-content-}
 {% if user then %}
 	欢迎您, {{user.username}}.
 	您的密码是{{user.password}}, 您的id是{{user.id}}.
-	<a href="/user/update">编辑我的资料</a>
+	<a href="/user/update/{{user.id}}">编辑我的资料</a>
 {% else%}
 	欢迎您, 游客
 {% end%}

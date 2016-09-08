@@ -24,7 +24,7 @@ def replace(go=False):
                     
 
 def search():
-    for old in ['jo']:
+    for old in ['utils.base']:
         arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
