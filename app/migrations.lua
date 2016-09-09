@@ -3,8 +3,25 @@
 -- https://dev.mysql.com/doc/refman/5.6/en/create-index.html
 -- http://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html
 local query = require"resty.mvc.query".single
+
+local function make_file(fn, content)
+  local f, e = io.open(fn, "w+")
+  if not f then
+    return nil, e
+  end
+  local res, err = f:write(content)
+  if not res then
+    return nil, err
+  end
+  local res, err = f:close()
+  if not res then
+    return nil, err
+  end
+  return true
+end
+
 local do_not_create = false
-local drop_existed_table = true
+local drop_existed_table = false
 local function simple_repr(s)
     if type(s)=='string' then
         s=string.format([["%s"]],s)
@@ -102,7 +119,6 @@ local function auto_models( ... )
     %s, 
     %s
 )%s;]], model.table_name, fields, field_options, table_options)
-                loger(table_create_defination)
                 if do_not_create then
                     -- loger(table_create_defination)
                 else
@@ -116,7 +132,16 @@ local function auto_models( ... )
                     if not res then
                         assert(nil, err)
                     end
-                    loger(res)
+                    local res, err = query('show create table '..model.table_name..';')
+                    if not res then
+                        assert(nil, err)
+                    else
+                        local fn = string.format('app/%s/table_defination.txt', model.table_name)
+                        local res, err = make_file(fn, res[1]["Create Table"])
+                        if not res then
+                            assert(nil, err)
+                        end
+                    end
                 end
             end
         end

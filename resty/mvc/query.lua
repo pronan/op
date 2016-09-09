@@ -2,7 +2,7 @@ local client = require"resty.mysql"
 
 local string_format = string.format
 local CONNECT_TABLE = {host = "127.0.0.1", port = 3306, 
-        database = "kaoshi", user = 'root', password = '', }
+        database = "test", user = 'root', password = '', }
 local CONNECT_TIMEOUT = 1000
 local IDLE_TIMEOUT = 10000
 local POOL_SIZE = 50

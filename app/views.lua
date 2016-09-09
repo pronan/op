@@ -75,7 +75,7 @@ function m.profile(request, kwargs)
     return response.Template(request, 'profile.html', {navbar='profile'})
 end
 function m.q(kwargs)
-    local ret, err = query("insert into user (username) values ('来来来');")
+    local ret, err = query("show create table user;")
     return response.Plain(repr(ret)..repr(err))
 end
 local function ran(step)

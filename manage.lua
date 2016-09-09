@@ -1,5 +1,20 @@
 -- lua manage.lua user -fields username password avatar openid
 -- lua manage.lua thread -fields user::User title content:text 
+local function make_file(fn, content)
+  local f, e = io.open(fn, "w+")
+  if not f then
+    return nil, e
+  end
+  local res, err = f:write(content)
+  if not res then
+    return nil, err
+  end
+  local res, err = f:close()
+  if not res then
+    return nil, err
+  end
+  return true
+end
 local function make_dir(s)
   local cmd, dmt, e;
   if package.config:sub(1,1) == '\\' then
@@ -204,19 +219,14 @@ end
 local layout = config.layout or config.l 
 local block = config.block or config.b
 for k,v in pairs(html_map) do
-  local fn = template_dir..k..'.html'
-  local f, e = io.open(fn, "w+")
-  if not f then
-    return nil, e
-  end
   if block then
     v = string.format('{-%s-}\n%s\n{-%s-}', block, v, block)
   end
   if layout then
     v = string.format('{%% layout = "%s" %%}\n\n', layout)..v
   end
-  f:write(v)
-  local res, err = f:close()
+  local fn = template_dir..k..'.html'
+  local res, err = make_file(fn, v)
   if not res then
     print('FAIL to create file: '..fn..' '..err)
     return
@@ -270,12 +280,7 @@ for name, template in pairs(file_map) do
     template = template:gsub('{%*'..k..'%*}', v)
   end
   local fn = dir..name..'.lua'
-  local f, e = io.open(fn, "w+")
-  if not f then
-    return nil, e
-  end
-  f:write(head..template)
-  local res, err = f:close()
+  local res, err = make_file(fn, head..template)
   if not res then
     print('FAIL to create file: '..fn..' '..err)
     return
