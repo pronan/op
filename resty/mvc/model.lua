@@ -93,7 +93,7 @@ function Model.get(self, params)
         return nil, err
     end
     if #res ~= 1 then
-        return nil, '`get` method should return only one row'
+        return nil, '`get` method should return only one row, but now is '..#res
     end
     return self.row_class:new(res[1])
 end

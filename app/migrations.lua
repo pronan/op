@@ -1,11 +1,16 @@
 -- https://dev.mysql.com/doc/refman/5.6/en/create-table.html
 -- http://dev.mysql.com/doc/refman/5.6/en/create-table-foreign-keys.html
 -- https://dev.mysql.com/doc/refman/5.6/en/create-index.html
-
+-- http://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html
 local query = require"resty.mvc.query".single
 local do_not_create = false
 local drop_existed_table = true
-
+local function simple_repr(s)
+    if type(s)=='string' then
+        s=string.format([["%s"]],s)
+    end
+    return tostring(s)
+end
 local function auto_models( ... )
     for i, name in ipairs(settings.APP) do
         local models = require("app."..name..".models")
@@ -55,7 +60,7 @@ local function auto_models( ... )
                             table.insert(field_options.index, string.format('INDEX (%s)', field.name))
                         end                
                         if field.default~=nil then
-                            db_type = db_type..' DEFAULT '..tostring(field.default)
+                            db_type = db_type..' DEFAULT '..simple_repr(field.default)
                         end
                         if field.unique then
                             db_type = db_type..' UNIQUE'
@@ -97,8 +102,9 @@ local function auto_models( ... )
     %s, 
     %s
 )%s;]], model.table_name, fields, field_options, table_options)
+                loger(table_create_defination)
                 if do_not_create then
-                    loger(table_create_defination)
+                    -- loger(table_create_defination)
                 else
                     if drop_existed_table then
                         local res, err = query('DROP TABLE IF EXISTS '..model.table_name)

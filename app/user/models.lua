@@ -5,13 +5,10 @@ local Field = require"resty.mvc.field"
 
 
 local User = Model:class{table_name = "user", 
-    meta = {auto_create_time=false},
+    meta = {auto_create_time=false,auto_update_time=false},
     fields = {
-        update_time = Field.DateTimeField{},
-        username = Field.CharField{maxlen=3},
-        password = Field.CharField{maxlen=6},
-        avatar = Field.CharField{maxlen=50},
-        openid = Field.CharField{maxlen=50}
+        username = Field.CharField{maxlen=3,default=''},
+        password = Field.CharField{maxlen=6,default=''},
     }
 }
 -- function User.foobar(self)

@@ -45,7 +45,7 @@ function Row.save(self)
         if res then
             return self
         else
-            return nil, err
+            return nil, {err}
         end
     else-- use the standard form for Postgresql
         local cols, vals = {}, {}
@@ -60,7 +60,7 @@ function Row.save(self)
             self.id = res.insert_id
             return self
         else
-            return nil, err
+            return nil, {err}
         end
     end
 end

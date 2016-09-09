@@ -177,7 +177,8 @@ function Form.save(self)
     elseif self.model then
         return self.model:create(self.cleaned_data)
     else
-        return nil, '`model_instance` or `model` should be set'
+        -- for consistent with Row:save and Model:create, error is returned as a table
+        return nil, {'`model_instance` or `model` should be set'}
     end
 end
 return Form

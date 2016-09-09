@@ -185,9 +185,9 @@ end
 
 local CreateView = FormView:new{}
 function CreateView.form_valid(self, form)
-    local object, err = form:save()
+    local object, errors = form:save()
     if not object then
-        return nil, 'Fail to call `form:save`'
+        return nil, '`form:save` failed: '..table.concat(errors,';')
     end
     self.object = object
     return FormView.form_valid(self, form)
@@ -223,12 +223,9 @@ function UpdateView.get_success_url(self)
     return string.format('/%s/%s', self.model.table_name, self.object.id)
 end
 function UpdateView.form_valid(self, form)
-    local object, err = form:save()
+    local object, errors = form:save()
     if not object then
-        if type(err) == 'table' then
-            err = err[1] -- for simple, just take the first error info.
-        end
-        return nil, '`form:save` failed: '..err
+        return nil, '`form:save` failed: '..table.concat(errors,';')
     end
     self.object = object
     return FormView.form_valid(self, form)
