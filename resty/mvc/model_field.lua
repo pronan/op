@@ -6,6 +6,7 @@
     -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
     -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
 local validator = require"resty.mvc.validator"
+local FormField = require"resty.mvc.form_field"
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs

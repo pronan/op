@@ -7,12 +7,12 @@ local forms = require"app.forms"
 local sub = string.sub
 
 local function login_require(func)
-    return function(request, kwargs)
+    return function(request)
         if not request.user then
             request.session.message = '请先登录再进行此操作'
             return response.Redirect('/login?redirect_url='..ngx.var.uri)
         else
-            return func(request, kwargs)
+            return func(request)
         end
     end
 end

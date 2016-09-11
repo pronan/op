@@ -1,6 +1,6 @@
 local get_post = require"resty.reqargs"
 
-local function before(request, kwargs)
+local function before(request)
     request.GET, request.POST, request.FILES = get_post{}
 end
  -- {\\table: 0x001bbb50
@@ -10,7 +10,7 @@ end
  --               "temp": "\s8rk.n",
  --               "type": "image/jpeg",
  --             },
-local function after(request, kwargs)
+local function after(request)
     for k, v in pairs(request.FILES) do
         os.remove(v.temp)
     end

@@ -10,7 +10,7 @@ local forms = require"app.thread.forms"
 local Thread = models.Thread
 local views = {}
 
--- function views.foobar(request, kwargs)
+-- function views.foobar(request)
 --     return response.Template("/")
 -- end
 

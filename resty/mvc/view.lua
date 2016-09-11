@@ -18,13 +18,13 @@ function View.new(self, opts)
     self.__index = self
     return setmetatable(opts, self)
 end
-function View.dispatch(self, request, kwargs)
+function View.dispatch(self, request)
     local name = request.get_method():lower()
     local method = self[name]
     if method  == nil then
         return nil, name..' is not supported'
     end
-    return method(self, request, kwargs)
+    return method(self, request)
 end
 function View.as_view(cls, init)
     init = init or {}
@@ -36,7 +36,7 @@ function View.as_view(cls, init)
             return nil, 'Only accept arguments that class can find'
         end
     end
-    function _view(request, kwargs)
+    function _view(request)
         -- making a fresh copy for each request
         local init_copy = {}
         for k,v in pairs(init) do
@@ -44,8 +44,8 @@ function View.as_view(cls, init)
         end
         local self = cls:new(init_copy)
         self.request = request
-        self.kwargs = kwargs
-        return self:dispatch(request, kwargs)
+        self.kwargs = request.kwargs
+        return self:dispatch(request)
     end
     return _view
 end
@@ -88,26 +88,26 @@ function View.get_context_data(self, kwargs)
 end
 
 local TemplateView = View:new{}
-function TemplateView.get(self, request, kwargs)
+function TemplateView.get(self, request)
     local context = self:get_context_data(kwargs)
     return self:render_to_response(context)
 end
 
 local DetailView = TemplateView:new{}
-function DetailView.get(self, request, kwargs)
+function DetailView.get(self, request)
     local object, err = self:get_object()
     if not object then
         return nil, 'can not get object, '..err
     end
     self.object = object
-    return TemplateView.get(self, request, kwargs)
+    return TemplateView.get(self, request)
 end
 function DetailView.get_template_name(self)
     return self.model.table_name..'/detail.html'
 end
 
 local FormView = View:new{success_url=false, fields=false, initial=false ,form_class=false,}
-function FormView.get(self, request, kwargs)
+function FormView.get(self, request)
     local form, err = self:get_form()
     if not form then
         return nil, err
@@ -115,7 +115,7 @@ function FormView.get(self, request, kwargs)
     local context = self:get_context_data{form=form}
     return self:render_to_response(context)
 end
-function FormView.post(self, request, kwargs)
+function FormView.post(self, request)
     local form, err = self:get_form()
     if not form then
         return nil, err
@@ -200,21 +200,21 @@ function CreateView.get_success_url(self)
 end
 
 local UpdateView = FormView:new{}
-function UpdateView.get(self, request, kwargs)
+function UpdateView.get(self, request)
     local object, err = self:get_object()
     if not object then
         return nil, 'can not get object, '..err
     end
     self.object = object
-    return FormView.get(self, request, kwargs)
+    return FormView.get(self, request)
 end
-function UpdateView.post(self, request, kwargs)
+function UpdateView.post(self, request)
     local object, err = self:get_object()
     if not object then
         return nil, 'can not get object, '..err
     end
     self.object = object
-    return FormView.post(self, request, kwargs)
+    return FormView.post(self, request)
 end
 function UpdateView.get_template_name(self)
     return self.model.table_name..'/update.html'
@@ -239,7 +239,7 @@ function UpdateView.get_initial(self, form)
 end
 
 local DeleteView = View:new{}
-function DeleteView.get(self, request, kwargs)
+function DeleteView.get(self, request)
     local object, err = self:get_object()
     if not object then
         return nil, 'can not get object to delete, '..err
@@ -255,7 +255,7 @@ function DeleteView.get_success_url(self)
 end
 
 local ListView = View:new{page_size=10, page_kwarg='page', order=false}
-function ListView.get(self, request, kwargs)
+function ListView.get(self, request)
     local object_list, err = self:get_queryset()
     if not object_list then
         return nil, 'can not get object_list, '..err

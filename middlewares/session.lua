@@ -40,10 +40,10 @@ local function proxy_session(data)
     end
     return setmetatable({}, meta)
 end
-local function before(request, kwargs)
+local function before(request)
     request.session = proxy_session(decrypt_session(request.cookies.session))
 end
-local function after(request, kwargs)
+local function after(request)
     local meta = getmetatable(request.session)
     if meta.modified then
         local data = meta.__index

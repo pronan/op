@@ -30,11 +30,11 @@ return function()
     for _, v in ipairs(patterns) do
         local regex, func = v[1], v[2]
         local kwargs, err = match(uri, regex, 'jo')
-        local request = Request:new()
+        local request = Request:new{kwargs=kwargs}
         if kwargs then
             for i, ware in ipairs(MIDDLEWARES) do
                 if ware.before then
-                    local err, ok = ware.before(request, kwargs)
+                    local err, ok = ware.before(request)
                     if err then
                         ngx.log(ngx.ERR, err)
                         if ware.strict then 
@@ -43,10 +43,10 @@ return function()
                     end
                 end
             end
-            local response, err = func(request, kwargs)
+            local response, err = func(request)
             for i, ware in ipairs(MIDDLEWARES_REVERSED) do
                 if ware.after then
-                    local err, ok = ware.after(request, kwargs)
+                    local err, ok = ware.after(request)
                     if err then
                         ngx.log(ngx.ERR, err)
                         if ware.strict then 

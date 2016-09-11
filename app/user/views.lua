@@ -10,7 +10,7 @@ local forms = require"app.user.forms"
 local User = models.User
 local views = {}
 
--- function views.foobar(request, kwargs)
+-- function views.foobar(request)
 --     return response.Template("/")
 -- end
 

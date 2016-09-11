@@ -1,8 +1,8 @@
-local function before(req, kwargs)
+local function before(request)
     req.message = req.session.message
 end
 
-local function after(req, kwargs)
+local function after(request)
     if req.message then
         req.session.message = nil
     end

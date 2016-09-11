@@ -3,7 +3,7 @@ import os
 
 
 def replace(go=False):
-    for old, new in [('resty.model','resty.mvc')]:
+    for old, new in [('request, kwargs)','request)'), ('req, kwargs)','request)')]:
         arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
@@ -24,7 +24,7 @@ def replace(go=False):
                     
 
 def search():
-    for old in ['utils.base']:
+    for old in ['kwargs)']:
         arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
@@ -32,11 +32,18 @@ def search():
                 if p[-3:] not in ['lua','tml']:
                     continue
                 with open(p,encoding='u8') as f:
-                    s = f.read()
-                    if old in s:
+                    e = 0
+                    for line in f :
+                        if old in line:
+                            e = 1
+                            print(line, end='')
+                    if e:
                         print(p)
 
-search()
+
+
+#search()
+replace(1)
 
 
     

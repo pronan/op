@@ -7,7 +7,7 @@ local forms = require"app.forms"
 
 
 local m={}
-function m.register(request, kwargs)
+function m.register(request)
     if request.user then
         return response.Redirect('/profile')
     end
@@ -30,7 +30,7 @@ function m.register(request, kwargs)
     end
     return response.Template(request, "register.html", {form=form, navbar='register'})
 end
-function m.login(request, kwargs)
+function m.login(request)
     if request.user then
         return response.Redirect('/profile')
     end
@@ -63,15 +63,15 @@ function m.login(request, kwargs)
         return response.Template(request, "login.html", {form=form, redi=redi, navbar='login'})
     end
 end
-function m.logout(request, kwargs)
+function m.logout(request)
     request.session.user = nil
     request.session.message = '您已成功退出'
     return response.Redirect("/")
 end
-function m.error(request, kwargs)
+function m.error(request)
     return response.Error("你出错了")
 end
-function m.profile(request, kwargs)
+function m.profile(request)
     return response.Template(request, 'profile.html', {navbar='profile'})
 end
 function m.q(kwargs)
@@ -111,7 +111,7 @@ end
 function m.home(request, kw)
     return response.Template(request, 'home.html', {navbar='home'})
 end
-function m.user_update(request, kwargs)
+function m.user_update(request)
     local form;
     if request.get_method()=='POST' then
         form = forms.UserEditForm:instance{data=request.POST, request=request}
@@ -134,20 +134,20 @@ function m.user_update(request, kwargs)
     end
     return response.Template(request, "form.html", {form=form})
 end
-function m.global(request, kwargs)
+function m.global(request)
     return response.Plain(repr(_G))
 end
 local oauth2 = {
     github = require"resty.oauth".github.login_redirect_uri, 
     qq = require"resty.oauth".qq.login_redirect_uri, 
 }
-function m.oauth(request, kwargs)
+function m.oauth(request)
     if request.user then
         return response.Redirect('/')
     end
-    return response.Redirect(require"resty.oauth"[kwargs.name]:get_login_redirect_uri(request.GET.redirect_url))
+    return response.Redirect(require"resty.oauth"[request.kwargs.name]:get_login_redirect_uri(request.GET.redirect_url))
 end
-function m.qq(request, kwargs)
+function m.qq(request)
     local qq = require"resty.oauth".qq()
     local code = request.GET.code
     local token, err = qq:get_access_token(code)
@@ -170,7 +170,7 @@ function m.qq(request, kwargs)
     return response.Redirect(request.GET.redirect_url or '/')
     --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n openid:%s, \nuser:%s', repr(qq), code, token, openid, repr(user)))
 end
-function m.github(request, kwargs)
+function m.github(request)
     local github = require"resty.oauth".github()
     local code = request.GET.code
     local token, err = github:get_access_token(code)
