@@ -8,7 +8,7 @@ local pairs = pairs
 local string_format = string.format
 local table_concat = table.concat
 
-local Form = {}
+local Form = {field_order=nil, prefix=nil}
 Form.row_template = [[<div> %s %s %s %s </div>]]
 Form.error_template = [[<ul class="error">%s</ul>]]
 Form.help_template = [[<p class="help">%s</p>]]
@@ -29,42 +29,12 @@ function Form.instance(cls, attrs)
     self.initial = self.initial or {}
     self.label_suffix = self.label_suffix or ''
     -- make instances of fields so we can safely dynamically overwrite 
-    -- some attributes of the field, e.g. `choices` of OptionField
+    -- some attributes of the field, e.g. `choices` of ChoiceField
     local fields = {}
     for name, field_class in pairs(self.fields) do 
         fields[name] = field_class:instance()
     end
     self.fields = fields
-    return self
-end
-function Form._resolve_fields(self)
-    -- for sugar: the hash table form of field defination
-    local fields = self.fields
-    if not fields then -- no fields to resolve, just return
-        return self
-    end
-    if fields[1]~=nil then -- array form
-        if self.field_order == nil then
-            local fo = {}
-            for i,v in ipairs(fields) do
-                fo[i] = v.name
-            end
-            self.field_order = fo
-        end
-    else --hash form, will be converted to array form
-        if self.field_order == nil then
-        	local fo = {}
-        	for name, v in pairs(fields) do
-        		fo[#fo+1] = name
-        	end
-        	self.field_order = fo
-        end
-        local final_fields = {}
-        for name, field_maker in pairs(fields) do
-        	final_fields[#final_fields+1] = field_maker{name=name}
-        end
-        self.fields = final_fields
-    end
     return self
 end
 function Form.get_value(self, field)
@@ -86,7 +56,6 @@ function Form._get_field(self, name)
 end
 function Form.render(self)
     local res = {}
-    local has_error = self.has_error
     for i, name in ipairs(self.field_order) do
         local field = self:_get_field(name)
         if field then
@@ -94,7 +63,7 @@ function Form.render(self)
                 res[#res+1] = field:render(self:get_value(field), field:get_base_attrs())
             else
                 local errors_string = ''
-                if has_error and self.errors[name] then
+                if self.errors[name] then
                     for i, message in ipairs(self.errors[name]) do
                         errors_string = errors_string..'<li>'..message..'</li>'
                     end
@@ -123,7 +92,7 @@ function Form.get_errors(self)
 end
 function Form.is_valid(self)
     self:get_errors()
-    return self.is_bound and not self.has_error
+    return self.is_bound and next(self.errors) == nil
 end
 function Form._clean_fields(self)
     for i, name in ipairs(self.field_order) do
@@ -131,7 +100,6 @@ function Form._clean_fields(self)
         local value = self.data[name] or self.files[name]
         local value, errors = field:clean(value)
         if errors then
-            self.has_error = true
             self.errors[name] = errors
         else
             self.cleaned_data[name] = value
@@ -139,7 +107,6 @@ function Form._clean_fields(self)
             if clean_method then
                 value, errors = clean_method(self, value)
                 if errors then
-                    self.has_error = true
                     self.errors[name] = errors
                 else
                     self.cleaned_data[name] = value
@@ -151,7 +118,6 @@ end
 function Form._clean_form(self)
     local cleaned_data, errors = self:clean()
     if errors then
-        self.has_error = true
         self.errors['__all__'] = errors
     elseif cleaned_data then
         self.cleaned_data = cleaned_data
