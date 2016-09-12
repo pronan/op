@@ -135,7 +135,7 @@ function FormView.form_valid(self, form)
 end
 function FormView.form_invalid(self, form)
     if self.request:is_ajax() then
-        local data = {valid=false, errors=form.errors}
+        local data = {valid=false, errors=form:errors()}
         return response.Json(data)
     end
     local context = self:get_context_data{form=form}

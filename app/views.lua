@@ -57,7 +57,7 @@ function m.login(request)
         redi = ''
     end
     if request:is_ajax() then
-        local data = {valid=false, errors=form.errors}
+        local data = {valid=false, errors=form:errors()}
         return response.Json(data)
     else
         return response.Template(request, "login.html", {form=form, redi=redi, navbar='login'})
@@ -76,7 +76,8 @@ function m.profile(request)
 end
 function m.q(kwargs)
     local ret, err = query("show create table user;")
-    return response.Plain(repr(ret)..repr(err))
+    local form = forms.UserUpdateForm:instance{}
+    return response.Plain(repr(form)..repr(err))
 end
 local function ran(step)
     step = step or 10

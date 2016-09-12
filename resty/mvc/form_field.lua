@@ -23,7 +23,7 @@ local os_rename = os.rename
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
 
-local function string_strip( s )
+local function string_strip(value)
     return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
 end
 local function to_html_attrs(tbl)
@@ -78,7 +78,7 @@ function BoundField.instance(cls, form, field, name)
     else
         self.label = field.label
     end
-    self.help_text = field.help_text or ''
+    self.help_text = field.help_text
     self._initial_value = UNSET
     return self
 end
@@ -87,7 +87,11 @@ function BoundField.errors(self)
     -- Returns an ErrorList for this field. Returns an empty ErrorList
     -- if there are none.
     -- """
-    return self.form.errors[self.name]
+    return self.form:errors()[self.name]
+end
+function BoundField.render(self)
+    -- just for consistency with api of `field` and `form`
+    return self:as_widget()
 end
 function BoundField.as_widget(self, widget, attrs)
     -- """
@@ -259,7 +263,7 @@ end
 -- }
 
 local function ClassCaller(cls, attrs)
-    return cls:_maker(attrs)
+    return cls:new(attrs)
 end
 
 local Field = {
@@ -277,6 +281,7 @@ end
 function Field.instance(cls, attrs)
     -- attrs can contain: required, widget, label, initial, help_text, error_messages
     -- validators, disabled, label_suffix
+    attrs = attrs or {}
     local self = cls:new(attrs)
 
     local widget = attrs.widget or cls.widget
@@ -529,6 +534,7 @@ function ChoiceField.valid_value(self, value)
     return false
 end
 
+local FileField = {}
 function FileField.validate(self, value)
     local value = value.file
     if (value == nil or value == '') and self.required then
