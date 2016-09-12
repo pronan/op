@@ -20,9 +20,12 @@ local table_concat = table.concat
 local table_insert = table.insert
 local os_rename = os.rename
 
-local gsub = ngx.re.gsub
-local match = ngx.re.match
+local ngx_re_gsub = ngx.re.gsub
+local ngx_re_match = ngx.re.match
 
+local function string_strip( s )
+    return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
+end
 local function to_html_attrs(tbl)
     local attrs = {}
     local boolean_attrs = {}
@@ -34,6 +37,29 @@ local function to_html_attrs(tbl)
         end
     end
     return table_concat(attrs, "")..table_concat(boolean_attrs, "")
+end
+local function is_empty_value(value)
+    if value == nil or value == '' then
+        return true
+    elseif type(value) == 'table' then
+        return next(value) == nil
+    else
+        return false
+    end
+end
+local function chain(a1, a2)
+    local total = {}
+    if a1 then
+        for i,v in ipairs(a1) do
+            table_insert(total, v)
+        end
+    end
+    if a2 then
+        for i,v in ipairs(a2) do
+            table_insert(total, v)
+        end
+    end
+    return total
 end
 
 local UNSET = {}
@@ -77,7 +103,7 @@ function BoundField.as_widget(self, widget, attrs)
         attrs['disabled'] = true
     end
     local auto_id = self:auto_id()
-    if auto_id and not attrs.id and not widget.attrs.id:
+    if auto_id and not attrs.id and not widget.attrs.id then
         attrs.id = auto_id
     end
     return widget:render(self.html_name, self:value(), attrs)
@@ -117,7 +143,7 @@ function BoundField.value(self)
     end
     return self.field:prepare_value(data)
 end
-function BoundField.label_tag(self, contents, attrs, label_suffix):
+function BoundField.label_tag(self, contents, attrs, label_suffix)
     -- """
     -- Wraps the given contents in a <label>, if the field has an ID attribute.
     -- contents should be 'mark_safe'd to avoid HTML escaping. If contents
@@ -200,7 +226,7 @@ function BoundField.auto_id(self)
     end
     return ''
 end
-function BoundField.id_for_label(self):
+function BoundField.id_for_label(self)
     -- """
     -- Wrapper around the field widget's `id_for_label` method.
     -- Useful, for example, for focusing on this field regardless of whether
@@ -231,36 +257,7 @@ end
 --     SelectMultiple = SelectMultiple --to do
 
 -- }
-local function is_empty_value(value)
-    if value == nil or value == '' then
-        return true
-    elseif type(value) == 'table' then
-        return next(value) == nil
-    else
-        return false
-    end
-end
-local function chain(a1, a2)
-    local total = {}
-    if a1 then
-        for i,v in ipairs(a1) do
-            table_insert(total, v)
-        end
-    end
-    if a2 then
-        for i,v in ipairs(a2) do
-            table_insert(total, v)
-        end
-    end
-    return total
-end
-local function _to_html_attrs(tbl)
-    local res = {}
-    for k,v in pairs(tbl) do
-        res[#res+1] = string_format('%s="%s"', k, v)
-    end
-    return table_concat(res, " ")
-end
+
 local function ClassCaller(cls, attrs)
     return cls:_maker(attrs)
 end
@@ -269,7 +266,6 @@ local Field = {
     widget = Widget.TextInput, 
     hidden_widget = Widget.HiddenInput, 
     default_error_messages = {required='This field is required.'}, 
-    creation_counter = 0, 
 }
 setmetatable(Field, {__call=ClassCaller})
 function Field.new(self, attrs)
@@ -342,7 +338,7 @@ function Field.run_validators(self, value)
 end
 function Field.clean(self, value)
     local value, err = self:to_lua(value)
-    if value == nil then
+    if value == nil and err ~= nil then
         return nil, {err}
     end
     -- validate
@@ -364,90 +360,48 @@ function Field.bound_data(self, data, initial)
     return data
 end
 function Field.get_bound_field(self, form, field_name)
-    return BoundField(form, self, field_name)
+    return BoundField:instance(form, self, field_name)
 end
 
 
 --<input id="id_sfzh" maxlen="18" name="sfzh" placeholder="" type="text">
 --逻辑值 <input checked="checked" id="id_enable" name="enable" type="checkbox" />
 
-local CharField = Field:new{template='<input %s />', type='text',}
-function CharField.init(cls, attrs)
-    local self = Field.init(cls, attrs) 
-    if not self.maxlen then 
-        assert(nil, '`maxlen` is required for CharField')
+local CharField = Field:new{maxlen=nil, minlen=nil, strip=true}
+function CharField.instance(cls, attrs)
+    local self = Field.instance(cls, attrs) 
+    if self.maxlen then 
+        table_insert(self.validators, validator.maxlen(self.maxlen))
     end
-    table_insert(self.validators, validator.maxlen(self.maxlen))
     if self.minlen then
         table_insert(self.validators, validator.minlen(self.minlen))
     end
-    if self.strip == nil then
-        self.strip = true
-    end
-    --self.errors = {}
     return self
 end
 function CharField.to_lua(self, value)
-    if not value then
+    if is_empty_value(value) then
         return ''
     end
-    value = tostring(value)
     if self.strip then
-        --value = string.gsub(value, '^%s*(.-)%s*$', '%1')
-        value = gsub(value, '^\\s*(.+)\\s*$', '$1','jo')
+        value = string_strip(value)
     end
     return value
 end
-function CharField.render(self, value, attrs)
-    attrs.maxlength = self.maxlen
-    attrs.value = value
-    attrs.type = self.type
+function CharField.widget_attrs(self, widget)
+    local attrs = Field.widget_attrs(self, widget)
+    if self.maxlen then
+        attrs.maxlength = self.maxlen
+    end
     if self.minlen then
         attrs.minlength = self.minlen
     end
-    return string_format(self.template, _to_html_attrs(attrs))
+    return attrs
 end
 
-local DateTimeField = Field:new{template='<input %s />', type='text', db_type='DATETIME'}
-function DateTimeField.validate(self, value)
-    local err = Field.validate(self, value)
-    if err then
-        return err
-    end
-    local res, err = match(value, [[^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$]], 'jo')
-    if not res then
-        return 'invalid datetime format'
-    end
-end
-function DateTimeField.render(self, value, attrs)
-    attrs.value = value
-    attrs.type = self.type
-    return string_format(self.template, _to_html_attrs(attrs))
-end
-
-local DateField = Field:new{template='<input %s />', type='text', db_type='DATE'}
-function DateField.validate(self, value)
-    local err = Field.validate(self, value)
-    if err then
-        return err
-    end
-    local res, err = match(value, [[^\d{4}-\d{1,2}-\d{1,2}$]], 'jo')
-    if not res then
-        return 'invalid datetime format'
-    end
-end
-function DateField.render(self, value, attrs)
-    attrs.value = value
-    attrs.type = self.type
-    return string_format(self.template, _to_html_attrs(attrs))
-end
-
-local HiddenField = CharField:new{type='hidden'}
-local PasswordField = CharField:new{type='password'}
-
-local IntegerField = Field:new{template='<input %s />', type='number', db_type='INT'}
-function IntegerField.init(cls, attrs)
-    local self = Field.init(cls, attrs) 
+local IntegerField = Field:new{widget=Widget.NumberInput, re_decimal=[[\.0*\s*$]],    
+    default_error_messages = {invalid='Enter an interger.'}}
+function IntegerField.instance(cls, attrs)
+    local self = Field.instance(cls, attrs) 
     if self.max then
         table_insert(self.validators, validator.max(self.max))
     end
@@ -457,163 +411,132 @@ function IntegerField.init(cls, attrs)
     return self
 end
 function IntegerField.to_lua(self, value)
-    return tonumber(value)
-end
-function IntegerField.render(self, value, attrs)
-    attrs.max = self.max
-    attrs.min = self.min
-    attrs.value = value
-    attrs.type = self.type
-    return string_format(self.template, _to_html_attrs(attrs))
-end
-
-local FloatField = Field:new{template='<input %s />', type='number', db_type='FLOAT'}
-function FloatField.init(cls, attrs)
-    local self = Field.init(cls, attrs) 
-    if self.max then
-        table_insert(self.validators, validator.max(self.max))
+    if is_empty_value(value) then
+        return
     end
-    if self.min then
-        table_insert(self.validators, validator.min(self.min))
-    end
-    return self
-end
-function FloatField.to_lua(self, value)
-    return tonumber(value)
-end
-function FloatField.render(self, value, attrs)
-    attrs.max = self.max
-    attrs.min = self.min
-    attrs.value = value
-    attrs.type = self.type
-    return string_format(self.template, _to_html_attrs(attrs))
-end
-
-local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=40, rows=6}}
-function TextField.init(cls, attrs)
-    local self = Field.init(cls, attrs)
-    if not self.maxlen then 
-        assert(nil, '`maxlen` is required for TextField')
-    end
-    table_insert(self.validators, validator.maxlen(self.maxlen))
-    if self.minlen then
-        table_insert(self.validators, validator.minlen(self.minlen))
-    end
-    return self
-end
--- function TextField.validate(self, value)
---     value = Field.validate(self, value)
---     return value
--- end
-function TextField.render(self, value, attrs)
-    attrs.maxlength = self.maxlen
-    if self.minlen then
-        attrs.minlength = self.minlen
-    end
-    return string_format(self.template, _to_html_attrs(attrs), value or '')
-end
--- <select id="id_model_name" name="model_name">
---  <option value="hetong" selected="selected">劳动合同制</option>
--- </select>
-
-local OptionField = Field:new{template='<select %s>%s</select>', choice_template='<option %s>%s</option>', }
-function OptionField.init(cls, attrs)
-    local self = Field.init(cls, attrs)
-    local choices = self.choices or assert(nil, 'choices is required for OptionField')
-    local first=choices[1]
-    if not first then
-        assert(nil,'you must provide 1 choice at least')
-    end
-    if type(first)=='string' then
-        self.choices={}
-        for i,v in ipairs(choices) do
-           self.choices[i]={v,v}
-        end
-    end
-    return self
-end
-function OptionField.to_lua(self, value)
-    if not value then
-        return ''
+    value = tonumber(value)
+    if not value or math.floor(value)~=value then
+        return nil, self.error_messages.invalid
     end
     return value
 end
-function OptionField.validate(self, value)
+function IntegerField.widget_attrs(self, widget)
+    local attrs = Field.widget_attrs(self, widget)
+    if self.max then
+        attrs.max = self.max
+    end
+    if self.min then
+        attrs.min = self.min
+    end
+    return attrs
+end
+
+local FloatField = IntegerField:new{default_error_messages={invalid='Enter an number.'}}
+function FloatField.to_lua(self, value)
+    if is_empty_value(value) then
+        return
+    end
+    value = tonumber(value)
+    if not value then
+        return nil, self.error_messages.invalid
+    end
+    return value
+end
+function FloatField.widget_attrs(self, widget)
+    local attrs = IntegerField.widget_attrs(self, widget)
+    if not widget.attrs.step then
+        attrs.step = 'any'
+    end
+    return attrs
+end
+
+local BaseTemporalField = Field:new{format_re=nil}
+function BaseTemporalField.to_lua(self, value)
+    if is_empty_value(value) then
+        return
+    end
+    value = string_strip(value)
+    local res, err = ngx_re_match(value, self.format_re, 'jo')
+    if not res then
+        return nil, self.error_messages.invalid
+    end
+    return value
+end
+
+local DateTimeField = BaseTemporalField:new{widget=Widget.DateTimeInput, 
+    default_error_messages={invalid='Please use `0000-00-00 00:00:00`'}, 
+    format_re = [[^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$]]}
+
+local DateField = BaseTemporalField:new{widget=Widget.DateInput, 
+    default_error_messages={invalid='Please use `0000-00-00`'}, 
+    format_re = [[^\d{4}-\d{1,2}-\d{1,2}$]]}
+
+local TimeField = BaseTemporalField:new{widget=Widget.TimeInput, 
+    default_error_messages={invalid='Please use `00:00:00`'}, 
+    format_re = [[^\d{1,2}:\d{1,2}:\d{1,2}$]]}
+
+local HiddenField = CharField:new{widget=Widget.HiddenInput}
+
+local PasswordField = CharField:new{widget=Widget.PasswordInput}
+
+local EmailField = CharField:new{widget=Widget.EmailInput}
+
+local URLField = CharField:new{widget=Widget.URLInput}
+
+local TextareaField = CharField:new{widget=Widget.Textarea}
+
+local BooleanField = Field:new{widget=Widget.CheckboxInput}
+
+local ChoiceField = Field:new{widget=Widget.Select, 
+    default_error_messages={invalid_choice='%s is not one of the available choices.'},}
+function ChoiceField.instance(cls, attrs)
+    local self = Field.instance(cls, attrs) 
+    self.choices = self.choices or {}
+    return self
+end
+function ChoiceField.to_lua(self, value)
+    if is_empty_value(value) then
+        return ''
+    end
+    return tostring(value)
+end
+function ChoiceField.validate(self, value)
     local err = Field.validate(self, value)
     if err then
         return err
     end
-    if value == nil or value == '' then
-        return --this field is not required, passed
-    end
-    local valid = false
-    for i, v in ipairs(self.choices) do
-        if v[1]==value then
-           valid=true
-        end
-    end
-    if not valid then
-        return 'invalid choice'
+    if value and not self:valid_value(value) then
+        return self.error_messages.invalid_choice
     end
 end
-function OptionField.render(self, value, attrs)
-    local choices={}
-    if value == nil or value =='' then
-        choices[1]='<option value=""></option>'
-    end
-    for i, choice in ipairs(self.choices) do
-        local db_val, val=choice[1], choice[2]
-        local inner_attrs={value=db_val}
-        if value==db_val then
-            inner_attrs.selected="selected"
+function ChoiceField.valid_value(self, value)
+    for i, e in ipairs(self.choices) do
+        local k, v = e
+        if type(v) == 'table' then
+            -- This is an optgroup, so look inside the group for options
+            for i, e in ipairs(v) do
+                local k2, v2 = e
+                if value == k2 then
+                    return true
+                end
+            end
+        else
+            if value == k then
+                return true
+            end
         end
-        choices[#choices+1]=string_format(self.choice_template, _to_html_attrs(inner_attrs),val)
     end
-    return string_format(self.template, _to_html_attrs(attrs), table_concat(choices,'\n'))
-end
--- <ul id="id-name">
--- <li><label for="id-name-0"><input type="radio" value="-1" id="id-name-0" name="name" />拒绝</label></li>
--- <li><label for="id-name-1"><input type="radio" value="0"  id="id-name-1" name="name" checked="checked" />复原</label></li>
--- <li><label for="id-name-2"><input type="radio" value="1"  id="id-name-2" name="name" />通过</label></li>
--- </ul>
-local RadioField = OptionField:new{template='<ul %s>%s</ul>',choice_template='<li><label %s><input %s />%s</label></li>',}
-function RadioField.render(self, value, attrs)
-    local choices={}
-    for i, choice in ipairs(self.choices) do
-        local db_val, val=choice[1], choice[2]
-        local inner_id = attrs.id..'-'..i
-        local inner_attrs={value=db_val, name=attrs.name, id=inner_id, type='radio'}
-        if value==db_val then
-            inner_attrs.checked="checked"
-        end
-        choices[#choices+1]=string_format(self.choice_template, _to_html_attrs({['for']=inner_id}), _to_html_attrs(inner_attrs), val)
-    end
-    return string_format(self.template, _to_html_attrs(attrs), table_concat(choices,'\n'))
+    return false
 end
 
-local FileField = Field:new{template='<input %s />', type='file'}
-function FileField.render(self, value, attrs)
-    attrs.type = self.type
-    return string_format(self.template, _to_html_attrs(attrs))
-end
--- function FileField.to_lua(self, value)
---     return value.temp
--- end
--- empty file input needs to remove the file
--- {
---   "file": "",
---   "name": "avatar",
---   "size": 0,
---   "temp": "\s8rk.c",
---   "type": "application/octet-stream",},
 function FileField.validate(self, value)
     local value = value.file
     if (value == nil or value == '') and self.required then
         return 'this field is required.'
     end 
 end
-function FileField.init(cls, attrs)
-    local self = Field.init(cls, attrs)
+function FileField.instance(cls, attrs)
+    local self = Field.instance(cls, attrs)
     self.upload_to = self.upload_to or 'static/files/' -- assert(nil, 'upload_to is required for FileField')
     local last_char = string_sub(self.upload_to, -1, -1)
     if last_char ~= '/' and last_char ~= '\\' then
@@ -634,7 +557,7 @@ end
 local ForeignKey = Field:new{template='<input %s />', type='file', db_type='FOREIGNKEY', 
                             on_delete=0, on_update=0}
 
-function ForeignKey.init(cls, attrs)
+function ForeignKey.instance(cls, attrs)
     local self = cls:new(attrs)
     self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
     local e = self.reference
@@ -660,5 +583,6 @@ return{
     DateField = DateField, 
     HiddenField = HiddenField, 
     FloatField = FloatField, 
+    ChoiceField = ChoiceField, 
     ForeignKey = ForeignKey, 
 }

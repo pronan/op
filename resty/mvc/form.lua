@@ -18,21 +18,21 @@ function Form.new(self, attrs)
     self.__index = self
     return setmetatable(attrs, self)
 end
-function Form.class(cls, subclass)
-    return cls:new(subclass):_resolve_fields()
-end
+-- function Form.class(cls, subclass)
+--     return cls:new(subclass):_resolve_fields()
+-- end
 function Form.instance(cls, attrs)
     local self = cls:new(attrs)
-    self.is_bound = self.data or self.files
+    self.is_bound = self.data~=nil or self.files~=nil
     self.data = self.data or {}
     self.files = self.files or {}
     self.initial = self.initial or {}
     self.label_suffix = self.label_suffix or ''
-    -- make a child-copy of fields so we can safely dynamically overwrite 
+    -- make instances of fields so we can safely dynamically overwrite 
     -- some attributes of the field, e.g. `choices` of OptionField
     local fields = {}
-    for i, v in ipairs(self.fields) do 
-        fields[#fields+1] = v:new()
+    for name, field_class in pairs(self.fields) do 
+        fields[name] = field_class:instance()
     end
     self.fields = fields
     return self

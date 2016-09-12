@@ -394,7 +394,7 @@ return {
 
     DateInput = DateInput, 
     DateTimeInput = DateTimeInput, 
-    TimeInput = TextInput, 
+    TimeInput = TimeInput, 
 
 
     Select = Select, 
