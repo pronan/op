@@ -26,9 +26,12 @@ local function chain(a1, a2)
     for i,v in ipairs(a1) do
         table_insert(total, v)
     end
-    for i,v in ipairs(a2) do
-        table_insert(total, v)
+    if a2 then
+        for i,v in ipairs(a2) do
+            table_insert(total, v)
+        end
     end
+    loger('total', total)
     return total
 end
 
@@ -57,8 +60,10 @@ function Widget.build_attrs(self, extra_attrs, kwargs)
     for k,v in pairs(extra_attrs) do
         attrs[k] = v
     end
-    for k,v in pairs(kwargs) do
-        attrs[k] = v
+    if kwargs then
+        for k,v in pairs(kwargs) do
+            attrs[k] = v
+        end
     end
     return attrs
 end
@@ -168,9 +173,10 @@ function Select.render(self, name, value, attrs, choices)
 end
 function Select.render_options(self, choices, selected_choices)
     local output = {}
+    loger('render_options', choices, self.choices, selected_choices)
     for i,v in ipairs(chain(choices, self.choices)) do
-        local option_value, option_label = v
-        if type(v) == 'table' then
+        local option_value, option_label = v[1], v[2]
+        if type(option_label) == 'table' then
             table_insert(output, string_format('<optgroup label="%s">', option_value))
             for i, option in ipairs(option_label) do
                 table_insert(output, self:render_option(selected_choices, option[1], option[2]))
@@ -266,10 +272,10 @@ function ChoiceInput.tag(self, attrs)
     for k,v in pairs(attrs) do
         final_attrs[k] = v
     end   
-    final_attrs.type = type
-    final_attrs.name = name
+    final_attrs.type = self.type
+    final_attrs.name = self.name
     final_attrs.value = self.choice_value
-    if self:checked() then
+    if self:is_checked() then
         final_attrs.checked = 'checked'
     end
     return string_format('<input%s />', to_html_attrs(final_attrs))
@@ -291,8 +297,8 @@ function CheckboxChoiceInput.is_checked(self)
 end
 
 local ChoiceFieldRenderer = {choice_input_class=nil, 
-    outer_html = '<ul{id_attr}>{content}</ul>', 
-    inner_html = '<li>{choice_value}{sub_widgets}</li>', }
+    outer_html = '<ul%s>%s</ul>', 
+    inner_html = '<li>%s%s</li>', }
 function ChoiceFieldRenderer.new(cls, self)
     self = self or {}
     cls.__index = cls
@@ -328,7 +334,7 @@ function ChoiceFieldRenderer.render(self)
             table_insert(output, string_format(self.inner_html, choice_value,
                 sub_ul_renderer:render()))
         else
-            local w = self.choice_input_class(self.name, self.value, self.attrs.copy(), choice, i)
+            local w = self.choice_input_class:instance(self.name, self.value, self.attrs, choice, i)
             table_insert(output, string_format(self.inner_html, w:render(), ''))
         end
     end
@@ -351,7 +357,7 @@ function RendererMixin.get_renderer(self, name, value, attrs, choices)
         value = self._empty_value
     end
     local final_attrs = self:build_attrs(attrs)
-    return self:renderer(name, value, final_attrs, chain(choices, self.choices))
+    return self.renderer:instance(name, value, final_attrs, chain(choices, self.choices))
 end
 
 function RendererMixin.render(self, name, value, attrs, choices)
@@ -374,8 +380,7 @@ for k,v in pairs(RendererMixin) do
     RadioSelect[k] = v
 end
 
-local CheckboxSelectMultiple = SelectMultiple:new{renderer=CheckboxFieldRenderer, 
-    _empty_value={}}
+local CheckboxSelectMultiple = SelectMultiple:new{renderer=CheckboxFieldRenderer,_empty_value={}}
 for k,v in pairs(RendererMixin) do
     CheckboxSelectMultiple[k] = v
 end

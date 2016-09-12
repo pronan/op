@@ -496,8 +496,12 @@ local ChoiceField = Field:new{widget=Widget.Select,
     default_error_messages={invalid_choice='%s is not one of the available choices.'},}
 function ChoiceField.instance(cls, attrs)
     local self = Field.instance(cls, attrs) 
-    self.choices = self.choices or {}
+    self:set_choices(self.choices or {}) 
     return self
+end
+function ChoiceField.set_choices(self, choices)
+    self.choices = choices
+    self.widget.choices = choices
 end
 function ChoiceField.to_lua(self, value)
     if is_empty_value(value) then
@@ -511,16 +515,16 @@ function ChoiceField.validate(self, value)
         return err
     end
     if value and not self:valid_value(value) then
-        return self.error_messages.invalid_choice
+        return string_format(self.error_messages.invalid_choice, value)
     end
 end
 function ChoiceField.valid_value(self, value)
     for i, e in ipairs(self.choices) do
-        local k, v = e
+        local k, v = e[1], e[2]
         if type(v) == 'table' then
             -- This is an optgroup, so look inside the group for options
             for i, e in ipairs(v) do
-                local k2, v2 = e
+                local k2, v2 = e[1], e[2]
                 if value == k2 then
                     return true
                 end
