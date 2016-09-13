@@ -1,6 +1,14 @@
 local Validator = require"resty.mvc.validator"
 local Widget = require"resty.mvc.widget"
 local BoundField = require"resty.mvc.boundfield"
+local utils = require"resty.mvc.utils"
+local string_strip = utils.string_strip
+local is_empty_value = utils.is_empty_value
+local to_html_attrs = utils.to_html_attrs
+local list = utils.list
+local dict = utils.dict
+local dict_update = utils.dict_update
+local reversed_metatables = utils.reversed_metatables
 local rawget = rawget
 local setmetatable = setmetatable
 local getmetatable = getmetatable
@@ -26,56 +34,7 @@ local ngx_re_match = ngx.re.match
 -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
 -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
 
-local function string_strip(value)
-    return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
-end
-local function is_empty_value(value)
-    if value == nil or value == '' then
-        return true
-    elseif type(value) == 'table' then
-        return next(value) == nil
-    else
-        return false
-    end
-end
-local function to_html_attrs(tbl)
-    local attrs = {}
-    local boolean_attrs = {}
-    for k, v in pairs(tbl) do
-        if v == true then
-            table_insert(boolean_attrs, ' '..k)
-        elseif v then -- exclude false
-            table_insert(attrs, string_format(' %s="%s"', k, v))
-        end
-    end
-    return table_concat(attrs, "")..table_concat(boolean_attrs, "")
-end
-local function list(...)
-    local total = {}
-    for i, list in next, {...}, nil do
-        for i, v in ipairs(list) do
-            total[#total+1] = v
-        end
-    end
-    return total
-end
-local function dict(...)
-    local total = {}
-    for i, dict in next, {...}, nil do
-        for k, v in pairs(dict) do
-            total[k] = v
-        end
-    end
-    return total
-end
-local function dict_update(t, ...)
-    for i, dict in next, {...}, nil do
-        for k, v in pairs(dict) do
-            t[k] = v
-        end
-    end
-    return t
-end
+
 local function ClassCaller(cls, attrs)
     return cls:new(attrs):instance()
 end
@@ -84,7 +43,7 @@ local Field = {
     widget = Widget.TextInput, 
     hidden_widget = Widget.HiddenInput, 
     default_error_messages = {required='This field is required.'}, 
-    required = false, 
+    required = true, 
 }
 setmetatable(Field, {__call=ClassCaller})
 function Field.new(cls, self)
@@ -97,7 +56,6 @@ function Field.new(cls, self)
     return setmetatable(self, cls)
 end
 function Field.instance(self)
-    local cls = getmetatable(self)
     -- widget stuff
     local widget = self.widget 
     if not widget.is_instance then
@@ -108,8 +66,11 @@ function Field.instance(self)
     -- Hook into self.widget_attrs() for any Field-specific HTML attributes.
     dict_update(widget.attrs, self:widget_attrs(widget))
     self.widget = widget
-
-    self.error_messages = dict(cls.default_error_messages, self.error_messages) 
+    local messages = dict(error_messages)
+    for i, parent in ipairs(reversed_metatables(self)) do
+        dict_update(messages, parent.default_error_messages)
+    end
+    self.error_messages = messages 
     self.validators = list(self.default_validators, self.validators)
     return self
 end
@@ -123,7 +84,9 @@ function Field.to_lua(self, value)
     return value
 end
 function Field.validate(self, value)
+    loger('validate', type(value), value)
     if is_empty_value(value) and self.required then
+        loger('error_messages', self.error_messages)
         return self.error_messages.required
     end
 end
@@ -308,7 +271,7 @@ function ChoiceField.set_choices(self, choices)
 end
 function ChoiceField.to_lua(self, value)
     if is_empty_value(value) then
-        return ''
+        return 
     end
     return tostring(value)
 end

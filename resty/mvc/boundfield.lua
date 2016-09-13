@@ -1,21 +1,9 @@
+local utils = require"resty.mvc.utils"
+local to_html_attrs = utils.to_html_attrs
 local string_format = string.format
 local table_concat = table.concat
 local table_insert = table.insert
-
 local UNSET = {}
-
-local function to_html_attrs(tbl)
-    local attrs = {}
-    local boolean_attrs = {}
-    for k, v in pairs(tbl) do
-        if v == true then
-            table_insert(boolean_attrs, ' '..k)
-        elseif v then -- exclude false
-            table_insert(attrs, string_format(' %s="%s"', k, v))
-        end
-    end
-    return table_concat(attrs, "")..table_concat(boolean_attrs, "")
-end
 
 local BoundField = {}
 function BoundField.new(cls, self)

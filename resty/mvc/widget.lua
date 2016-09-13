@@ -1,44 +1,16 @@
---      'Widget', 'TextInput', 'NumberInput',
---     'EmailInput', 'URLInput', 'PasswordInput', 'HiddenInput',
---     'FileInput', 'Textarea','DateInput', 'DateTimeInput', 'TimeInput', 'CheckboxInput', 'RadioSelect',
---     'RadioSelect',
 -- https://docs.djangoproject.com/en/1.10/ref/forms/widgets/#django.forms.SelectMultiple
+local utils = require"resty.mvc.utils"
+local to_html_attrs = utils.to_html_attrs
+local list = utils.list
+local dict = utils.dict
+local dict_update = utils.dict_update
 local string_format = string.format
 local pairs = pairs
+local setmetatable = setmetatable
+local assert = assert
 local table_insert = table.insert
 local table_concat = table.concat
 local table_remove = table.remove
-
-local function to_html_attrs(tbl)
-    local attrs = {}
-    local boolean_attrs = {}
-    for k, v in pairs(tbl) do
-        if v == true then
-            table_insert(boolean_attrs, ' '..k)
-        elseif v then -- exclude false
-            table_insert(attrs, string_format(' %s="%s"', k, v))
-        end
-    end
-    return table_concat(attrs, "")..table_concat(boolean_attrs, "")
-end
-local function list(...)
-    local total = {}
-    for i, list in next, {...}, nil do
-        for i, v in ipairs(list) do
-            total[#total+1] = v
-        end
-    end
-    return total
-end
-local function dict(...)
-    local total = {}
-    for i, dict in next, {...}, nil do
-        for k, v in pairs(dict) do
-            total[k] = v
-        end
-    end
-    return total
-end
 
 local Widget = {multipart=false}
 function Widget.new(cls, init)
@@ -121,7 +93,7 @@ function Textarea.render(self, name, value, attrs)
         value = ''
     end
     local final_attrs = self:build_attrs(attrs, {name=name})
-    return string_format('<textarea%s>\r\n%s</textarea>', to_html_attrs(final_attrs), value)
+    return string_format('<textarea%s>\n%s</textarea>', to_html_attrs(final_attrs), value)
 end
 
 local DateInput = TextInput:new{format_key=''}
@@ -383,7 +355,6 @@ return {
     DateInput = DateInput, 
     DateTimeInput = DateTimeInput, 
     TimeInput = TimeInput, 
-
 
     Select = Select, 
     RadioSelect = RadioSelect, 

@@ -1,3 +1,13 @@
+local type = type
+local pairs = pairs
+local next = next
+local ipairs = ipairs
+local string_format = string.format
+local table_concat = table.concat
+local table_insert = table.insert
+local ngx_re_gsub = ngx.re.gsub
+local ngx_re_match = ngx.re.match
+
 local function string_strip(value)
     return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
 end
@@ -56,10 +66,35 @@ local function list_extend(t, ...)
     end
     return t
 end
-return{
+local function reversed_metatables(self)
+    local res = {}
+    while true do
+        local p = getmetatable(self)
+        if p then
+            table_insert(res, 1, p)
+            self = p
+        else
+            break
+        end
+    end
+    return res
+end
+local function walk_metatables(self)
+    local function iter()
+        local cls = getmetatable(self)
+        self = cls
+        return cls
+    end
+    return iter
+end
+return {
     dict = dict, 
     list = list, 
     to_html_attrs = to_html_attrs, 
     string_strip = string_strip, 
     is_empty_value = is_empty_value, 
+    dict_update = dict_update, 
+    list_extend = list_extend, 
+    reversed_metatables = reversed_metatables, 
+    walk_metatables = walk_metatables, 
 }
