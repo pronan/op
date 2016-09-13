@@ -23,15 +23,30 @@ local function to_html_attrs(tbl)
 end
 local function chain(a1, a2)
     local total = {}
-    for i,v in ipairs(a1) do
-        table_insert(total, v)
+    if a1 then
+        for i,v in ipairs(a1) do
+            table_insert(total, v)
+        end
     end
     if a2 then
         for i,v in ipairs(a2) do
             table_insert(total, v)
         end
     end
-    loger('total', total)
+    return total
+end
+local function chain_dict(a1, a2)
+    local total = {}
+    if a1 then
+        for k, v in pairs(a1) do
+            total[k] = v
+        end
+    end
+    if a2 then
+        for k, v in pairs(a2) do
+            total[k] = v
+        end
+    end
     return total
 end
 
@@ -196,7 +211,7 @@ function Select.render_option(self, selected_choices, option_value, option_label
     local j
     for i, v in ipairs(selected_choices) do
         if v == option_value then
-            has = true
+            selected = true
             j = i
             break
         end
@@ -216,9 +231,12 @@ end
 
 local SelectMultiple = Select:new{allow_multiple_selected=true}
 function SelectMultiple.render(self, name, value, attrs, choices)
+    -- 待定, 多选下拉框解析成的值是table
     choices = choices or {}
     if not value then
         value = {}
+    elseif type(value) == 'string' then
+        value = {value}
     end
     local final_attrs = self:build_attrs(attrs, {name=name})
     return string_format('<select multiple="multiple"%s>%s</select>', to_html_attrs(final_attrs), 
@@ -244,7 +262,7 @@ function ChoiceInput.instance(cls, name, value, attrs, choice, index)
     self.choice_label = choice[2]
     self.index = index
     if attrs.id then
-        attrs.id = string_format('%s_%s',  attrs.id, self.index)
+        self.attrs.id = string_format('%s_%s',  attrs.id, self.index)
     end
     return self
 end
@@ -254,27 +272,17 @@ function ChoiceInput.render(self, name, value, attrs, choices)
     if self.attrs.id then
         label_for = string_format(' for="%s"', self.attrs.id)
     end
-    local final_attrs = {}
-    for k,v in pairs(self.attrs) do
-        final_attrs[k] = v
-    end
-    if attrs then 
-        for k,v in pairs(attrs) do
-            final_attrs[k] = v
-        end
+    if attrs then
+        attrs = chain_dict(self.attrs, attrs)
+    else
+        attrs = self.attrs
     end
     return string_format('<label%s>%s %s</label>', label_for, 
-        self:tag(final_attrs), self.choice_label)
+        self:tag(attrs), self.choice_label)
 end
 function ChoiceInput.tag(self, attrs)
     attrs = attrs or self.attrs
-    local final_attrs = {}
-    for k,v in pairs(attrs) do
-        final_attrs[k] = v
-    end   
-    final_attrs.type = self.type
-    final_attrs.name = self.name
-    final_attrs.value = self.choice_value
+    local final_attrs = chain_dict(attrs, {type=self.type, name=self.name, value=self.choice_value})
     if self:is_checked() then
         final_attrs.checked = 'checked'
     end
@@ -288,7 +296,7 @@ local RadioChoiceInput = ChoiceInput:new{type='radio'}
 
 local CheckboxChoiceInput = ChoiceInput:new{type='checkbox'}
 function CheckboxChoiceInput.is_checked(self)
-    for i,v in ipairs(self.value) do
+    for i, v in ipairs(self.value) do
         if v == self.choice_value then
             return true
         end
@@ -297,8 +305,7 @@ function CheckboxChoiceInput.is_checked(self)
 end
 
 local ChoiceFieldRenderer = {choice_input_class=nil, 
-    outer_html = '<ul%s>%s</ul>', 
-    inner_html = '<li>%s%s</li>', }
+    outer_html = '<ul%s>%s</ul>',  inner_html = '<li>%s%s</li>', }
 function ChoiceFieldRenderer.new(cls, self)
     self = self or {}
     cls.__index = cls
@@ -319,7 +326,7 @@ function ChoiceFieldRenderer.render(self)
     local id = self.attrs.id
     local output = {}
     for i, choice in ipairs(self.choices) do
-        local choice_value, choice_label = choice
+        local choice_value, choice_label = choice[1], choice[2]
         if type(choice_label)=='table' then
             local attrs_plus = {}
             for k,v in pairs(self.attrs) do
