@@ -82,7 +82,7 @@ function Form.render(self)
             res[#res+1] = bf:render()
         else
             local css_classes = bf:css_classes()
-            if css_classes then
+            if css_classes and css_classes~='' then
                 html_class_attr = string_format(' class="%s"', css_classes)
             end
             if bf.label then

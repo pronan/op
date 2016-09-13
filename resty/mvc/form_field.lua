@@ -27,6 +27,15 @@ local ngx_re_match = ngx.re.match
 local function string_strip(value)
     return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
 end
+local function is_empty_value(value)
+    if value == nil or value == '' then
+        return true
+    elseif type(value) == 'table' then
+        return next(value) == nil
+    else
+        return false
+    end
+end
 local function to_html_attrs(tbl)
     local attrs = {}
     local boolean_attrs = {}
@@ -39,30 +48,42 @@ local function to_html_attrs(tbl)
     end
     return table_concat(attrs, "")..table_concat(boolean_attrs, "")
 end
-local function is_empty_value(value)
-    if value == nil or value == '' then
-        return true
-    elseif type(value) == 'table' then
-        return next(value) == nil
-    else
-        return false
-    end
-end
-local function chain(a1, a2)
-    local total = {}
-    if a1 then
-        for i,v in ipairs(a1) do
-            table_insert(total, v)
+local function list(t)
+    local res = {}
+    if t then
+        for i, v in ipairs(t) do
+            res[#res+1] = v
         end
     end
-    if a2 then
-        for i,v in ipairs(a2) do
-            table_insert(total, v)
+    return res
+end
+local function dict(t)
+    local res = {}
+    if t then
+        for k, v in pairs(t) do
+            res[k] = v
+        end
+    end
+    return res
+end
+local function chain_list(...)
+    local total = {}
+    for i, list in ipairs{...} do
+        for i, v in ipairs(list) do
+            total[#total+1] = v
         end
     end
     return total
 end
-
+local function chain_dict(...)
+    local total = {}
+    for i, dict in ipairs{...} do
+        for k, v in pairs(dict) do
+            total[k] = v
+        end
+    end
+    return total
+end
 local function ClassCaller(cls, attrs)
     return cls:new(attrs)
 end
@@ -71,6 +92,7 @@ local Field = {
     widget = Widget.TextInput, 
     hidden_widget = Widget.HiddenInput, 
     default_error_messages = {required='This field is required.'}, 
+    required = false, 
 }
 setmetatable(Field, {__call=ClassCaller})
 function Field.new(self, attrs)
@@ -108,7 +130,7 @@ function Field.instance(cls, attrs)
     end
     self.error_messages = messages
 
-    self.validators = chain(self.default_validators, attrs.validators)
+    self.validators = chain_list(self.default_validators, attrs.validators)
     return self
 end
 function Field.widget_attrs(self, widget)
@@ -339,7 +361,35 @@ function ChoiceField.valid_value(self, value)
     return false
 end
 
-local FileField = {}
+local MultipleChoiceField = ChoiceField:new{widget = SelectMultiple, 
+    default_error_messages = {
+        invalid_choice='Select a valid choice. %s is not one of the available choices.',
+        invalid_list='Enter a list of values.'}, 
+}
+function MultipleChoiceField.to_lua(self, value)
+    -- 待定, reqargs将多选下拉框解析成的值是, 没选时直接忽略, 选1个的时候是字符串, 大于1个是table
+    if not value then
+        return {}
+    elseif type(value) =='string' then
+        return {value}
+    elseif type(value)~='table' then
+        return nil, self.error_messages.invalid_list
+    end
+    return value
+end
+function MultipleChoiceField.validate(self, value)
+    if self.required and next(value) == nil then
+        return self.error_messages.required
+    end
+    -- Validate that each value in the value list is in self.choices.
+    for _, val in ipairs(value) do
+        if not self:valid_value(val) then
+            return string_format(self.error_messages.invalid_choice, val)
+        end
+    end
+end
+
+local FileField = Field:new{}
 function FileField.validate(self, value)
     local value = value.file
     if (value == nil or value == '') and self.required then
@@ -385,8 +435,6 @@ return{
     CharField = CharField, 
     IntegerField = IntegerField, 
     TextField = TextField, 
-    RadioField = RadioField,
-    OptionField = OptionField,
     PasswordField = PasswordField, 
     FileField = FileField, 
     DateField = DateField, 
@@ -395,5 +443,7 @@ return{
     HiddenField = HiddenField, 
     FloatField = FloatField, 
     ChoiceField = ChoiceField, 
-    ForeignKey = ForeignKey, 
+
+    MultipleChoiceField = MultipleChoiceField, -- todo
+    ForeignKey = ForeignKey, -- to do
 }

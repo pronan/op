@@ -23,8 +23,8 @@ local UserCreateForm = Form:class{model = User,
 
 local UserUpdateForm = Form:class{model = User, 
     fields = {
-        username = Field.ChoiceField{ widget=Widget.RadioSelect, 
-            choices={{'a', '啊'}, {'b', '比'}}, help_text='名字, 最多1个字'},
+        username = Field.ChoiceField{ widget=Widget.Select, 
+            choices={{'a', '啊'}, {'g1', {{'b', '比'}, {'c', '吃'}}}}, help_text='名字, 最多1个字'},
         password = Field.CharField{widget=Widget.TextInput, maxlen=50},
     }, 
 }

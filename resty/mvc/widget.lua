@@ -21,29 +21,37 @@ local function to_html_attrs(tbl)
     end
     return table_concat(attrs, "")..table_concat(boolean_attrs, "")
 end
-local function chain(a1, a2)
-    local total = {}
-    if a1 then
-        for i,v in ipairs(a1) do
-            table_insert(total, v)
+local function list(t)
+    local res = {}
+    if t then
+        for i, v in ipairs(t) do
+            res[#res+1] = v
         end
     end
-    if a2 then
-        for i,v in ipairs(a2) do
-            table_insert(total, v)
+    return res
+end
+local function dict(t)
+    local res = {}
+    if t then
+        for k, v in pairs(t) do
+            res[k] = v
+        end
+    end
+    return res
+end
+local function chain_list(...)
+    local total = {}
+    for i, list in ipairs{...} do
+        for i, v in ipairs(list) do
+            total[#total+1] = v
         end
     end
     return total
 end
-local function chain_dict(a1, a2)
+local function chain_dict(...)
     local total = {}
-    if a1 then
-        for k, v in pairs(a1) do
-            total[k] = v
-        end
-    end
-    if a2 then
-        for k, v in pairs(a2) do
+    for i, dict in ipairs{...} do
+        for k, v in pairs(dict) do
             total[k] = v
         end
     end
@@ -188,8 +196,7 @@ function Select.render(self, name, value, attrs, choices)
 end
 function Select.render_options(self, choices, selected_choices)
     local output = {}
-    loger('render_options', choices, self.choices, selected_choices)
-    for i,v in ipairs(chain(choices, self.choices)) do
+    for i,v in ipairs(chain_list(choices, self.choices)) do
         local option_value, option_label = v[1], v[2]
         if type(option_label) == 'table' then
             table_insert(output, string_format('<optgroup label="%s">', option_value))
@@ -231,7 +238,7 @@ end
 
 local SelectMultiple = Select:new{allow_multiple_selected=true}
 function SelectMultiple.render(self, name, value, attrs, choices)
-    -- 待定, 多选下拉框解析成的值是table
+    -- 待定, reqargs将多选下拉框解析成的值是, 没选时直接忽略, 选1个的时候是字符串, 大于1个是table
     choices = choices or {}
     if not value then
         value = {}
@@ -242,10 +249,10 @@ function SelectMultiple.render(self, name, value, attrs, choices)
     return string_format('<select multiple="multiple"%s>%s</select>', to_html_attrs(final_attrs), 
         self:render_options(choices, value))
 end
-function SelectMultiple.value_from_datadict(self, data, files, name)
-    -- 待定
-    return data[name]
-end
+-- function SelectMultiple.value_from_datadict(self, data, files, name)
+--     -- 待定, OpenResy似乎无此问题, 直接从data读取即可
+--     return data[name]
+-- end
 
 local ChoiceInput = {type=nil}
 function ChoiceInput.new(cls, self)
@@ -305,7 +312,7 @@ function CheckboxChoiceInput.is_checked(self)
 end
 
 local ChoiceFieldRenderer = {choice_input_class=nil, 
-    outer_html = '<ul%s>%s</ul>',  inner_html = '<li>%s%s</li>', }
+    outer_html = '<ul%s>\n%s\n</ul>',  inner_html = '<li>%s%s</li>', }
 function ChoiceFieldRenderer.new(cls, self)
     self = self or {}
     cls.__index = cls
@@ -327,21 +334,16 @@ function ChoiceFieldRenderer.render(self)
     local output = {}
     for i, choice in ipairs(self.choices) do
         local choice_value, choice_label = choice[1], choice[2]
+        local attrs = dict(self.attrs)
         if type(choice_label)=='table' then
-            local attrs_plus = {}
-            for k,v in pairs(self.attrs) do
-                attrs_plus[k] = v
-            end
             if id then
-                attrs_plus.id = attrs_plus.id..'_'..i
+                attrs.id = attrs.id..'_'..i
             end
-            local sub_ul_renderer = ChoiceFieldRenderer:instance(
-                self.name, self.value, attrs_plus, choice_label)
+            local sub_ul_renderer = self:instance(self.name, self.value, attrs, choice_label)
             sub_ul_renderer.choice_input_class = self.choice_input_class
-            table_insert(output, string_format(self.inner_html, choice_value,
-                sub_ul_renderer:render()))
+            table_insert(output, string_format(self.inner_html, choice_value, sub_ul_renderer:render()))
         else
-            local w = self.choice_input_class:instance(self.name, self.value, self.attrs, choice, i)
+            local w = self.choice_input_class:instance(self.name, self.value, attrs, choice, i)
             table_insert(output, string_format(self.inner_html, w:render(), ''))
         end
     end
@@ -364,9 +366,8 @@ function RendererMixin.get_renderer(self, name, value, attrs, choices)
         value = self._empty_value
     end
     local final_attrs = self:build_attrs(attrs)
-    return self.renderer:instance(name, value, final_attrs, chain(choices, self.choices))
+    return self.renderer:instance(name, value, final_attrs, chain_list(choices, self.choices))
 end
-
 function RendererMixin.render(self, name, value, attrs, choices)
     return self:get_renderer(name, value, attrs, choices):render()
 end
@@ -376,8 +377,13 @@ function RendererMixin.id_for_label(self, id)
     -- # The IDs are made distinct by y "_X" suffix, where X is the zero-based
     -- # index of the choice field. Thus, the label for the main widget should
     -- # reference the first subwidget, hence the "_0" suffix.
+    -- <label for="id_xb_0">性别:</label>
+    -- <ul id="id_xb">
+        -- <li><label for="id_xb_0"><input id="id_xb_0" name="xb" type="radio" value="男" /> 男</label></li>
+        -- <li><label for="id_xb_1"><input id="id_xb_1" name="xb" type="radio" value="女" /> 女</label></li>
+    -- </ul>
     if id then
-        id = id..'_0'
+        id = id..'_1'
     end
     return id
 end
@@ -387,7 +393,7 @@ for k,v in pairs(RendererMixin) do
     RadioSelect[k] = v
 end
 
-local CheckboxSelectMultiple = SelectMultiple:new{renderer=CheckboxFieldRenderer,_empty_value={}}
+local CheckboxSelectMultiple = SelectMultiple:new{renderer=CheckboxFieldRenderer, _empty_value={}}
 for k,v in pairs(RendererMixin) do
     CheckboxSelectMultiple[k] = v
 end
