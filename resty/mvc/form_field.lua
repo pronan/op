@@ -1,28 +1,30 @@
-    -- 'Field', 'CharField', 'IntegerField',
-    -- 'DateField', 'TimeField', 'DateTimeField', 'DurationField',
-    -- 'RegexField', 'EmailField', 'FileField', 'ImageField', 'URLField',
-    -- 'BooleanField', 'NullBooleanField', 'ChoiceField', 'MultipleChoiceField',
-    -- 'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
-    -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
-    -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
-local validator = require"resty.mvc.validator"
+local Validator = require"resty.mvc.validator"
 local Widget = require"resty.mvc.widget"
 local BoundField = require"resty.mvc.boundfield"
 local rawget = rawget
 local setmetatable = setmetatable
+local getmetatable = getmetatable
 local ipairs = ipairs
 local tostring = tostring
 local type = type
 local pairs = pairs
 local assert = assert
+local next = next
 local string_format = string.format
 local string_sub = string.sub
 local table_concat = table.concat
 local table_insert = table.insert
 local os_rename = os.rename
-
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
+
+-- 'Field', 'CharField', 'IntegerField',
+-- 'DateField', 'TimeField', 'DateTimeField', 'DurationField',
+-- 'RegexField', 'EmailField', 'FileField', 'ImageField', 'URLField',
+-- 'BooleanField', 'NullBooleanField', 'ChoiceField', 'MultipleChoiceField',
+-- 'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
+-- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
+-- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
 
 local function string_strip(value)
     return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
@@ -48,44 +50,34 @@ local function to_html_attrs(tbl)
     end
     return table_concat(attrs, "")..table_concat(boolean_attrs, "")
 end
-local function list(t)
-    local res = {}
-    if t then
-        for i, v in ipairs(t) do
-            res[#res+1] = v
-        end
-    end
-    return res
-end
-local function dict(t)
-    local res = {}
-    if t then
-        for k, v in pairs(t) do
-            res[k] = v
-        end
-    end
-    return res
-end
-local function chain_list(...)
+local function list(...)
     local total = {}
-    for i, list in ipairs{...} do
+    for i, list in next, {...}, nil do
         for i, v in ipairs(list) do
             total[#total+1] = v
         end
     end
     return total
 end
-local function chain_dict(...)
+local function dict(...)
     local total = {}
-    for i, dict in ipairs{...} do
+    for i, dict in next, {...}, nil do
         for k, v in pairs(dict) do
             total[k] = v
         end
     end
     return total
 end
+local function dict_update(t, ...)
+    for i, dict in next, {...}, nil do
+        for k, v in pairs(dict) do
+            t[k] = v
+        end
+    end
+    return t
+end
 local function ClassCaller(cls, attrs)
-    return cls:new(attrs)
+    return cls:new(attrs):instance()
 end
 
 local Field = {
@@ -95,42 +87,30 @@ local Field = {
     required = false, 
 }
 setmetatable(Field, {__call=ClassCaller})
-function Field.new(self, attrs)
-    attrs = attrs or {}
-    self.__index = self
-    self.__call = ClassCaller
-    return setmetatable(attrs, self)
-end
-function Field.instance(cls, attrs)
-    -- attrs can contain: required, widget, label, initial, help_text, error_messages
+function Field.new(cls, self)
+    -- supported options of self: 
+    -- required, widget, label, initial, help_text, error_messages
     -- validators, disabled, label_suffix
-    attrs = attrs or {}
-    local self = cls:new(attrs)
-
-    local widget = attrs.widget or cls.widget
-    widget = widget:instance()
+    self = self or {}
+    cls.__index = cls
+    cls.__call = ClassCaller
+    return setmetatable(self, cls)
+end
+function Field.instance(self)
+    local cls = getmetatable(self)
+    -- widget stuff
+    local widget = self.widget 
+    if not widget.is_instance then
+        widget = widget:instance()
+    end
     -- Let the widget know whether it should display as required.
     widget.is_required = self.required
     -- Hook into self.widget_attrs() for any Field-specific HTML attributes.
-    local extra_attrs = self:widget_attrs(widget)
-    if extra_attrs then
-        for k,v in pairs(extra_attrs) do
-            widget.attrs[k] = v
-        end
-    end
+    dict_update(widget.attrs, self:widget_attrs(widget))
     self.widget = widget
 
-    local messages = {}
-    local parent_error_messages = cls.default_error_messages or {}
-    for k,v in pairs(parent_error_messages) do
-        messages[k] = v
-    end
-    for k,v in pairs(attrs.error_messages or {}) do
-        messages[k] = v
-    end
-    self.error_messages = messages
-
-    self.validators = chain_list(self.default_validators, attrs.validators)
+    self.error_messages = dict(cls.default_error_messages, self.error_messages) 
+    self.validators = list(self.default_validators, self.validators)
     return self
 end
 function Field.widget_attrs(self, widget)
@@ -199,10 +179,10 @@ local CharField = Field:new{maxlen=nil, minlen=nil, strip=true}
 function CharField.instance(cls, attrs)
     local self = Field.instance(cls, attrs) 
     if self.maxlen then 
-        table_insert(self.validators, validator.maxlen(self.maxlen))
+        table_insert(self.validators, Validator.maxlen(self.maxlen))
     end
     if self.minlen then
-        table_insert(self.validators, validator.minlen(self.minlen))
+        table_insert(self.validators, Validator.minlen(self.minlen))
     end
     return self
 end
@@ -231,10 +211,10 @@ local IntegerField = Field:new{widget=Widget.NumberInput, re_decimal=[[\.0*\s*$]
 function IntegerField.instance(cls, attrs)
     local self = Field.instance(cls, attrs) 
     if self.max then
-        table_insert(self.validators, validator.max(self.max))
+        table_insert(self.validators, Validator.max(self.max))
     end
     if self.min then
-        table_insert(self.validators, validator.min(self.min))
+        table_insert(self.validators, Validator.min(self.min))
     end
     return self
 end

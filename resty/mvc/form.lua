@@ -43,7 +43,7 @@ function Form.instance(cls, attrs)
     -- some attributes of the field, e.g. `choices` of ChoiceField
     local fields = {}
     for name, field_class in pairs(self.fields) do 
-        fields[name] = field_class:instance{}
+        fields[name] = field_class:new()
     end
     self.fields = fields
     self._bound_fields_cache = {}

@@ -21,36 +21,18 @@ local function to_html_attrs(tbl)
     end
     return table_concat(attrs, "")..table_concat(boolean_attrs, "")
 end
-local function list(t)
-    local res = {}
-    if t then
-        for i, v in ipairs(t) do
-            res[#res+1] = v
-        end
-    end
-    return res
-end
-local function dict(t)
-    local res = {}
-    if t then
-        for k, v in pairs(t) do
-            res[k] = v
-        end
-    end
-    return res
-end
-local function chain_list(...)
+local function list(...)
     local total = {}
-    for i, list in ipairs{...} do
+    for i, list in next, {...}, nil do
         for i, v in ipairs(list) do
             total[#total+1] = v
         end
     end
     return total
 end
-local function chain_dict(...)
+local function dict(...)
     local total = {}
-    for i, dict in ipairs{...} do
+    for i, dict in next, {...}, nil do
         for k, v in pairs(dict) do
             total[k] = v
         end
@@ -67,6 +49,7 @@ end
 function Widget.instance(cls, attrs)
     local self = cls:new()
     self.attrs = attrs or {}
+    self.is_instance = true
     return self
 end
 function Widget.is_hidden(self)
@@ -79,16 +62,7 @@ function Widget.render(self, name, value, attrs)
     assert(nil, 'subclasses of Widget must provide a render() method')
 end
 function Widget.build_attrs(self, extra_attrs, kwargs)
-    local attrs = self.attrs
-    for k,v in pairs(extra_attrs) do
-        attrs[k] = v
-    end
-    if kwargs then
-        for k,v in pairs(kwargs) do
-            attrs[k] = v
-        end
-    end
-    return attrs
+    return dict(self.attrs, extra_attrs, kwargs)
 end
 function Widget.value_from_datadict(self, data, files, name)
     return data[name]
@@ -140,11 +114,7 @@ end
 
 local Textarea = Widget:new{default_attrs={cols=40, rows=10}}
 function Textarea.instance(cls, attrs)
-    attrs = attrs or {}
-    for k,v in pairs(cls.default_attrs) do
-        attrs[k] = v
-    end
-    return Widget.instance(cls, attrs)
+    return Widget.instance(cls, dict(cls.default_attrs, attrs))
 end
 function Textarea.render(self, name, value, attrs)
     if not value then
@@ -196,7 +166,7 @@ function Select.render(self, name, value, attrs, choices)
 end
 function Select.render_options(self, choices, selected_choices)
     local output = {}
-    for i,v in ipairs(chain_list(choices, self.choices)) do
+    for i,v in ipairs(list(choices, self.choices)) do
         local option_value, option_label = v[1], v[2]
         if type(option_label) == 'table' then
             table_insert(output, string_format('<optgroup label="%s">', option_value))
@@ -280,7 +250,7 @@ function ChoiceInput.render(self, name, value, attrs, choices)
         label_for = string_format(' for="%s"', self.attrs.id)
     end
     if attrs then
-        attrs = chain_dict(self.attrs, attrs)
+        attrs = dict(self.attrs, attrs)
     else
         attrs = self.attrs
     end
@@ -289,7 +259,7 @@ function ChoiceInput.render(self, name, value, attrs, choices)
 end
 function ChoiceInput.tag(self, attrs)
     attrs = attrs or self.attrs
-    local final_attrs = chain_dict(attrs, {type=self.type, name=self.name, value=self.choice_value})
+    local final_attrs = dict(attrs, {type=self.type, name=self.name, value=self.choice_value})
     if self:is_checked() then
         final_attrs.checked = 'checked'
     end
@@ -366,7 +336,7 @@ function RendererMixin.get_renderer(self, name, value, attrs, choices)
         value = self._empty_value
     end
     local final_attrs = self:build_attrs(attrs)
-    return self.renderer:instance(name, value, final_attrs, chain_list(choices, self.choices))
+    return self.renderer:instance(name, value, final_attrs, list(choices, self.choices))
 end
 function RendererMixin.render(self, name, value, attrs, choices)
     return self:get_renderer(name, value, attrs, choices):render()
