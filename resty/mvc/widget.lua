@@ -105,17 +105,17 @@ local TimeInput = TextInput:new{format_key=''}
 local CheckboxInput = Widget:new{}
 function CheckboxInput.value_from_datadict(self, data, files, name)
     local value = data[name]
-    if not value or value == 'false' then
+    if not value or value == '' or value =='0' or value=='false' then
         return false
     end
     return true
 end
 function CheckboxInput.render(self, name, value, attrs)
     local final_attrs = self:build_attrs(attrs, {type='checkbox', name=name})
-    if not (value==true or value==false or value==nil or value =='') then
+    if not (value==false or value==nil or value =='') then
         final_attrs.checked = 'checked'
     end
-    if not (value==false or value==nil or value =='') then
+    if not (value==true or value==false or value==nil or value =='') then
         final_attrs.value = value
     end 
     return string_format('<input%s />', to_html_attrs(final_attrs))
@@ -197,6 +197,8 @@ end
 -- end
 
 local ChoiceInput = {type=nil}
+-- An object used by ChoiceFieldRenderer that represents a single
+-- <input type='$input_type'>.
 function ChoiceInput.new(cls, self)
     self = self or {}
     cls.__index = cls
@@ -226,8 +228,7 @@ function ChoiceInput.render(self, name, value, attrs, choices)
     else
         attrs = self.attrs
     end
-    return string_format('<label%s>%s %s</label>', label_for, 
-        self:tag(attrs), self.choice_label)
+    return string_format('<label%s>%s %s</label>', label_for, self:tag(attrs), self.choice_label)
 end
 function ChoiceInput.tag(self, attrs)
     attrs = attrs or self.attrs

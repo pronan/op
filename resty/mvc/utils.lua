@@ -12,7 +12,7 @@ local function string_strip(value)
     return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
 end
 local function is_empty_value(value)
-    if value == nil or value == '' or value==true or value==false then
+    if value == nil or value == '' then
         return true
     elseif type(value) == 'table' then
         return next(value) == nil
@@ -67,19 +67,29 @@ local function list_extend(t, ...)
     return t
 end
 local function reversed_metatables(self)
-    local res = {}
+    local depth = 0
+    local _self = self
     while true do
-        local p = getmetatable(self)
-        if p then
-            table_insert(res, 1, p)
-            self = p
+        _self = getmetatable(_self)
+        if _self then
+            depth = depth + 1
         else
             break
         end
     end
-    return res
+    local function iter()
+        local _self = self
+        for i = 1,  depth do
+            _self = getmetatable(_self)
+        end
+        depth = depth -1
+        if depth ~= -1 then
+            return _self
+        end
+    end
+    return iter
 end
-local function walk_metatables(self)
+local function metatables(self)
     local function iter()
         local cls = getmetatable(self)
         self = cls
@@ -87,9 +97,19 @@ local function walk_metatables(self)
     end
     return iter
 end
+local function table_has(t, e)
+    for i, v in ipairs(t) do
+        if v == e then
+            return true
+        end
+    end
+    return false
+end
+
 return {
     dict = dict, 
     list = list, 
+    table_has = table_has, 
     to_html_attrs = to_html_attrs, 
     string_strip = string_strip, 
     is_empty_value = is_empty_value, 

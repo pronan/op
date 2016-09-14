@@ -66,11 +66,12 @@ function Field.instance(self)
     -- Hook into self.widget_attrs() for any Field-specific HTML attributes.
     dict_update(widget.attrs, self:widget_attrs(widget))
     self.widget = widget
-    local messages = dict(error_messages)
-    for i, parent in ipairs(reversed_metatables(self)) do
+    -- walk parents
+    local messages = {}
+    for parent in reversed_metatables(self) do
         dict_update(messages, parent.default_error_messages)
     end
-    self.error_messages = messages 
+    self.error_messages = dict(messages, self.error_messages) 
     self.validators = list(self.default_validators, self.validators)
     return self
 end
@@ -84,9 +85,7 @@ function Field.to_lua(self, value)
     return value
 end
 function Field.validate(self, value)
-    loger('validate', type(value), value)
     if is_empty_value(value) and self.required then
-        loger('error_messages', self.error_messages)
         return self.error_messages.required
     end
 end
@@ -169,7 +168,7 @@ function CharField.widget_attrs(self, widget)
     return attrs
 end
 
-local IntegerField = Field:new{widget=Widget.NumberInput, re_decimal=[[\.0*\s*$]],    
+local IntegerField = Field:new{widget=Widget.NumberInput, 
     default_error_messages = {invalid='Enter an interger.'}}
 function IntegerField.instance(cls, attrs)
     local self = Field.instance(cls, attrs) 
@@ -257,6 +256,19 @@ local URLField = CharField:new{widget=Widget.URLInput}
 local TextareaField = CharField:new{widget=Widget.Textarea}
 
 local BooleanField = Field:new{widget=Widget.CheckboxInput}
+function BooleanField.to_lua(self, value)
+    -- 这里的value是从widget的value_from_datadict传来的, 默认它只会传true或false
+    -- 这里仍然检测是防止value_from_datadict被重写
+    if not value or value == '' or value =='0' or value=='false' then
+        return false
+    end
+    return true
+end
+function BooleanField.validate(self, value)
+    if not value and self.required then
+        return self.error_messages.required
+    end
+end
 
 local ChoiceField = Field:new{widget=Widget.Select, 
     default_error_messages={invalid_choice='%s is not one of the available choices.'},}
@@ -360,7 +372,6 @@ end
 
 local ForeignKey = Field:new{template='<input %s />', type='file', db_type='FOREIGNKEY', 
                             on_delete=0, on_update=0}
-
 function ForeignKey.instance(cls, attrs)
     local self = cls:new(attrs)
     self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
@@ -379,14 +390,16 @@ return{
     IntegerField = IntegerField, 
     TextField = TextField, 
     PasswordField = PasswordField, 
-    FileField = FileField, 
+    
     DateField = DateField, 
     DateTimeField = DateTimeField, 
-    DateField = DateField, 
+    TimeField = TimeField, 
     HiddenField = HiddenField, 
     FloatField = FloatField, 
     ChoiceField = ChoiceField, 
+    BooleanField = BooleanField, 
 
+    FileField = FileField,  -- todo
     MultipleChoiceField = MultipleChoiceField, -- todo
     ForeignKey = ForeignKey, -- to do
 }

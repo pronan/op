@@ -2,7 +2,7 @@ local get_post = require"resty.reqargs"
 
 local function before(request)
     request.GET, request.POST, request.FILES = get_post{}
-    -- loger('request.POST', request.POST)
+    --loger('request.POST', request.POST)
 end
  -- {\\table: 0x001bbb50
  --               "file": "wyj.JPG",  -- or ''
