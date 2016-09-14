@@ -58,9 +58,12 @@ end
 function Field.instance(self)
     -- widget stuff
     local widget = self.widget 
-    if not widget.is_instance then
+    if not rawget(widget, 'is_instance') then
         widget = widget:instance()
     end
+    -- big different from Django: widget should be capable to refer to field
+    -- currently mainly for easy override of `choices` for widget of `Select` and `RadioSelect`
+    widget.field = self 
     -- Let the widget know whether it should display as required.
     widget.is_required = self.required
     -- Hook into self.widget_attrs() for any Field-specific HTML attributes.
@@ -272,15 +275,15 @@ end
 
 local ChoiceField = Field:new{widget=Widget.Select, 
     default_error_messages={invalid_choice='%s is not one of the available choices.'},}
-function ChoiceField.instance(cls, attrs)
-    local self = Field.instance(cls, attrs) 
-    self:set_choices(self.choices or {}) 
-    return self
-end
-function ChoiceField.set_choices(self, choices)
-    self.choices = choices
-    self.widget.choices = choices
-end
+-- function ChoiceField.instance(cls, attrs)
+--     local self = Field.instance(cls, attrs) 
+--     self:set_choices(self.choices or {}) 
+--     return self
+-- end
+-- function ChoiceField.set_choices(self, choices)
+--     self.choices = choices
+--     self.widget.choices = choices
+-- end
 function ChoiceField.to_lua(self, value)
     if is_empty_value(value) then
         return 

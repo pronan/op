@@ -20,7 +20,11 @@ function Widget.new(cls, init)
 end
 function Widget.instance(cls, attrs)
     local self = cls:new()
-    self.attrs = attrs or {}
+    if attrs ~= nil then
+        self.attrs = dict(attrs)
+    else
+        self.attrs = {}
+    end
     self.is_instance = true
     return self
 end
@@ -304,12 +308,13 @@ local CheckboxFieldRenderer = ChoiceFieldRenderer:new{choice_input_class=Checkbo
 local RendererMixin = {renderer=nil, _empty_value=nil}
 function RendererMixin.get_renderer(self, name, value, attrs, choices)
     -- Returns an instance of the renderer.
-    choices = choices or {}
+    -- big different from Django: use `self.field.choices` instead of `self.choices`
+    choices = list(choices, self.field.choices)
     if value == nil then
         value = self._empty_value
     end
     local final_attrs = self:build_attrs(attrs)
-    return self.renderer:instance(name, value, final_attrs, list(choices, self.choices))
+    return self.renderer:instance(name, value, final_attrs, choices)
 end
 function RendererMixin.render(self, name, value, attrs, choices)
     return self:get_renderer(name, value, attrs, choices):render()
