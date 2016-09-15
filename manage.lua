@@ -148,19 +148,19 @@ local html_map = {
 <table class="table">
   {% if object_list[1] then %}
     <tr>
-      {%for k,v in pairs(object_list[1]) do%}
+      {%for k, v in pairs(object_list[1]) do%}
       <th>{{k}}</th>
       {% end%}
       <th>EDIT</th>
       <th>DELETE</th>
     </tr>
-    {% for i, u in ipairs(object_list) do%}
+    {% for i, object in ipairs(object_list) do%}
     <tr>
-      {%for k,v in pairs(u) do%}
+      {%for k, v in pairs(object) do%}
       <td> {{v}} </td>
       {% end%}
       <td><a href="/{*name*}/update/{{object.id}}" >edit</a></td>
-      <td><a href="/{*name*}/delete/{{object.id}}" >edit</a></td>
+      <td><a href="/{*name*}/delete/{{object.id}}" >delete</a></td>
     </tr>
     {% end%}
   {% else%}

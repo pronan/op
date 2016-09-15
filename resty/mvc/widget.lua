@@ -286,7 +286,7 @@ function ChoiceFieldRenderer.render(self)
             if id then
                 attrs.id = attrs.id..'_'..i
             end
-            local sub_ul_renderer = self:instance(self.name, self.value, attrs, choice_label)
+            local sub_ul_renderer = ChoiceFieldRenderer:instance(self.name, self.value, attrs, choice_label)
             sub_ul_renderer.choice_input_class = self.choice_input_class
             table_insert(output, string_format(self.inner_html, choice_value, sub_ul_renderer:render()))
         else

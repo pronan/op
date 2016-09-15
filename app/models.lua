@@ -9,7 +9,7 @@ models.User = Model:class{table_name='user',
         username = Field.CharField{maxlen=150},
         avatar = Field.CharField{maxlen=100},  
         openid = Field.CharField{maxlen=60}, 
-        password = Field.PasswordField{maxlen=100}, 
+        password = Field.CharField{maxlen=100}, 
     }, 
 }
 

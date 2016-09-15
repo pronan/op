@@ -36,7 +36,7 @@ local ngx_re_match = ngx.re.match
 
 
 local function ClassCaller(cls, attrs)
-    return cls:new(attrs):instance()
+    return cls:instance(attrs)
 end
 
 local Field = {
@@ -55,8 +55,9 @@ function Field.new(cls, self)
     cls.__call = ClassCaller
     return setmetatable(self, cls)
 end
-function Field.instance(self)
+function Field.instance(cls, attrs)
     -- widget stuff
+    local self = cls:new(attrs)
     local widget = self.widget 
     if not rawget(widget, 'is_instance') then
         widget = widget:instance()
@@ -97,15 +98,13 @@ function Field.run_validators(self, value)
         return 
     end
     local errors = {}
-    local has_error;
     for i, validator in ipairs(self.validators) do
         local err = validator(value)
         if err then
-            has_error = true
             errors[#errors+1] = err
         end
     end
-    if has_error then
+    if next(errors) then
         return errors
     end
 end
