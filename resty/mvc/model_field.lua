@@ -5,7 +5,7 @@
     -- 'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
     -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
     -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
--- SELECT "jiangan_hetong"."jtzycyqk", "accounts_user"."id", "accounts_user"."password" FROM "jiangan_hetong" INNER JOIN "accounts_user" ON ("jiangan_hetong"."creater_id" = "accounts_user"."id") 
+-- SELECT "jiangan_hetong"."jtzycyqk", "accounts_user"."id", "accounts_user"."password" FROM "jiangan_hetong" INNER JOIN "accounts_user" ON ("jiangan_hetong"."creater_id" = "accounts_user"."id")
 -- WHERE ("jiangan_hetong"."check_status" = 1 AND "jiangan_hetong"."config" = 2 AND "jiangan_hetong"."bscj" > -1.0) ORDER BY "jiangan_hetong"."bkgw" ASC, "jiangan_hetong"."bscj" DESC
 local validator = require"resty.mvc.validator"
 local FormField = require"resty.mvc.form_field"
@@ -24,6 +24,7 @@ local tostring = tostring
 local type = type
 local pairs = pairs
 local assert = assert
+local math_floor = math.floor
 local string_format = string.format
 local string_sub = string.sub
 local table_concat = table.concat
@@ -37,16 +38,16 @@ local function ClassCaller(cls, attrs)
 end
 
 local Field = setmetatable({
-    empty_strings_allowed = true, 
-    empty_values = {}, 
-    default_validators = {}, 
+    empty_strings_allowed = true,
+    empty_values = {},
+    default_validators = {},
     default_error_messages = {
         invalid_choice='%s is not a valid choice.',
         null='This field cannot be null.',
         blank='This field cannot be blank.',
         unique='This field already exists.',
-    }, 
-    hidden = false, 
+    },
+    hidden = false,
 } , {__call=ClassCaller})
 
 -- A guide to Field parameters:
@@ -63,7 +64,7 @@ local Field = setmetatable({
 
 --     getattr(obj, opts.pk.attname)
 
--- verbose_name=None, name=None, 
+-- verbose_name=None, name=None,
 local NOT_PROVIDED = {}
 function Field.new(cls, self)
     self = self or {}
@@ -81,7 +82,7 @@ function Field.instance(cls, attrs)
     self.blank = self.blank or false
     self.null = self.null or false
     self.db_index = self.db_index or false
-    self.auto_created = self.auto_created or false, 
+    self.auto_created = self.auto_created or false,
     if self.editable == nil then
         self.editable = true
     end
@@ -89,13 +90,13 @@ function Field.instance(cls, attrs)
         self.serialize = true
     end
     self.unique = self.unique or false
-    self.is_relation = self.remote_field ~= nil    
+    self.is_relation = self.remote_field ~= nil
     self.default = self.default or NOT_PROVIDED
     local messages = {}
     for parent in reversed_metatables(self) do
         dict_update(messages, parent.default_error_messages)
     end
-    self.error_messages = dict_update(messages, self.error_messages) 
+    self.error_messages = dict_update(messages, self.error_messages)
 end
 function Field.check(self, kwargs)
     errors = {}
@@ -106,9 +107,9 @@ function Field.check(self, kwargs)
     return errors
 end
 function Feild._check_field_name(self)
-    -- Check if field name is valid, i.e. 
-    -- 1) does not end with an underscore, 
-    -- 2) does not contain "__" 
+    -- Check if field name is valid, i.e.
+    -- 1) does not end with an underscore,
+    -- 2) does not contain "__"
     -- 3) is not "pk"
     if self.name:match('_$') then
         return 'Field names must not end with an underscore.'
@@ -168,7 +169,7 @@ function Feild.get_validators(self)
 end
 function Field.run_validators(self, value)
     if is_empty_value(value) then
-        return 
+        return
     end
     local errors = {}
     for i, validator in ipairs(self:get_validators()) do
@@ -512,7 +513,7 @@ function Feild.formfield(self, form_class, choices_form_class, kwargs)
             end
         end
     end
-    dict_update(defaults, kwargs) 
+    dict_update(defaults, kwargs)
     if form_class == nil then
         form_class = form_field.CharField
     end
@@ -520,11 +521,11 @@ function Feild.formfield(self, form_class, choices_form_class, kwargs)
 end
 
 local AutoField = Field:new{
-    description = "Integer", 
-    empty_strings_allowed = false, 
+    description = "Integer",
+    empty_strings_allowed = false,
     default_error_messages = {
         invalid = "'%s' value must be an integer.",
-    }, 
+    },
 }
 function AutoField.instance(cls, attrs)
     attrs.blank = true
@@ -548,8 +549,8 @@ function AutoField.to_lua(self, value)
         return value
     end
     value = tonumber(value)
-    if not value or math.floor(value)~=value then
-        return nil, self.error_messages.invalid
+    if not value or math_floor(value)~=value then
+        return nil, string_format(self.error_messages.invalid, value) 
     end
 end
 function AutoField.validate(self, value, model_instance)
@@ -582,11 +583,11 @@ end
 
 
 local BooleanField = Field:new{
-    description = "Boolean (Either True or false)", 
-    empty_strings_allowed = false, 
+    description = "Boolean (Either True or false)",
+    empty_strings_allowed = false,
     default_error_messages = {
-        invalid = "'%s' value must be either True or false.",
-    }, 
+        invalid = "'%s' value must be either true or false.",
+    },
 }
 function BooleanField.instance(cls, attrs)
     attrs.blank = true
@@ -613,9 +614,9 @@ function BooleanField.to_lua(self, value)
         return true
     end
     if value == 'false' or value == '0' or value == 'f' then
-        return true
+        return false
     end
-    return nil, self.error_messages.invalid
+    return nil, string_format(self.error_messages.invalid, value)
 end
 function BooleanField.get_prep_lookup(self, lookup_type, value)
     -- Special-case handling for filters coming from a Web request (e.g. the
@@ -651,11 +652,12 @@ function BooleanField.formfield(self, kwargs)
 end
 
 local CharField = Field:new{
-    description = "String", 
+    description = "String",
 }
 function CharField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
-    self.validators[#self.validators+1] = validators.maxlen(self.maxlen)
+    local v = self.validators
+    v[#v + 1] = validators.maxlen(self.maxlen)
     return self
 end
 function CharField.check(self, kwargs)
@@ -691,22 +693,6 @@ function CharField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
-
-
-class CommaSeparatedIntegerField(CharField):
-default_validators = [validators.validate_comma_separated_integer_list]
-description = _("Comma-separated integers")
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {
-        'error_messages': {
-            invalid = _('Enter only digits separated by commas.'),
-        }
-    }
-    defaults.update(kwargs)
-    return super(CommaSeparatedIntegerField, self).formfield(**defaults)
 
 
 class DateTimeCheckMixin(object):
@@ -2160,20 +2146,20 @@ function Field.new(self, attrs)
 end
 function Field._maker(cls, attrs)
     -- read attrs from model class or form class
-    -- currently mainly for auto setting field.label 
+    -- currently mainly for auto setting field.label
     local function field_maker(extern_attrs)
         for k, v in pairs(extern_attrs) do
             attrs[k] = v
         end
         return cls:init(attrs)
     end
-    return field_maker 
+    return field_maker
 end
 function Field.init(cls, attrs)
     local self = cls:new(attrs)
     self.id = self.id_prefix..self.name
     self.label = self.label or self[1] or self.name
-    self.label_html = string_format('<label for="%s">%s%s</label>', self.id_prefix..self.name, 
+    self.label_html = string_format('<label for="%s">%s%s</label>', self.id_prefix..self.name,
         self.label, self.label_suffix or '')
     -- if self.required == nil then
     --     self.required = true
@@ -2189,8 +2175,8 @@ function Field.get_base_attrs(self)
     if self.attrs then
         for k,v in pairs(self.attrs) do
             base_attrs[k] = v
-        end   
-    end 
+        end
+    end
     return base_attrs
 end
 function Field.render(self, value, attrs)
@@ -2236,8 +2222,8 @@ end
 
 local CharField = Field:new{template='<input %s />', type='text',}
 function CharField.init(cls, attrs)
-    local self = Field.init(cls, attrs) 
-    if not self.maxlen then 
+    local self = Field.init(cls, attrs)
+    if not self.maxlen then
         assert(nil, '`maxlen` is required for CharField')
     end
     table_insert(self.validators, validator.maxlen(self.maxlen))
@@ -2310,7 +2296,7 @@ local PasswordField = CharField:new{type='password'}
 
 local IntegerField = Field:new{template='<input %s />', type='number', db_type='INT'}
 function IntegerField.init(cls, attrs)
-    local self = Field.init(cls, attrs) 
+    local self = Field.init(cls, attrs)
     if self.max then
         table_insert(self.validators, validator.max(self.max))
     end
@@ -2332,7 +2318,7 @@ end
 
 local FloatField = Field:new{template='<input %s />', type='number', db_type='FLOAT'}
 function FloatField.init(cls, attrs)
-    local self = Field.init(cls, attrs) 
+    local self = Field.init(cls, attrs)
     if self.max then
         table_insert(self.validators, validator.max(self.max))
     end
@@ -2355,7 +2341,7 @@ end
 local TextField = Field:new{template='<textarea %s>%s</textarea>', attrs={cols=40, rows=6}}
 function TextField.init(cls, attrs)
     local self = Field.init(cls, attrs)
-    if not self.maxlen then 
+    if not self.maxlen then
         assert(nil, '`maxlen` is required for TextField')
     end
     table_insert(self.validators, validator.maxlen(self.maxlen))
@@ -2473,7 +2459,7 @@ function FileField.validate(self, value)
     local value = value.file
     if (value == nil or value == '') and self.required then
         return 'this field is required.'
-    end 
+    end
 end
 function FileField.init(cls, attrs)
     local self = Field.init(cls, attrs)
@@ -2485,7 +2471,7 @@ function FileField.init(cls, attrs)
     return self
 end
 function FileField.clean(self, value)
-    local value, errors = Field.clean(self, value) 
+    local value, errors = Field.clean(self, value)
     if errors then
         return nil, errors
     end
@@ -2494,7 +2480,7 @@ function FileField.clean(self, value)
     return value
 end
 
-local ForeignKey = Field:new{template='<input %s />', type='file', db_type='FOREIGNKEY', 
+local ForeignKey = Field:new{template='<input %s />', type='file', db_type='FOREIGNKEY',
                             on_delete=0, on_update=0}
 
 function ForeignKey.init(cls, attrs)
@@ -2504,20 +2490,20 @@ function ForeignKey.init(cls, attrs)
     assert(e.table_name and e.fields, 'It seems that you didnot provide a model')
     self.id = self.id_prefix..self.name
     self.label = self.label or self[2] or self.name
-    self.label_html = string_format('<label for="%s">%s%s</label>', self.id, 
+    self.label_html = string_format('<label for="%s">%s%s</label>', self.id,
         self.label, self.label_suffix or '')
     self.validators = self.validators or {}
     return self
 end
 
 return{
-    CharField = CharField, 
-    TextField = TextField, 
-    IntegerField = IntegerField, 
-    FloatField = FloatField, 
-    DateField = DateField, 
-    DateTimeField = DateTimeField, 
-    DateField = DateField, 
-    FileField = FileField,     
-    ForeignKey = ForeignKey, 
+    CharField = CharField,
+    TextField = TextField,
+    IntegerField = IntegerField,
+    FloatField = FloatField,
+    DateField = DateField,
+    DateTimeField = DateTimeField,
+    DateField = DateField,
+    FileField = FileField,
+    ForeignKey = ForeignKey,
 }

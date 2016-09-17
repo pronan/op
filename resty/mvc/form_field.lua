@@ -22,6 +22,7 @@ local string_format = string.format
 local string_sub = string.sub
 local table_concat = table.concat
 local table_insert = table.insert
+local math_floor = math.floor
 local os_rename = os.rename
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
@@ -187,7 +188,7 @@ function IntegerField.to_lua(self, value)
         return
     end
     value = tonumber(value)
-    if not value or math.floor(value)~=value then
+    if not value or math_floor(value)~=value then
         return nil, self.error_messages.invalid
     end
     return value
