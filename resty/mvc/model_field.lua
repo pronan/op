@@ -64,29 +64,6 @@ local Field = setmetatable({
 --     getattr(obj, opts.pk.attname)
 
 -- verbose_name=None, name=None, 
-primary_key=false,
-unique=false, 
-blank=false, 
-null=false,
-db_index=false,
-auto_created=false, 
-
-editable=True,
-serialize=True,
-
-default=NOT_PROVIDED, 
-
-validators={},
-
-help_text=''
-
-max_length=None, 
-rel=None, 
-unique_for_date=None, unique_for_month=None,
-unique_for_year=None, choices=None, , db_column=None,
-db_tablespace=None, 
-error_messages=None
-
 local NOT_PROVIDED = {}
 function Field.new(cls, self)
     self = self or {}
@@ -99,7 +76,7 @@ function Field.instance(cls, attrs)
     local self = cls:new(attrs)
     self.help_text = self.help_text or ''
     self.choices = self.choices or {}
-    self.validators = self.validators or {}
+    self.validators = list(self.default_validators, self.validators)
     self.primary_key = self.primary_key or false
     self.blank = self.blank or false
     self.null = self.null or false
@@ -118,9 +95,9 @@ function Field.instance(cls, attrs)
     for parent in reversed_metatables(self) do
         dict_update(messages, parent.default_error_messages)
     end
-    self.error_messages = dict(messages, self.error_messages) 
+    self.error_messages = dict_update(messages, self.error_messages) 
 end
-function Feild.check(self, kwargs)
+function Field.check(self, kwargs)
     errors = {}
     errors[#errors+1] = self:_check_field_name()
     errors[#errors+1] = self:_check_choices()
@@ -164,29 +141,6 @@ function Feild._check_null_allowed_for_primary_keys(self)
     if self.primary_key and self.null then
         return 'Primary keys must not have null=true.'
     end
-end
-
-function Feild.get_col(self, alias, output_field)
-    if output_field == nil then
-        output_field = self
-    end
-    if alias ~= self.model._meta.db_table or output_field ~= self then
-        from django.db.models.expressions import Col
-        return Col(alias, self, output_field)
-    else
-        return self:cached_col()
-    end
-end
-function Feild.cached_col(self)
-    from django.db.models.expressions import Col
-    return Col(self.model._meta.db_table, self)
-end
-
-function Feild.select_format(self, compiler, sql, params)
-    -- Custom format for select clauses. For example, GIS columns need to be
-    -- selected as AsText(table.col) on MySQL as the table.col data can't be used
-    -- by Django.
-    return sql, params
 end
 function Feild.clone(self)
     return Feild:instance(dict(self))
@@ -235,11 +189,13 @@ function Feild.validate(self, value, model_instance)
         return
     end
     if self.choices and not is_empty_value(value) then
-        for i, choice in ipairs(self.choices) do
+        for i = 1, #self.choices do
+            local choice = self.choices[i]
             local option_key, option_value = choice[1], choice[2]
             if type(option_value) == 'table' then
                 -- This is an optgroup, so look inside the group for options.
-                for i, option in ipairs(option_value) do
+                for i = 1, #option_value do
+                    local option = option_value[i]
                     local optgroup_key, optgroup_value = option[1], option[2]
                     if value == optgroup_key then
                         return
@@ -275,69 +231,8 @@ function Field.clean(self, value, model_instance)
     end
     return value
 end
-function Feild.db_type(self, connection)
-
-    -- Returns the database column data type for this field, for the provided
-    -- connection.
-
-    -- The default implementation of this method looks at the
-    -- backend-specific data_types dictionary, looking up the field by its
-    -- "internal type".
-
-    -- A Field class can implement the get_internal_type() method to specify
-    -- which *preexisting* Django Field class it's most similar to -- i.e.,
-    -- a custom field might be represented by a TEXT column type, which is
-    -- the same as the TextField Django field type, which means the custom
-    -- field's get_internal_type() returns 'TextField'.
-
-    -- But the limitation of the get_internal_type() / data_types approach
-    -- is that it cannot handle database column types that aren't already
-    -- mapped to one of the built-in Django field types. In this case, you
-    -- can implement db_type() instead of get_internal_type() to specify
-    -- exactly which wacky database column type you want to use.
-    -- data = DictWrapper(self.__dict__, connection.ops.quote_name, "qn_")
-    -- try:
-    --     return connection.data_types[self.get_internal_type()] % data
-    -- except KeyError:
-    --     return None
-end
-function Feild.db_parameters(self, connection)
-    -- """
-    -- Extension of db_type(), providing a range of different return
-    -- values (type, checks).
-    -- This will look at db_type(), allowing custom model fields to override it.
-    -- """
-    -- data = DictWrapper(self.__dict__, connection.ops.quote_name, "qn_")
-    -- type_string = self:db_type(connection)
-    -- try:
-    --     check_string = connection.data_type_check_constraints[self.get_internal_type()] % data
-    -- except KeyError:
-    --     check_string = None
-    -- return {
-    --     type = type_string,
-    --     check = check_string,
-    -- }
-end
-function Feild.db_type_suffix(self, connection)
-    -- return connection.data_types_suffix.get(self:get_internal_type())
-end
-function Feild.get_db_converters(self, connection)
-    -- if hasattr(self, 'from_db_value') then
-    --     return [self.from_db_value]
-    -- return []
-end
 function Feild.is_unique(self)
     return self.unique or self.primary_key
-end
-function Feild.set_attributes_from_name(self, name)
-    if not self.name then
-        self.name = name
-    end
-    self.attname, self.column = unpack(self:get_attname_column())
-    self.concrete = self.column ~= nil
-    if self.verbose_name == nil and self.name then
-        self.verbose_name = (self.name:gsub('_', ' '))
-    end
 end
 function Feild.contribute_to_class(self, cls, name, virtual_only)
     virtual_only = virtual_only or false
@@ -352,18 +247,28 @@ function Feild.contribute_to_class(self, cls, name, virtual_only)
         -- setattr(cls, 'get_%s_display' % self.name, curry(cls._get_FIELD_display, field=self))
     end
 end
-function Feild.get_filter_kwargs_for_object(self, obj)
-    -- Return a dict that when passed as kwargs to self.model.filter(), would
-    -- yield all instances having the same value for this field as obj has.
-    return {[self.name]=obj[self.attname]}
-end
-function Feild.get_attname(self)
-    return self.name
+function Feild.set_attributes_from_name(self, name)
+    if not self.name then
+        self.name = name
+    end
+    self.attname, self.column = unpack(self:get_attname_column())
+    self.concrete = self.column ~= nil
+    if self.verbose_name == nil and self.name then
+        self.verbose_name = (self.name:gsub('_', ' '))
+    end
 end
 function Feild.get_attname_column(self)
     local attname = sel:get_attname()
     local column = self.db_column or attname
     return attname, column
+end
+function Feild.get_attname(self)
+    return self.name
+end
+function Feild.get_filter_kwargs_for_object(self, obj)
+    -- Return a dict that when passed as kwargs to self.model.filter(), would
+    -- yield all instances having the same value for this field as obj has.
+    return {[self.name]=obj[self.attname]}
 end
 function Feild.get_cache_name(self)
     return string_format('_%s_cache', self.name)
@@ -422,7 +327,11 @@ function Feild.get_prep_lookup(self, lookup_type, value)
     elseif compare_lookup_table[lookup_type]  then
         return self:get_prep_value(value)
     elseif lookup_type == 'range' or lookup_type == 'in' then
-        return [self:get_prep_value(v) for v in value]
+        local res = {}
+        for i, v in ipairs(value) do
+            res[#res+1] = self:get_prep_value(v)
+        end
+        return res
     end
     return self:get_prep_value(value)
 end
@@ -481,391 +390,307 @@ function Feild.get_default(self)
     end
     return ""
 end
-function Feild.get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, limit_choices_to=None)
+local BLANK_CHOICE_DASH = {{"", "---------"}}
+function Feild.get_choices(self, include_blank, blank_choice, limit_choices_to)
     -- Returns choices with a default blank choices included, for use
     -- as SelectField choices for this field.
-    blank_defined = false
-    choices = list(self.choices) if self.choices else []
-    named_groups = choices and isinstance(choices[0][1], (list, tuple))
+    if include_blank == nil then
+        include_blank = true
+    end
+    if blank_choice == nil then
+        blank_choice = BLANK_CHOICE_DASH
+    end
+    local blank_defined = false
+    local choices = list(self.choices)
+    local named_groups = next(choices)~=nil and type(choices[0][1])=='table'
     if not named_groups then
-        for choice, __ in choices do
-            if choice in ('', None) then
-                blank_defined = True
+        for i = 1, #choices do
+            local val = choices[i][1]
+            if val == '' or val == nil then
+                blank_defined = true
                 break
-
-    first_choice = (blank_choice if include_blank and
-                    not blank_defined else [])
-    if self.choices then
-        return first_choice + choices
-    rel_model = self.remote_field.model
-    limit_choices_to = limit_choices_to or self.get_limit_choices_to()
-    if hasattr(self.remote_field, 'get_related_field') then
-        lst = [(getattr(x, self.remote_field.get_related_field().attname),
-               smart_text(x))
-               for x in rel_model._default_manager.complex_filter(
-                   limit_choices_to)]
+            end
+        end
+    end
+    local first_choice
+    if include_blank and not blank_defined then
+        first_choice = blank_choice
     else
-        lst = [(x._get_pk_val(), smart_text(x))
-               for x in rel_model._default_manager.complex_filter(
-                   limit_choices_to)]
-    return first_choice + lst
-
+        first_choice = {}
+    end
+    if next(choices) then
+        return list(first_choice, choices)
+    end
+    local rel_model = self.remote_field.model
+    local limit_choices_to = limit_choices_to or self:get_limit_choices_to()
+    local lst = {}
+    local t = rel_model._default_manager:complex_filter(limit_choices_to)
+    if self.remote_field.get_related_field then
+        for i, x in ipairs(t) do
+            lst[#lst+1] = {x[self.remote_field:get_related_field().attname], tostring(x)}
+        end
+    else
+        for i, x in ipairs(t) do
+            lst[#lst+1] = {x:_get_pk_val(), tostring(x)}
+        end
+    end
+    return list(first_choice, lst)
 end
-
 function Feild.get_choices_default(self)
-    return self.get_choices()
-
-@warn_about_renamed_method(
-    'Field', '_get_val_from_obj', 'value_from_object',
-    RemovedInDjango20Warning
-)
+    return self:get_choices()
 end
-
-function Feild._get_val_from_obj(self, obj)
-    if obj ~= None:
-        return getattr(obj, self.attname)
+function Feild.value_from_object(self, obj)
+    if obj ~= nil:
+        return obj[self.attname]
     else
-        return self.get_default()
-
+        return self:get_default()
+    end
 end
-
 function Feild.value_to_string(self, obj)
-    """
-    Returns a string value of this field from the passed obj.
-    This is used by the serialization framework.
-    """
-    return smart_text(self:value_from_object(obj))
-
+    -- Returns a string value of this field from the passed obj.
+    -- This is used by the serialization framework.
+    return self:value_from_object(obj)
 end
-
-function Feild._get_flatchoices(self)
-    """Flattened version of choices tuple."""
-    flat = []
-    for choice, value in self.choices do
-        if isinstance(value, (list, tuple)) then
-            flat.extend(value)
+function Feild.flatchoices(self)
+    -- """Flattened version of choices tuple."""
+    local flat = {}
+    for i = 1, #self.choices do
+        local e = self.choices[i]
+        local choice, value = e[1], e[2]
+        if type(value) == 'table' then
+            list_extend(flat, value)
         else
-            flat.append((choice, value))
+            flat[#flat+1] = {choice, value}
+        end
+    end
     return flat
-flatchoices = property(_get_flatchoices)
-
 end
-
 function Feild.save_form_data(self, instance, data)
-    setattr(instance, self.name, data)
-
+    instance[self.name] = data
 end
-
-function Feild.formfield(self, form_class=None, choices_form_class=None, **kwargs)
-    """
-    Returns a django.forms.Field instance for this database Field.
-    """
-    defaults = {required = not self.blank,
-                label = capfirst(self.verbose_name),
-                'help_text': self.help_text}
-    if self.has_default() then
-        if callable(self.default) then
-            defaults['initial'] = self.default
-            defaults['show_hidden_initial'] = True
+local valid_typed_kwargs = {
+    coerce = true,
+    empty_value = true,
+    choices = true,
+    required = true,
+    widget = true,
+    label = true,
+    initial = true,
+    help_text = true,
+    error_messages = true,
+    show_hidden_initial = true,}
+function Feild.formfield(self, form_class, choices_form_class, kwargs)
+    -- Returns a form_Field instance for this database Field.
+    local defaults = {required=not self.blank, label=self.verbose_name, help_text=self.help_text}
+    if self:has_default() then
+        if type(self.default) == 'function' then
+            defaults.initial = self.default
+            defaults.show_hidden_initial = true
         else
-            defaults['initial'] = self.get_default()
+            defaults.initial = self:get_default()
+        end
+    end
     if self.choices then
         -- Fields with choices get special treatment.
-        include_blank = (self.blank or
-                         not (self:has_default() or 'initial' in kwargs))
-        defaults['choices'] = self:get_choices(include_blank=include_blank)
-        defaults['coerce'] = self.to_python
+        local include_blank = self.blank or not (self:has_default() or kwargs.initial~=nil)
+        defaults.choices = self:get_choices(include_blank)
+        defaults.coerce = self.to_lua
         if self.null then
-            defaults['empty_value'] = None
-        if choices_form_class ~= None:
+            defaults.empty_value = nil
+        end
+        if choices_form_class ~= nil then
             form_class = choices_form_class
         else
-            form_class = forms.TypedChoiceField
+            form_class = form_field.TypedChoiceField
+        end
         -- Many of the subclass-specific formfield arguments (min_value,
         -- max_value) don't apply for choice fields, so be sure to only pass
         -- the values that TypedChoiceField will understand.
-        for k in list(kwargs) do
-            if k not in ('coerce', 'empty_value', 'choices', 'required',
-                         'widget', 'label', 'initial', 'help_text',
-                         'error_messages', 'show_hidden_initial'):
-                del kwargs[k]
-    defaults.update(kwargs)
-    if form_class is None then
-        form_class = forms.CharField
-    return form_class(**defaults)
-
+        for k, v in pairs(kwargs) do
+            if not valid_typed_kwargs[k] then
+                kwargs[k] = nil
+            end
+        end
+    end
+    dict_update(defaults, kwargs) 
+    if form_class == nil then
+        form_class = form_field.CharField
+    end
+    return form_class:instance(defaults)
 end
 
-function Feild.value_from_object(self, obj)
-    """
-    Returns the value of this field in the given model instance.
-    """
-    return getattr(obj, self.attname)
-
-
-class AutoField(Field):
-description = _("Integer")
-
-empty_strings_allowed = false
-default_error_messages = {
-    invalid = _("'%(value)s' value must be an integer."),
+local AutoField = Field:new{
+    description = "Integer", 
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid = "'%s' value must be an integer.",
+    }, 
 }
-
+function AutoField.instance(cls, attrs)
+    attrs.blank = true
+    return Field.instance(cls, attrs)
 end
-
-function Feild.__init__(self, *args, **kwargs)
-    kwargs['blank'] = True
-    super(AutoField, self).__init__(*args, **kwargs)
-
-end
-
-function Feild.check(self, **kwargs)
-    errors = super(AutoField, self).check(**kwargs)
-    errors[#errors+1] = self:_check_primary_key())
+function AutoField.check(self, kwargs)
+    local errors = Field.check(self, kwargs)
+    errors[#errors+1] = self:_check_primary_key()
     return errors
-
 end
-
-function Feild._check_primary_key(self)
+function AutoField._check_primary_key(self)
     if not self.primary_key then
-        return [
-            checks.Error(
-                'AutoFields must set primary_key=True.',
-                hint=None,
-                obj=self,
-                id='fields.E100',
-            ),
-        ]
-    else
-        return []
-
+        return 'AutoFields must set primary_key=true.'
+    end
 end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(AutoField, self).deconstruct()
-    del kwargs['blank']
-    kwargs['primary_key'] = True
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
+function AutoField.get_internal_type(self)
     return "AutoField"
-
 end
-
-function Feild.to_python(self, value)
-    if value is None then
+function AutoField.to_lua(self, value)
+    if value == nil then
         return value
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        raise exceptions.ValidationError(
-            self.error_messages['invalid'],
-            code='invalid',
-            params={value = value},
-        )
+    end
+    value = tonumber(value)
+    if not value or math.floor(value)~=value then
+        return nil, self.error_messages.invalid
+    end
+end
+function AutoField.validate(self, value, model_instance)
 
 end
-
-function Feild.validate(self, value, model_instance)
-    pass
-
-end
-
-function Feild.get_db_prep_value(self, value, connection, prepared=false)
+function AutoField.get_db_prep_value(self, value, connection, prepared)
+    prepared = prepared or false
     if not prepared then
         value = self:get_prep_value(value)
-        value = connection.ops.validate_autopk_value(value)
+        value = connection.ops:validate_autopk_value(value)
+    end
     return value
-
 end
-
-function Feild.get_prep_value(self, value)
-    value = super(AutoField, self).get_prep_value(value)
-    if value is None then
-        return None
-    return int(value)
-
+function AutoField.get_prep_value(self, value)
+    value = Field.get_prep_value(self, value)
+    if value == nil then
+        return nil
+    end
+    return tonumber(value)
 end
-
-function Feild.contribute_to_class(self, cls, name, **kwargs)
-    assert not cls._meta.has_auto_field, \
-        "A model can't have more than one AutoField."
-    super(AutoField, self).contribute_to_class(cls, name, **kwargs)
-    cls._meta.has_auto_field = True
+function AutoField.contribute_to_class(self, cls, name, kwargs)
+    assert(not cls._meta.has_auto_field, "A model can't have more than one AutoField.")
+    Field.contribute_to_class(self, cls, name, kwargs)
+    cls._meta.has_auto_field = true
     cls._meta.auto_field = self
-
+end
+function AutoField.formfield(self, kwargs)
+    return nil
 end
 
-function Feild.formfield(self, **kwargs)
-    return None
 
-
-class BooleanField(Field):
-empty_strings_allowed = false
-default_error_messages = {
-    invalid = _("'%(value)s' value must be either True or false."),
+local BooleanField = Field:new{
+    description = "Boolean (Either True or false)", 
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid = "'%s' value must be either True or false.",
+    }, 
 }
-description = _("Boolean (Either True or false)")
-
+function BooleanField.instance(cls, attrs)
+    attrs.blank = true
+    return Field.instance(cls, attrs)
 end
-
-function Feild.__init__(self, *args, **kwargs)
-    kwargs['blank'] = True
-    super(BooleanField, self).__init__(*args, **kwargs)
-
-end
-
-function Feild.check(self, **kwargs)
-    errors = super(BooleanField, self).check(**kwargs)
-    errors[#errors+1] = self:_check_null(**kwargs))
+function BooleanField.check(self, kwargs)
+    local errors = Feild.check(self, kwargs)
+    errors[#errors+1] = self:_check_null(kwargs)
     return errors
-
 end
-
-function Feild._check_null(self, **kwargs)
-    if getattr(self, 'null', false) then
-        return [
-            checks.Error(
-                'BooleanFields do not accept null values.',
-                hint='Use a NullBooleanField instead.',
-                obj=self,
-                id='fields.E110',
-            )
-        ]
-    else
-        return []
-
+function BooleanField._check_null(self, kwargs)
+    if self.null then
+        return 'BooleanFields do not accept null values.'
+    end
 end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(BooleanField, self).deconstruct()
-    del kwargs['blank']
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
+function BooleanField.get_internal_type(self)
     return "BooleanField"
-
 end
-
-function Feild.to_python(self, value)
-    if value in (True, false) then
-        -- if value is 1 or 0 than it's equal to True or false, but we want
-        -- to return a true bool for semantic reasons.
-        return bool(value)
-    if value in ('t', 'True', '1') then
-        return True
-    if value in ('f', 'false', '0') then
-        return false
-    raise exceptions.ValidationError(
-        self.error_messages['invalid'],
-        code='invalid',
-        params={value = value},
-    )
-
+function BooleanField.to_lua(self, value)
+    if value == true or value == false then
+        return value
+    end
+    if value == 'true' or value == '1' or value == 't' then
+        return true
+    end
+    if value == 'false' or value == '0' or value == 'f' then
+        return true
+    end
+    return nil, self.error_messages.invalid
 end
-
-function Feild.get_prep_lookup(self, lookup_type, value)
+function BooleanField.get_prep_lookup(self, lookup_type, value)
     -- Special-case handling for filters coming from a Web request (e.g. the
     -- admin interface). Only works for scalar values (not lists). If you're
     -- passing in a list, you might as well make things the right type when
     -- constructing the list.
-    if value in ('1', '0') then
-        value = bool(int(value))
-    return super(BooleanField, self).get_prep_lookup(lookup_type, value)
-
+    if value == '1' then
+        value = true
+    elseif value == '0' then
+        value = false
+    end
+    return Field.get_prep_lookup(self, lookup_type, value)
 end
-
-function Feild.get_prep_value(self, value)
-    value = super(BooleanField, self).get_prep_value(value)
-    if value is None then
-        return None
-    return bool(value)
-
+function BooleanField.get_prep_value(self, value)
+    value = Field.get_prep_value(self, value)
+    if value == nil then
+        return nil
+    end
+    return not not value
 end
-
-function Feild.formfield(self, **kwargs)
+function BooleanField.formfield(self, kwargs)
     -- Unlike most fields, BooleanField figures out include_blank from
     -- self.null instead of self.blank.
+    local defaults
     if self.choices then
-        include_blank = not (self:has_default() or 'initial' in kwargs)
-        defaults = {'choices': self:get_choices(include_blank=include_blank)}
+        local include_blank = not (self:has_default() or kwargs.initial~=nil)
+        defaults = {choices = self:get_choices(include_blank)}
     else
-        defaults = {'form_class': forms.BooleanField}
-    defaults.update(kwargs)
-    return super(BooleanField, self).formfield(**defaults)
-
-
-class CharField(Field):
-description = _("String (up to %(max_length)s)")
-
+        defaults = {form_class = form_field.BooleanField}
+    end
+    dict_update(defaults, kwargs)
+    return Feild.formfield(self, defaults)
 end
 
-function Feild.__init__(self, *args, **kwargs)
-    super(CharField, self).__init__(*args, **kwargs)
-    self.validators.append(validators.MaxLengthValidator(self.max_length))
-
+local CharField = Field:new{
+    description = "String", 
+}
+function CharField.instance(cls, attrs)
+    local self = Field.instance(cls, attrs)
+    self.validators[#self.validators+1] = validators.maxlen(self.maxlen)
+    return self
 end
-
-function Feild.check(self, **kwargs)
-    errors = super(CharField, self).check(**kwargs)
-    errors[#errors+1] = self:_check_max_length_attribute(**kwargs))
+function CharField.check(self, kwargs)
+    local errors = Field.check(self, kwargs)
+    errors[#errors+1] = self:_check_max_length_attribute(kwargs)
     return errors
-
 end
-
-function Feild._check_max_length_attribute(self, **kwargs)
-    if self.max_length is None then
-        return [
-            checks.Error(
-                "CharFields must define a 'max_length' attribute.",
-                hint=None,
-                obj=self,
-                id='fields.E120',
-            )
-        ]
-    elif not isinstance(self.max_length, six.integer_types) or self.max_length <= 0 then
-        return [
-            checks.Error(
-                "'max_length' must be a positive integer.",
-                hint=None,
-                obj=self,
-                id='fields.E121',
-            )
-        ]
-    else
-        return []
-
+function CharField._check_max_length_attribute(self, kwargs)
+    if self.maxlen == nil then
+        return "CharFields must define a 'maxlen' attribute."
+    elseif not type(self.max_length) == 'number' or self.max_length <= 0 then
+        return "'maxlen' must be a positive integer."
+    end
 end
-
-function Feild.get_internal_type(self)
+function CharField.get_internal_type(self)
     return "CharField"
-
 end
-
-function Feild.to_python(self, value)
-    if isinstance(value, six.string_types) or value is None then
+function CharField.to_lua(self, value)
+    if type(value)=='string' or value == nil then
         return value
-    return smart_text(value)
-
+    end
+    return tostring(value)
 end
-
-function Feild.get_prep_value(self, value)
-    value = super(CharField, self).get_prep_value(value)
-    return self:to_python(value)
-
+function CharField.get_prep_value(self, value)
+    value = Field.get_prep_value(self, value)
+    return self:to_lua(value)
 end
-
-function Feild.formfield(self, **kwargs)
+function CharField.formfield(self, kwargs)
     -- Passing max_length to forms.CharField means that the value's length
     -- will be validated twice. This is considered acceptable since we want
     -- the value in the form field (to pass into widget for example).
-    defaults = {'max_length': self.max_length}
-    defaults.update(kwargs)
-    return super(CharField, self).formfield(**defaults)
+    defaults = {maxlen = self.maxlen}
+    dict_update(defaults, kwargs)
+    return Field.formfield(self, defaults)
+end
 
 
 class CommaSeparatedIntegerField(CharField):
@@ -1907,84 +1732,6 @@ function Feild.formfield(self, **kwargs)
     }
     defaults.update(kwargs)
     return super(GenericIPAddressField, self).formfield(**defaults)
-
-
-class NullBooleanField(Field):
-empty_strings_allowed = false
-default_error_messages = {
-    invalid = _("'%(value)s' value must be either None, True or false."),
-}
-description = _("Boolean (Either True, false or None)")
-
-end
-
-function Feild.__init__(self, *args, **kwargs)
-    kwargs['null'] = True
-    kwargs['blank'] = True
-    super(NullBooleanField, self).__init__(*args, **kwargs)
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(NullBooleanField, self).deconstruct()
-    del kwargs['null']
-    del kwargs['blank']
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
-    return "NullBooleanField"
-
-end
-
-function Feild.to_python(self, value)
-    if value is None then
-        return None
-    if value in (True, false) then
-        return bool(value)
-    if value in ('None',) then
-        return None
-    if value in ('t', 'True', '1') then
-        return True
-    if value in ('f', 'false', '0') then
-        return false
-    raise exceptions.ValidationError(
-        self.error_messages['invalid'],
-        code='invalid',
-        params={value = value},
-    )
-
-end
-
-function Feild.get_prep_lookup(self, lookup_type, value)
-    -- Special-case handling for filters coming from a Web request (e.g. the
-    -- admin interface). Only works for scalar values (not lists). If you're
-    -- passing in a list, you might as well make things the right type when
-    -- constructing the list.
-    if value in ('1', '0') then
-        value = bool(int(value))
-    return super(NullBooleanField, self).get_prep_lookup(lookup_type,
-                                                         value)
-
-end
-
-function Feild.get_prep_value(self, value)
-    value = super(NullBooleanField, self).get_prep_value(value)
-    if value is None then
-        return None
-    return bool(value)
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {
-        form_class = forms.NullBooleanField,
-        required = not self.blank,
-        label = capfirst(self.verbose_name),
-        'help_text': self.help_text}
-    defaults.update(kwargs)
-    return super(NullBooleanField, self).formfield(**defaults)
 
 
 class PositiveIntegerField(IntegerField):

@@ -2,9 +2,10 @@ local type = type
 local pairs = pairs
 local next = next
 local ipairs = ipairs
-local string_format = string.format
+local table_sort = table.sort
 local table_concat = table.concat
 local table_insert = table.insert
+local string_format = string.format
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
 
@@ -106,6 +107,19 @@ local function table_has(t, e)
     return false
 end
 
+local function sorted(t, func)
+    local keys = {}
+    for k, v in pairs(t) do
+        keys[#keys+1] = k
+    end
+    table_sort(keys, func)
+    local i = 0
+    return function ()
+        i = i + 1
+        key = keys[i]
+        return key, t[key]
+    end
+end
 return {
     dict = dict, 
     list = list, 
@@ -117,4 +131,5 @@ return {
     list_extend = list_extend, 
     reversed_metatables = reversed_metatables, 
     walk_metatables = walk_metatables, 
+    sorted = sorted, 
 }

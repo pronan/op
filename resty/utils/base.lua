@@ -1,16 +1,18 @@
+local table_sort = table.sort
+
 local function caller(t, opts) 
     return t:new(opts):initialize() 
 end
 local function sorted(t, func)
     local keys = {}
-    for k,v in pairs(t) do
+    for k, v in pairs(t) do
         keys[#keys+1] = k
     end
-    table.sort(keys, func)
-    local i = 1
+    table_sort(keys, func)
+    local i = 0
     return function ()
+        i = i + 1
         key = keys[i]
-        i = i+1
         return key, t[key]
     end
 end
