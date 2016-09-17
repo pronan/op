@@ -120,6 +120,12 @@ local function sorted(t, func)
         return key, t[key]
     end
 end
+local function curry(func, kwargs)
+    local function _curry(morekwargs)
+        return func(dict(kwargs, morekwargs))
+    end
+    return _curry
+end
 return {
     dict = dict, 
     list = list, 
@@ -132,4 +138,5 @@ return {
     reversed_metatables = reversed_metatables, 
     walk_metatables = walk_metatables, 
     sorted = sorted, 
+    curry = curry, 
 }
