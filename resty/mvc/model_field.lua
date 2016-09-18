@@ -33,6 +33,9 @@ local os_rename = os.rename
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
 
+-- super\((\w+?), self\)\.(\w+?)\((.+?)\)
+-- Field.\2(self, \3)
+
 local function ClassCaller(cls, attrs)
     return cls:instance(attrs)
 end
@@ -719,7 +722,7 @@ end
 local DateField = Field:new{
     empty_strings_allowed = false, 
     default_error_messages = {
-        invalid="YYYY-MM-DD format.",
+        invalid="please use YYYY-MM-DD format.",
         invalid_date="invalid date.",
     }, 
     description = "Date (without time)", 
@@ -738,9 +741,14 @@ end
 function DateField.get_internal_type(self)
     return "DateField"
 end
-function DateField.to_python(self, value)
+function DateField.to_lua(self, value)
     if value == nil then
-        return value
+        return nil
+    end
+    value = string_strip(value)
+    local res, err = ngx_re_match(value, [[^\d{4}-\d{1,2}-\d{1,2}$]], 'jo')
+    if not res then
+        return nil, self.error_messages.invalid
     end
     return value
 end
@@ -764,7 +772,7 @@ function DateField.contribute_to_class(self, cls, name, kwargs)
 end
 function DateField.get_prep_value(self, value)
     value = Feild.get_prep_value(self, value)
-    return self:to_python(value)
+    return self:to_lua(value)
 end
 function DateField.get_db_prep_value(self, value, connection, prepared)
     prepared = prepared or false
@@ -788,943 +796,164 @@ function DateField.formfield(self, kwargs)
 end
 
 
-class DateTimeField(DateField):
-empty_strings_allowed = false
-default_error_messages = {
-    'invalid': _("'%(value)s' value has an invalid format. It must be in "
-                 "YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format."),
-    'invalid_date': _("'%(value)s' value has the correct format "
-                      "(YYYY-MM-DD) but it is an invalid date."),
-    'invalid_datetime': _("'%(value)s' value has the correct format "
-                          "(YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]) "
-                          "but it is an invalid date/time."),
+local DateTimeField = DateField:new{
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid="please use YYYY-MM-DD HH:MM:SS format.",
+        invalid_date="invalid datetime.",
+    }, 
+    description = "Date (with time)", 
 }
-description = _("Date (with time)")
-
--- __init__ is inherited from DateField
+local function DateTimeField._check_fix_default_value(self)
 
 end
-
-function Feild._check_fix_default_value(self)
-    """
-    Adds a warning to the checks framework stating, that using an actual
-    date or datetime value is probably wrong; it's only being evaluated on
-    server start-up.
-
-    For details see ticket --21905
-    """
-    if not self.has_default() then
-        return []
-
-    now = timezone.now()
-    if not timezone.is_naive(now) then
-        now = timezone.make_naive(now, timezone.utc)
-    value = self.default
-    if isinstance(value, datetime.datetime) then
-        second_offset = datetime.timedelta(seconds=10)
-        lower = now - second_offset
-        upper = now + second_offset
-        if timezone.is_aware(value) then
-            value = timezone.make_naive(value, timezone.utc)
-    elif isinstance(value, datetime.date) then
-        second_offset = datetime.timedelta(seconds=10)
-        lower = now - second_offset
-        lower = datetime.datetime(lower.year, lower.month, lower.day)
-        upper = now + second_offset
-        upper = datetime.datetime(upper.year, upper.month, upper.day)
-        value = datetime.datetime(value.year, value.month, value.day)
-    else
-        -- No explicit date / datetime value -- no checks necessary
-        return []
-    if lower <= value <= upper then
-        return [
-            checks.Warning(
-                'Fixed default value provided.',
-                hint='It seems you set a fixed date / time / datetime '
-                     'value as default for this field. This may not be '
-                     'what you want. If you want to have the current date '
-                     'as default, use `django.utils.timezone.now`',
-                obj=self,
-                id='fields.W161',
-            )
-        ]
-
-    return []
-
-end
-
-function Feild.get_internal_type(self)
+function DateTimeField.get_internal_type(self)
     return "DateTimeField"
-
 end
-
-function Feild.to_python(self, value)
-    if value is None then
-        return value
-    if isinstance(value, datetime.datetime) then
-        return value
-    if isinstance(value, datetime.date) then
-        value = datetime.datetime(value.year, value.month, value.day)
-        if settings.USE_TZ then
-            -- For backwards compatibility, interpret naive datetimes in
-            -- local time. This won't work during DST change, but we can't
-            -- do much about it, so we let the exceptions percolate up the
-            -- call stack.
-            warnings.warn("DateTimeField %s.%s received a naive datetime "
-                          "(%s) while time zone support is active." %
-                          (self.model.__name__, self.name, value),
-                          RuntimeWarning)
-            default_timezone = timezone.get_default_timezone()
-            value = timezone.make_aware(value, default_timezone)
-        return value
-
-    try:
-        parsed = parse_datetime(value)
-        if parsed ~= None:
-            return parsed
-    except ValueError:
-        raise exceptions.ValidationError(
-            self.error_messages['invalid_datetime'],
-            code='invalid_datetime',
-            params={value = value},
-        )
-
-    try:
-        parsed = parse_date(value)
-        if parsed ~= None:
-            return datetime.datetime(parsed.year, parsed.month, parsed.day)
-    except ValueError:
-        raise exceptions.ValidationError(
-            self.error_messages['invalid_date'],
-            code='invalid_date',
-            params={value = value},
-        )
-
-    raise exceptions.ValidationError(
-        self.error_messages['invalid'],
-        code='invalid',
-        params={value = value},
-    )
-
+function DateTimeField.to_lua(self, value)
+    if value == nil then
+        return nil
+    end
+    value = string_strip(value)
+    local res, err = ngx_re_match(value, [[^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$]], 'jo')
+    if not res then
+        return nil, self.error_messages.invalid
+    end
+    return value
 end
-
-function Feild.pre_save(self, model_instance, add)
+function DateTimeField.pre_save(self, model_instance, add)
     if self.auto_now or (self.auto_now_add and add) then
-        value = timezone.now()
-        setattr(model_instance, self.attname, value)
+        local value = timezone.now()
+        model_instance[self.attname] = value
         return value
     else
-        return super(DateTimeField, self).pre_save(model_instance, add)
-
+        return DateField.pre_save(self, model_instance, add)
+    end
 -- contribute_to_class is inherited from DateField, it registers
 -- get_next_by_FOO and get_prev_by_FOO
 
 -- get_prep_lookup is inherited from DateField
 
 end
+-- function DateTimeField.get_prep_value(self, value)
 
-function Feild.get_prep_value(self, value)
-    value = super(DateTimeField, self).get_prep_value(value)
-    value = self:to_python(value)
-    if value ~= None and settings.USE_TZ and timezone.is_naive(value):
-        -- For backwards compatibility, interpret naive datetimes in local
-        -- time. This won't work during DST change, but we can't do much
-        -- about it, so we let the exceptions percolate up the call stack.
-        try:
-            name = '%s.%s' % (self.model.__name__, self.name)
-        except AttributeError:
-            name = '(unbound)'
-        warnings.warn("DateTimeField %s received a naive datetime (%s)"
-                      " while time zone support is active." %
-                      (name, value),
-                      RuntimeWarning)
-        default_timezone = timezone.get_default_timezone()
-        value = timezone.make_aware(value, default_timezone)
-    return value
-
-end
-
-function Feild.get_db_prep_value(self, value, connection, prepared=false)
+-- end
+function DateTimeField.get_db_prep_value(self, value, connection, prepared)
     -- Casts datetimes into the format expected by the backend
+    prepared = prepared or false
     if not prepared then
         value = self:get_prep_value(value)
+    end
     return connection.ops.adapt_datetimefield_value(value)
-
+end
+function DateTimeField.value_to_string(self, obj)
+    local val = self:value_from_object(obj)
+    if val == nil then
+        return ''
+    else
+        return val:isoformat()
+    end
+end
+function DateTimeField.formfield(self, kwargs)
+    local defaults = {form_class = forms.DateTimeField}
+    return DateField.formfield(self, dict_update(defaults, kwargs))
 end
 
-function Feild.value_to_string(self, obj)
-    val = self:value_from_object(obj)
-    return '' if val is None else val.isoformat()
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {'form_class': forms.DateTimeField}
-    defaults.update(kwargs)
-    return super(DateTimeField, self).formfield(**defaults)
-
-
-class DecimalField(Field):
-empty_strings_allowed = false
-default_error_messages = {
-    invalid = _("'%(value)s' value must be a decimal number."),
+local EmailField = CharField:new{
+    default_validators = {validators.validate_email}, 
+    description = "Email address" , 
 }
-description = _("Decimal number")
-
-def __init__(self, verbose_name=None, name=None, max_digits=None,
-             decimal_places=None, **kwargs):
-    self.max_digits, self.decimal_places = max_digits, decimal_places
-    super(DecimalField, self).__init__(verbose_name, name, **kwargs)
-
-end
-
-function Feild.check(self, **kwargs)
-    errors = super(DecimalField, self).check(**kwargs)
-
-    digits_errors = self._check_decimal_places()
-    digits_errors.extend(self:_check_max_digits())
-    if not digits_errors then
-        errors[#errors+1] = self:_check_decimal_places_and_max_digits(**kwargs))
-    else
-        errors[#errors+1] = digits_errors)
-    return errors
-
-end
-
-function Feild._check_decimal_places(self)
-    try:
-        decimal_places = int(self.decimal_places)
-        if decimal_places < 0 then
-            raise ValueError()
-    except TypeError:
-        return [
-            checks.Error(
-                "DecimalFields must define a 'decimal_places' attribute.",
-                hint=None,
-                obj=self,
-                id='fields.E130',
-            )
-        ]
-    except ValueError:
-        return [
-            checks.Error(
-                "'decimal_places' must be a non-negative integer.",
-                hint=None,
-                obj=self,
-                id='fields.E131',
-            )
-        ]
-    else
-        return []
-
-end
-
-function Feild._check_max_digits(self)
-    try:
-        max_digits = int(self.max_digits)
-        if max_digits <= 0 then
-            raise ValueError()
-    except TypeError:
-        return [
-            checks.Error(
-                "DecimalFields must define a 'max_digits' attribute.",
-                hint=None,
-                obj=self,
-                id='fields.E132',
-            )
-        ]
-    except ValueError:
-        return [
-            checks.Error(
-                "'max_digits' must be a positive integer.",
-                hint=None,
-                obj=self,
-                id='fields.E133',
-            )
-        ]
-    else
-        return []
-
-end
-
-function Feild._check_decimal_places_and_max_digits(self, **kwargs)
-    if int(self.decimal_places) > int(self.max_digits) then
-        return [
-            checks.Error(
-                "'max_digits' must be greater or equal to 'decimal_places'.",
-                hint=None,
-                obj=self,
-                id='fields.E134',
-            )
-        ]
-    return []
-
-@cached_property
-end
-
-function Feild.validators(self)
-    return super(DecimalField, self).validators + [
-        validators.DecimalValidator(self.max_digits, self.decimal_places)
-    ]
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(DecimalField, self).deconstruct()
-    if self.max_digits ~= None:
-        kwargs['max_digits'] = self.max_digits
-    if self.decimal_places ~= None:
-        kwargs['decimal_places'] = self.decimal_places
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
-    return "DecimalField"
-
-end
-
-function Feild.to_python(self, value)
-    if value is None then
-        return value
-    try:
-        return decimal.Decimal(value)
-    except decimal.InvalidOperation:
-        raise exceptions.ValidationError(
-            self.error_messages['invalid'],
-            code='invalid',
-            params={value = value},
-        )
-
-end
-
-function Feild._format(self, value)
-    if isinstance(value, six.string_types) then
-        return value
-    else
-        return self:format_number(value)
-
-end
-
-function Feild.format_number(self, value)
-    """
-    Formats a number into a string with the requisite number of digits and
-    decimal places.
-    """
-    -- Method moved to django.db.backends.utils.
-    #
-    -- It is preserved because it is used by the oracle backend
-    -- (django.db.backends.oracle.query), and also for
-    -- backwards-compatibility with any external code which may have used
-    -- this method.
-    from django.db.backends import utils
-    return utils.format_number(value, self.max_digits, self.decimal_places)
-
-end
-
-function Feild.get_db_prep_save(self, value, connection)
-    return connection.ops.adapt_decimalfield_value(self:to_python(value),
-            self.max_digits, self.decimal_places)
-
-end
-
-function Feild.get_prep_value(self, value)
-    value = super(DecimalField, self).get_prep_value(value)
-    return self:to_python(value)
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {
-        max_digits = self.max_digits,
-        decimal_places = self.decimal_places,
-        form_class = forms.DecimalField,
-    }
-    defaults.update(kwargs)
-    return super(DecimalField, self).formfield(**defaults)
-
-
-class DurationField(Field):
-"""Stores timedelta objects.
-
-Uses interval on postgres, INVERAL DAY TO SECOND on Oracle, and bigint of
-microseconds on other databases.
-"""
-empty_strings_allowed = false
-default_error_messages = {
-    'invalid': _("'%(value)s' value has an invalid format. It must be in "
-                 "[DD] [HH:[MM:]]ss[.uuuuuu] format.")
-}
-description = _("Duration")
-
-end
-
-function Feild.get_internal_type(self)
-    return "DurationField"
-
-end
-
-function Feild.to_python(self, value)
-    if value is None then
-        return value
-    if isinstance(value, datetime.timedelta) then
-        return value
-    try:
-        parsed = parse_duration(value)
-    except ValueError:
-        pass
-    else
-        if parsed ~= None:
-            return parsed
-
-    raise exceptions.ValidationError(
-        self.error_messages['invalid'],
-        code='invalid',
-        params={value = value},
-    )
-
-end
-
-function Feild.get_db_prep_value(self, value, connection, prepared=false)
-    if connection.features.has_native_duration_field then
-        return value
-    if value is None then
-        return None
-    -- Discard any fractional microseconds due to floating point arithmetic.
-    return int(round(value.total_seconds() * 1000000))
-
-end
-
-function Feild.get_db_converters(self, connection)
-    converters = []
-    if not connection.features.has_native_duration_field then
-        converters.append(connection.ops.convert_durationfield_value)
-    return converters + super(DurationField, self).get_db_converters(connection)
-
-end
-
-function Feild.value_to_string(self, obj)
-    val = self:value_from_object(obj)
-    return '' if val is None else duration_string(val)
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {
-        form_class = forms.DurationField,
-    }
-    defaults.update(kwargs)
-    return super(DurationField, self).formfield(**defaults)
-
-
-class EmailField(CharField):
-default_validators = [validators.validate_email]
-description = _("Email address")
-
-end
-
-function Feild.__init__(self, *args, **kwargs)
+function EmailField.instance(self, kwargs)
     -- max_length=254 to be compliant with RFCs 3696 and 5321
-    kwargs['max_length'] = kwargs.get('max_length', 254)
-    super(EmailField, self).__init__(*args, **kwargs)
-
+    kwargs.max_length = kwargs.max_length or 254
+    return CharField.instance(self, kwargs)
+end
+function EmailField.formfield(self, kwargs)
+    -- As with CharField, this will cause email validation to be performed twice.
+    local defaults = { form_class = forms.EmailField}
+    return CharField.formfield(self, dict_update(defaults, kwargs))
 end
 
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(EmailField, self).deconstruct()
-    -- We do not exclude max_length if it matches default as we want to change
-    -- the default in future.
-    return name, path, args, kwargs
-
-end
-
-function Feild.formfield(self, **kwargs)
-    -- As with CharField, this will cause email validation to be performed
-    -- twice.
-    defaults = {
-        form_class = forms.EmailField,
-    }
-    defaults.update(kwargs)
-    return super(EmailField, self).formfield(**defaults)
-
-
-class FilePathField(Field):
-description = _("File path")
-
-def __init__(self, verbose_name=None, name=None, path='', match=None,
-             recursive=false, allow_files=True, allow_folders=false, **kwargs):
-    self.path, self.match, self.recursive = path, match, recursive
-    self.allow_files, self.allow_folders = allow_files, allow_folders
-    kwargs['max_length'] = kwargs.get('max_length', 100)
-    super(FilePathField, self).__init__(verbose_name, name, **kwargs)
-
-end
-
-function Feild.check(self, **kwargs)
-    errors = super(FilePathField, self).check(**kwargs)
-    errors[#errors+1] = self:_check_allowing_files_or_folders(**kwargs))
-    return errors
-
-end
-
-function Feild._check_allowing_files_or_folders(self, **kwargs)
-    if not self.allow_files and not self.allow_folders then
-        return [
-            checks.Error(
-                "FilePathFields must have either 'allow_files' or 'allow_folders' set to True.",
-                hint=None,
-                obj=self,
-                id='fields.E140',
-            )
-        ]
-    return []
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(FilePathField, self).deconstruct()
-    if self.path != '' then
-        kwargs['path'] = self.path
-    if self.match ~= None:
-        kwargs['match'] = self.match
-    if self.recursive ~= false:
-        kwargs['recursive'] = self.recursive
-    if self.allow_files ~= True:
-        kwargs['allow_files'] = self.allow_files
-    if self.allow_folders ~= false:
-        kwargs['allow_folders'] = self.allow_folders
-    if kwargs.get("max_length") == 100 then
-        del kwargs["max_length"]
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_prep_value(self, value)
-    value = super(FilePathField, self).get_prep_value(value)
-    if value is None then
-        return None
-    return six.text_type(value)
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {
-        path = self.path,
-        match = self.match,
-        recursive = self.recursive,
-        form_class = forms.FilePathField,
-        allow_files = self.allow_files,
-        allow_folders = self.allow_folders,
-    }
-    defaults.update(kwargs)
-    return super(FilePathField, self).formfield(**defaults)
-
-end
-
-function Feild.get_internal_type(self)
-    return "FilePathField"
-
-
-class FloatField(Field):
-empty_strings_allowed = false
-default_error_messages = {
-    invalid = _("'%(value)s' value must be a float."),
+local FloatField = Field:new{
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid = "value must be a float.",
+    }, 
+    description = "Floating point number", 
 }
-description = _("Floating point number")
-
+function FloatField.get_prep_value(self, value)
+    value = Field.get_prep_value(self, value)
+    if value == nil then
+        return nil
+    end
+    return tonumber(value)
 end
-
-function Feild.get_prep_value(self, value)
-    value = super(FloatField, self).get_prep_value(value)
-    if value is None then
-        return None
-    return float(value)
-
-end
-
-function Feild.get_internal_type(self)
+function FloatField.get_internal_type(self)
     return "FloatField"
-
 end
-
-function Feild.to_python(self, value)
-    if value is None then
-        return value
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        raise exceptions.ValidationError(
-            self.error_messages['invalid'],
-            code='invalid',
-            params={value = value},
-        )
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {'form_class': forms.FloatField}
-    defaults.update(kwargs)
-    return super(FloatField, self).formfield(**defaults)
-
-
-class IntegerField(Field):
-empty_strings_allowed = false
-default_error_messages = {
-    invalid = _("'%(value)s' value must be an integer."),
-}
-description = _("Integer")
-
-end
-
-function Feild.check(self, **kwargs)
-    errors = super(IntegerField, self).check(**kwargs)
-    errors[#errors+1] = self:_check_max_length_warning())
-    return errors
-
-end
-
-function Feild._check_max_length_warning(self)
-    if self.max_length ~= None:
-        return [
-            checks.Warning(
-                "'max_length' is ignored when used with IntegerField",
-                hint="Remove 'max_length' from field",
-                obj=self,
-                id='fields.W122',
-            )
-        ]
-    return []
-
-@cached_property
-end
-
-function Feild.validators(self)
-    -- These validators can't be added at field initialization time since
-    -- they're based on values retrieved from `connection`.
-    range_validators = []
-    internal_type = self.get_internal_type()
-    min_value, max_value = connection.ops.integer_field_range(internal_type)
-    if min_value ~= None:
-        range_validators.append(validators.MinValueValidator(min_value))
-    if max_value ~= None:
-        range_validators.append(validators.MaxValueValidator(max_value))
-    return super(IntegerField, self).validators + range_validators
-
-end
-
-function Feild.get_prep_value(self, value)
-    value = super(IntegerField, self).get_prep_value(value)
-    if value is None then
-        return None
-    return int(value)
-
-end
-
-function Feild.get_prep_lookup(self, lookup_type, value)
-    if ((lookup_type == 'gte' or lookup_type == 'lt')
-            and isinstance(value, float)):
-        value = math.ceil(value)
-    return super(IntegerField, self).get_prep_lookup(lookup_type, value)
-
-end
-
-function Feild.get_internal_type(self)
-    return "IntegerField"
-
-end
-
-function Feild.to_python(self, value)
-    if value is None then
-        return value
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        raise exceptions.ValidationError(
-            self.error_messages['invalid'],
-            code='invalid',
-            params={value = value},
-        )
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {'form_class': forms.IntegerField}
-    defaults.update(kwargs)
-    return super(IntegerField, self).formfield(**defaults)
-
-
-class BigIntegerField(IntegerField):
-empty_strings_allowed = false
-description = _("Big (8 byte) integer")
-MAX_BIGINT = 9223372036854775807
-
-end
-
-function Feild.get_internal_type(self)
-    return "BigIntegerField"
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {min_value = -BigIntegerField.MAX_BIGINT - 1,
-                'max_value': BigIntegerField.MAX_BIGINT}
-    defaults.update(kwargs)
-    return super(BigIntegerField, self).formfield(**defaults)
-
-
-class IPAddressField(Field):
-empty_strings_allowed = false
-description = _("IPv4 address")
-system_check_removed_details = {
-    'msg': (
-        'IPAddressField has been removed except for support in '
-        'historical migrations.'
-    ),
-    hint = 'Use GenericIPAddressField instead.',
-    id = 'fields.E900',
-}
-
-end
-
-function Feild.__init__(self, *args, **kwargs)
-    kwargs['max_length'] = 15
-    super(IPAddressField, self).__init__(*args, **kwargs)
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(IPAddressField, self).deconstruct()
-    del kwargs['max_length']
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_prep_value(self, value)
-    value = super(IPAddressField, self).get_prep_value(value)
-    if value is None then
-        return None
-    return six.text_type(value)
-
-end
-
-function Feild.get_internal_type(self)
-    return "IPAddressField"
-
-
-class GenericIPAddressField(Field):
-empty_strings_allowed = false
-description = _("IP address")
-default_error_messages = {}
-
-def __init__(self, verbose_name=None, name=None, protocol='both',
-             unpack_ipv4=false, *args, **kwargs):
-    self.unpack_ipv4 = unpack_ipv4
-    self.protocol = protocol
-    self.default_validators, invalid_error_message = \
-        validators.ip_address_validators(protocol, unpack_ipv4)
-    self.default_error_messages['invalid'] = invalid_error_message
-    kwargs['max_length'] = 39
-    super(GenericIPAddressField, self).__init__(verbose_name, name, *args,
-                                                **kwargs)
-
-end
-
-function Feild.check(self, **kwargs)
-    errors = super(GenericIPAddressField, self).check(**kwargs)
-    errors[#errors+1] = self:_check_blank_and_null_values(**kwargs))
-    return errors
-
-end
-
-function Feild._check_blank_and_null_values(self, **kwargs)
-    if not getattr(self, 'null', false) and getattr(self, 'blank', false) then
-        return [
-            checks.Error(
-                ('GenericIPAddressFields cannot have blank=True if null=false, '
-                 'as blank values are stored as nulls.'),
-                hint=None,
-                obj=self,
-                id='fields.E150',
-            )
-        ]
-    return []
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(GenericIPAddressField, self).deconstruct()
-    if self.unpack_ipv4 ~= false:
-        kwargs['unpack_ipv4'] = self.unpack_ipv4
-    if self.protocol != "both" then
-        kwargs['protocol'] = self.protocol
-    if kwargs.get("max_length") == 39 then
-        del kwargs['max_length']
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
-    return "GenericIPAddressField"
-
-end
-
-function Feild.to_python(self, value)
-    if value is None then
-        return None
-    if not isinstance(value, six.string_types) then
-        value = force_text(value)
-    value = value.strip()
-    if ' then' in value:
-        return clean_ipv6_address(value,
-            self.unpack_ipv4, self.error_messages['invalid'])
+function FloatField.to_lua(self, value)
+    if value == nil then
+        return nil
+    end
+    value = tonumber(value)
+    if not value then
+        return nil, self.error_messages.invalid
+    end
     return value
-
+end
+function FloatField.formfield(self, kwargs)
+    local defaults = {form_class=forms.FloatField}
+    return Field.formfield(self, dict_update(defaults, kwargs))
 end
 
-function Feild.get_db_prep_value(self, value, connection, prepared=false)
-    if not prepared then
-        value = self:get_prep_value(value)
-    return connection.ops.adapt_ipaddressfield_value(value)
 
+local IntegerField = Field:new{
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid = "value must be an integer.",
+    }, 
+    description = "Integer", 
+}
+function IntegerField.check(self, kwargs)
+    local errors = Field.check(self, kwargs)
+    errors[#errors+1] = self:_check_max_length_warning()
+    return errors
 end
-
-function Feild.get_prep_value(self, value)
-    value = super(GenericIPAddressField, self).get_prep_value(value)
-    if value is None then
-        return None
-    if value and ' then' in value:
-        try:
-            return clean_ipv6_address(value, self.unpack_ipv4)
-        except exceptions.ValidationError:
-            pass
-    return six.text_type(value)
-
+function IntegerField._check_max_length_warning(self)
+    if self.maxlen ~= nil then
+        return "'maxlen' is ignored when used with IntegerField"
+    end
 end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {
-        protocol = self.protocol,
-        form_class = forms.GenericIPAddressField,
-    }
-    defaults.update(kwargs)
-    return super(GenericIPAddressField, self).formfield(**defaults)
-
-
-class PositiveIntegerField(IntegerField):
-description = _("Positive integer")
-
+function IntegerField.get_prep_value(self, value)
+    value = Field.get_prep_value(self, value)
+    if value == nil then
+        return nil
+    end
+    return math_floor(tonumber(value))
 end
-
-function Feild.get_internal_type(self)
-    return "PositiveIntegerField"
-
+function IntegerField.get_prep_lookup(self, lookup_type, value)
+    if ((lookup_type == 'gte' or lookup_type == 'lt') and type(value) =='number') then
+        value = math_floor(value)
+    end
+    return Field.get_prep_lookup(self, lookup_type, value)
 end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {'min_value': 0}
-    defaults.update(kwargs)
-    return super(PositiveIntegerField, self).formfield(**defaults)
-
-
-class PositiveSmallIntegerField(IntegerField):
-description = _("Positive small integer")
-
+function IntegerField.get_internal_type(self)
+    return "IntegerField"
 end
-
-function Feild.get_internal_type(self)
-    return "PositiveSmallIntegerField"
-
+function IntegerField.to_lua(self, value)
+    if value == nil then
+        return nil
+    end
+    value = tonumber(value)
+    if not value or math_floor(value)~=value then
+        return nil, self.error_messages.invalid
+    end
+    return value
 end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {'min_value': 0}
-    defaults.update(kwargs)
-    return super(PositiveSmallIntegerField, self).formfield(**defaults)
-
-
-class SlugField(CharField):
-default_validators = [validators.validate_slug]
-description = _("Slug (up to %(max_length)s)")
-
+function IntegerField.formfield(self, kwargs)
+    local defaults = {form_class=forms.IntegerField}
+    return Field.formfield(self, dict_update(defaults, kwargs))
 end
-
-function Feild.__init__(self, *args, **kwargs)
-    kwargs['max_length'] = kwargs.get('max_length', 50)
-    -- Set db_index=True unless it's been set manually.
-    if 'db_index' not in kwargs then
-        kwargs['db_index'] = True
-    self.allow_unicode = kwargs.pop('allow_unicode', false)
-    if self.allow_unicode then
-        self.default_validators = [validators.validate_unicode_slug]
-    super(SlugField, self).__init__(*args, **kwargs)
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(SlugField, self).deconstruct()
-    if kwargs.get("max_length") == 50 then
-        del kwargs['max_length']
-    if self.db_index is false then
-        kwargs['db_index'] = false
-    else
-        del kwargs['db_index']
-    if self.allow_unicode ~= false:
-        kwargs['allow_unicode'] = self.allow_unicode
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
-    return "SlugField"
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {form_class = forms.SlugField, 'allow_unicode': self.allow_unicode}
-    defaults.update(kwargs)
-    return super(SlugField, self).formfield(**defaults)
-
-
-class SmallIntegerField(IntegerField):
-description = _("Small integer")
-
-end
-
-function Feild.get_internal_type(self)
-    return "SmallIntegerField"
-
-
-class TextField(Field):
-description = _("Text")
-
-end
-
-function Feild.get_internal_type(self)
-    return "TextField"
-
-end
-
-function Feild.to_python(self, value)
-    if isinstance(value, six.string_types) or value is None then
-        return value
-    return smart_text(value)
-
-end
-
-function Feild.get_prep_value(self, value)
-    value = super(TextField, self).get_prep_value(value)
-    return self:to_python(value)
-
-end
-
-function Feild.formfield(self, **kwargs)
-    -- Passing max_length to forms.CharField means that the value's length
-    -- will be validated twice. This is considered acceptable since we want
-    -- the value in the form field (to pass into widget for example).
-    defaults = {max_length = self.max_length, 'widget': forms.Textarea}
-    defaults.update(kwargs)
-    return super(TextField, self).formfield(**defaults)
-
 
 class TimeField(DateTimeCheckMixin, Field):
 empty_strings_allowed = false
@@ -1737,12 +966,12 @@ default_error_messages = {
 description = _("Time")
 
 def __init__(self, verbose_name=None, name=None, auto_now=false,
-             auto_now_add=false, **kwargs):
+             auto_now_add=false, kwargs):
     self.auto_now, self.auto_now_add = auto_now, auto_now_add
     if auto_now or auto_now_add then
         kwargs['editable'] = false
         kwargs['blank'] = True
-    super(TimeField, self).__init__(verbose_name, name, **kwargs)
+    Field.__init__(self, verbose_name, name, kwargs)
 
 end
 
@@ -1812,8 +1041,8 @@ function Feild.get_internal_type(self)
 
 end
 
-function Feild.to_python(self, value)
-    if value is None then
+function Feild.to_lua(self, value)
+    if value == nil then
         return None
     if isinstance(value, datetime.time) then
         return value
@@ -1848,13 +1077,13 @@ function Feild.pre_save(self, model_instance, add)
         setattr(model_instance, self.attname, value)
         return value
     else
-        return super(TimeField, self).pre_save(model_instance, add)
+        return Field.pre_save(self, model_instance, add)
 
 end
 
 function Feild.get_prep_value(self, value)
-    value = super(TimeField, self).get_prep_value(value)
-    return self:to_python(value)
+    value = Field.get_prep_value(self, value)
+    return self:to_lua(value)
 
 end
 
@@ -1868,14 +1097,14 @@ end
 
 function Feild.value_to_string(self, obj)
     val = self:value_from_object(obj)
-    return '' if val is None else val.isoformat()
+    return '' if val == nil else val.isoformat()
 
 end
 
-function Feild.formfield(self, **kwargs)
+function Feild.formfield(self, kwargs)
     defaults = {'form_class': forms.TimeField}
     defaults.update(kwargs)
-    return super(TimeField, self).formfield(**defaults)
+    return Field.formfield(self, **defaults)
 
 
 class URLField(CharField):
@@ -1884,9 +1113,9 @@ description = _("URL")
 
 end
 
-function Feild.__init__(self, verbose_name=None, name=None, **kwargs)
+function Feild.__init__(self, verbose_name=None, name=None, kwargs)
     kwargs['max_length'] = kwargs.get('max_length', 200)
-    super(URLField, self).__init__(verbose_name, name, **kwargs)
+    Field.__init__(self, verbose_name, name, kwargs)
 
 end
 
@@ -1898,135 +1127,15 @@ function Feild.deconstruct(self)
 
 end
 
-function Feild.formfield(self, **kwargs)
+function Feild.formfield(self, kwargs)
     -- As with CharField, this will cause URL validation to be performed
     -- twice.
     defaults = {
         form_class = forms.URLField,
     }
     defaults.update(kwargs)
-    return super(URLField, self).formfield(**defaults)
+    return Field.formfield(self, **defaults)
 
-
-class BinaryField(Field):
-description = _("Raw binary data")
-empty_values = [None, b'']
-
-end
-
-function Feild.__init__(self, *args, **kwargs)
-    kwargs['editable'] = false
-    super(BinaryField, self).__init__(*args, **kwargs)
-    if self.max_length ~= None:
-        self.validators.append(validators.MaxLengthValidator(self.max_length))
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(BinaryField, self).deconstruct()
-    del kwargs['editable']
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
-    return "BinaryField"
-
-end
-
-function Feild.get_default(self)
-    if self.has_default() and not callable(self.default) then
-        return self.default
-    default = super(BinaryField, self).get_default()
-    if default == '' then
-        return b''
-    return default
-
-end
-
-function Feild.get_db_prep_value(self, value, connection, prepared=false)
-    value = super(BinaryField, self).get_db_prep_value(value, connection, prepared)
-    if value ~= None:
-        return connection.Database.Binary(value)
-    return value
-
-end
-
-function Feild.value_to_string(self, obj)
-    """Binary data is serialized as base64"""
-    return b64encode(force_bytes(self:value_from_object(obj))).decode('ascii')
-
-end
-
-function Feild.to_python(self, value)
-    -- If it's a string, it should be base64-encoded data
-    if isinstance(value, six.text_type) then
-        return six.memoryview(b64decode(force_bytes(value)))
-    return value
-
-
-class UUIDField(Field):
-default_error_messages = {
-    'invalid': _("'%(value)s' ~= a valid UUID."),
-}
-description = 'Universally unique identifier'
-empty_strings_allowed = false
-
-end
-
-function Feild.__init__(self, verbose_name=None, **kwargs)
-    kwargs['max_length'] = 32
-    super(UUIDField, self).__init__(verbose_name, **kwargs)
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(UUIDField, self).deconstruct()
-    del kwargs['max_length']
-    return name, path, args, kwargs
-
-end
-
-function Feild.get_internal_type(self)
-    return "UUIDField"
-
-end
-
-function Feild.get_db_prep_value(self, value, connection, prepared=false)
-    if value is None then
-        return None
-    if not isinstance(value, uuid.UUID) then
-        try:
-            value = uuid.UUID(value)
-        except AttributeError:
-            raise TypeError(self.error_messages['invalid'] % {'value': value})
-
-    if connection.features.has_native_uuid_field then
-        return value
-    return value.hex
-
-end
-
-function Feild.to_python(self, value)
-    if value and not isinstance(value, uuid.UUID) then
-        try:
-            return uuid.UUID(value)
-        except ValueError:
-            raise exceptions.ValidationError(
-                self.error_messages['invalid'],
-                code='invalid',
-                params={value = value},
-            )
-    return value
-
-end
-
-function Feild.formfield(self, **kwargs)
-    defaults = {
-        form_class = forms.UUIDField,
-    }
-    defaults.update(kwargs)
-    return super(UUIDField, self).formfield(**defaults)
 
 function Field.new(self, attrs)
     attrs = attrs or {}
