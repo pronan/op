@@ -85,7 +85,7 @@ function Field.instance(cls, attrs)
     self.blank = self.blank or false
     self.null = self.null or false
     self.db_index = self.db_index or false
-    self.auto_created = self.auto_created or false,
+    self.auto_created = self.auto_created or false
     if self.editable == nil then
         self.editable = true
     end
@@ -376,7 +376,7 @@ function Feild.get_db_prep_lookup(self, lookup_type, value, connection,prepared)
         end
         return res
     else
-        return [value]
+        return {value}
     end
 end
 function Feild.has_default(self)
@@ -444,7 +444,7 @@ function Feild.get_choices_default(self)
     return self:get_choices()
 end
 function Feild.value_from_object(self, obj)
-    if obj ~= nil:
+    if obj ~= nil then
         return obj[self.attname]
     else
         return self:get_default()
@@ -730,8 +730,8 @@ local DateField = Field:new{
 function DateField.instance(cls, attrs)
     local self = cls:new(attrs)
     if self.auto_now or self.auto_now_add then
-        kwargs.editable = false
-        kwargs.blank = true
+        self.editable = false
+        self.blank = true
     end
     return self
 end
@@ -795,7 +795,6 @@ function DateField.formfield(self, kwargs)
     return Field.formfield(self, dict_update(defaults, kwargs))
 end
 
-
 local DateTimeField = DateField:new{
     empty_strings_allowed = false, 
     default_error_messages = {
@@ -804,7 +803,7 @@ local DateTimeField = DateField:new{
     }, 
     description = "Date (with time)", 
 }
-local function DateTimeField._check_fix_default_value(self)
+function DateTimeField._check_fix_default_value(self)
 
 end
 function DateTimeField.get_internal_type(self)
@@ -955,188 +954,71 @@ function IntegerField.formfield(self, kwargs)
     return Field.formfield(self, dict_update(defaults, kwargs))
 end
 
-class TimeField(DateTimeCheckMixin, Field):
-empty_strings_allowed = false
-default_error_messages = {
-    'invalid': _("'%(value)s' value has an invalid format. It must be in "
-                 "HH:MM[:ss[.uuuuuu]] format."),
-    'invalid_time': _("'%(value)s' value has the correct format "
-                      "(HH:MM[:ss[.uuuuuu]]) but it is an invalid time."),
+local TimeField = Field:new{
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid= "please use 00:00:00",
+        invalid_time = "invalid time format",
+    }, 
+    description = "Time", 
 }
-description = _("Time")
-
-def __init__(self, verbose_name=None, name=None, auto_now=false,
-             auto_now_add=false, kwargs):
-    self.auto_now, self.auto_now_add = auto_now, auto_now_add
-    if auto_now or auto_now_add then
-        kwargs['editable'] = false
-        kwargs['blank'] = True
-    Field.__init__(self, verbose_name, name, kwargs)
-
-end
-
-function Feild._check_fix_default_value(self)
-    """
-    Adds a warning to the checks framework stating, that using an actual
-    time or datetime value is probably wrong; it's only being evaluated on
-    server start-up.
-
-    For details see ticket --21905
-    """
-    if not self.has_default() then
-        return []
-
-    now = timezone.now()
-    if not timezone.is_naive(now) then
-        now = timezone.make_naive(now, timezone.utc)
-    value = self.default
-    if isinstance(value, datetime.datetime) then
-        second_offset = datetime.timedelta(seconds=10)
-        lower = now - second_offset
-        upper = now + second_offset
-        if timezone.is_aware(value) then
-            value = timezone.make_naive(value, timezone.utc)
-    elif isinstance(value, datetime.time) then
-        second_offset = datetime.timedelta(seconds=10)
-        lower = now - second_offset
-        upper = now + second_offset
-        value = datetime.datetime.combine(now.date(), value)
-        if timezone.is_aware(value) then
-            value = timezone.make_naive(value, timezone.utc).time()
-    else
-        -- No explicit time / datetime value -- no checks necessary
-        return []
-    if lower <= value <= upper then
-        return [
-            checks.Warning(
-                'Fixed default value provided.',
-                hint='It seems you set a fixed date / time / datetime '
-                     'value as default for this field. This may not be '
-                     'what you want. If you want to have the current date '
-                     'as default, use `django.utils.timezone.now`',
-                obj=self,
-                id='fields.W161',
-            )
-        ]
-
-    return []
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(TimeField, self).deconstruct()
-    if self.auto_now ~= false:
-        kwargs["auto_now"] = self.auto_now
-    if self.auto_now_add ~= false:
-        kwargs["auto_now_add"] = self.auto_now_add
+function TimeField.instance(cls, attrs)
+    local self = cls:new(attrs)
     if self.auto_now or self.auto_now_add then
-        del kwargs['blank']
-        del kwargs['editable']
-    return name, path, args, kwargs
-
+        self.editable = false
+        self.blank = true
+    end
+    return self
 end
-
-function Feild.get_internal_type(self)
+function TimeField.get_internal_type(self)
     return "TimeField"
-
 end
-
-function Feild.to_lua(self, value)
+function TimeField.to_lua(self, value)
     if value == nil then
-        return None
-    if isinstance(value, datetime.time) then
-        return value
-    if isinstance(value, datetime.datetime) then
-        -- Not usually a good idea to pass in a datetime here (it loses
-        -- information), but this can be a side-effect of interacting with a
-        -- database backend (e.g. Oracle), so we'll be accommodating.
-        return value.time()
-
-    try:
-        parsed = parse_time(value)
-        if parsed ~= None:
-            return parsed
-    except ValueError:
-        raise exceptions.ValidationError(
-            self.error_messages['invalid_time'],
-            code='invalid_time',
-            params={value = value},
-        )
-
-    raise exceptions.ValidationError(
-        self.error_messages['invalid'],
-        code='invalid',
-        params={value = value},
-    )
-
+        return nil
+    end
+    value = string_strip(value)
+    local res, err = ngx_re_match(value, [[^\d{1,2}:\d{1,2}:\d{1,2}$]], 'jo')
+    if not res then
+        return nil, self.error_messages.invalid
+    end
+    return value
 end
-
-function Feild.pre_save(self, model_instance, add)
+function TimeField.pre_save(self, model_instance, add)
     if self.auto_now or (self.auto_now_add and add) then
-        value = datetime.datetime.now().time()
-        setattr(model_instance, self.attname, value)
+        local value = now()
+        model_instance[self.attname] = value
         return value
     else
         return Field.pre_save(self, model_instance, add)
-
+    end
 end
-
-function Feild.get_prep_value(self, value)
-    value = Field.get_prep_value(self, value)
+function TimeField.get_prep_value(self, value)
+    local value = Field.get_prep_value(self, value)
     return self:to_lua(value)
-
 end
-
-function Feild.get_db_prep_value(self, value, connection, prepared=false)
+function TimeField.get_db_prep_value(self, value, connection, prepared)
+    prepared = prepared or false
     -- Casts times into the format expected by the backend
     if not prepared then
         value = self:get_prep_value(value)
+    end
     return connection.ops.adapt_timefield_value(value)
-
+end
+function TimeField.value_to_string(self, obj)
+    local val = self:value_from_object(obj)
+    if val == nil then
+        return ''
+    else
+        return val:isoformat()
+    end
+end
+function TimeField.formfield(self, kwargs)
+    local defaults = {form_class=forms.TimeField}
+    return Field.formfield(self, dict_update(defaults, kwargs))
 end
 
-function Feild.value_to_string(self, obj)
-    val = self:value_from_object(obj)
-    return '' if val == nil else val.isoformat()
-
-end
-
-function Feild.formfield(self, kwargs)
-    defaults = {'form_class': forms.TimeField}
-    defaults.update(kwargs)
-    return Field.formfield(self, **defaults)
-
-
-class URLField(CharField):
-default_validators = [validators.URLValidator()]
-description = _("URL")
-
-end
-
-function Feild.__init__(self, verbose_name=None, name=None, kwargs)
-    kwargs['max_length'] = kwargs.get('max_length', 200)
-    Field.__init__(self, verbose_name, name, kwargs)
-
-end
-
-function Feild.deconstruct(self)
-    name, path, args, kwargs = super(URLField, self).deconstruct()
-    if kwargs.get("max_length") == 200 then
-        del kwargs['max_length']
-    return name, path, args, kwargs
-
-end
-
-function Feild.formfield(self, kwargs)
-    -- As with CharField, this will cause URL validation to be performed
-    -- twice.
-    defaults = {
-        form_class = forms.URLField,
-    }
-    defaults.update(kwargs)
-    return Field.formfield(self, **defaults)
-
-
+----
 function Field.new(self, attrs)
     attrs = attrs or {}
     self.__index = self
