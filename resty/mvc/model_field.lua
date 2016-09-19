@@ -17,6 +17,7 @@ local list = utils.list
 local dict = utils.dict
 local dict_update = utils.dict_update
 local list_extend = utils.dict_update
+local reversed_metatables = utils.reversed_metatables
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -109,7 +110,7 @@ function Field.check(self, kwargs)
     errors[#errors+1] = self:_check_null_allowed_for_primary_keys()
     return errors
 end
-function Feild._check_field_name(self)
+function Field._check_field_name(self)
     -- Check if field name is valid, i.e.
     -- 1) does not end with an underscore,
     -- 2) does not contain "__"
@@ -122,7 +123,7 @@ function Feild._check_field_name(self)
         return "`pk` is a reserved word that cannot be used as a field name."
     end
 end
-function Feild._check_choices(self)
+function Field._check_choices(self)
     if self.choices then
         if type(self.choices) ~= 'table' then
             return "`choices` must be a table"
@@ -136,20 +137,20 @@ function Feild._check_choices(self)
         end
     end
 end
-function Feild._check_db_index(self)
+function Field._check_db_index(self)
     if self.db_index ~= nil or self.db_index ~= true or self.db_index ~= false then
         return "`db_index` must be nil, true or false."
     end
 end
-function Feild._check_null_allowed_for_primary_keys(self)
+function Field._check_null_allowed_for_primary_keys(self)
     if self.primary_key and self.null then
         return 'Primary keys must not have null=true.'
     end
 end
-function Feild.clone(self)
-    return Feild:instance(dict(self))
+function Field.clone(self)
+    return Field:instance(dict(self))
 end
-function Feild.get_pk_value_on_save(self, instance)
+function Field.get_pk_value_on_save(self, instance)
     -- Hook to generate new PK values on save. This method is called when
     -- saving instances with no primary key value set. If this method returns
     -- something else than None, then the returned value is used when saving
@@ -158,13 +159,13 @@ function Feild.get_pk_value_on_save(self, instance)
         return self:get_default()
     end
 end
-function Feild.to_lua(self, value)
+function Field.to_lua(self, value)
     -- Converts the input value into the expected Python data type, raising
     -- error if the data can't be converted.
     -- Returns the converted value. Subclasses should override this.
     return value
 end
-function Feild.get_validators(self)
+function Field.get_validators(self)
     -- Some validators can't be created at field initialization time.
     -- This method provides a way to delay their creation until required.
     -- doubt it..
@@ -185,7 +186,7 @@ function Field.run_validators(self, value)
         return errors
     end
 end
-function Feild.validate(self, value, model_instance)
+function Field.validate(self, value, model_instance)
     -- Validates value and throws ValidationError. Subclasses should override
     -- this to provide validation logic.
     if not self.editable then
@@ -235,10 +236,10 @@ function Field.clean(self, value, model_instance)
     end
     return value
 end
-function Feild.is_unique(self)
+function Field.is_unique(self)
     return self.unique or self.primary_key
 end
-function Feild.contribute_to_class(self, cls, name, virtual_only)
+function Field.contribute_to_class(self, cls, name, virtual_only)
     virtual_only = virtual_only or false
     self:set_attributes_from_name(name)
     self.model = cls
@@ -251,7 +252,7 @@ function Feild.contribute_to_class(self, cls, name, virtual_only)
         cls[string_format('get_%s_display', self.name)] = curry(cls._get_FIELD_display, {field=self})   
     end
 end
-function Feild.set_attributes_from_name(self, name)
+function Field.set_attributes_from_name(self, name)
     if not self.name then
         self.name = name
     end
@@ -261,34 +262,34 @@ function Feild.set_attributes_from_name(self, name)
         self.verbose_name = (self.name:gsub('_', ' '))
     end
 end
-function Feild.get_attname_column(self)
+function Field.get_attname_column(self)
     local attname = sel:get_attname()
     local column = self.db_column or attname
     return attname, column
 end
-function Feild.get_attname(self)
+function Field.get_attname(self)
     return self.name
 end
-function Feild.get_filter_kwargs_for_object(self, obj)
+function Field.get_filter_kwargs_for_object(self, obj)
     -- Return a dict that when passed as kwargs to self.model.filter(), would
     -- yield all instances having the same value for this field as obj has.
     return {[self.name]=obj[self.attname]}
 end
-function Feild.get_cache_name(self)
+function Field.get_cache_name(self)
     return string_format('_%s_cache', self.name)
 end
-function Feild.get_internal_type(self)
+function Field.get_internal_type(self)
     return self.__class__.__name__
 end
-function Feild.pre_save(self, model_instance, add)
+function Field.pre_save(self, model_instance, add)
     -- Returns field's value just before saving.
     return model_instance[self.attname]
 end
-function Feild.get_prep_value(self, value)
+function Field.get_prep_value(self, value)
     -- Perform preliminary non-db specific value checks and conversions.
     return value
 end
-function Feild.get_db_prep_value(self, value, connection, prepared)
+function Field.get_db_prep_value(self, value, connection, prepared)
     -- """Returns field's value prepared for interacting with the database
     -- backend.
 
@@ -301,7 +302,7 @@ function Feild.get_db_prep_value(self, value, connection, prepared)
     end
     return value
 end
-function Feild.get_db_prep_save(self, value, connection)
+function Field.get_db_prep_save(self, value, connection)
     return self:get_db_prep_value(value, connection,false)
 end
 local string_lookup_table = {
@@ -322,7 +323,7 @@ local compare_lookup_table = {
     gte = true,
     lt = true,
     lte = true,}
-function Feild.get_prep_lookup(self, lookup_type, value)
+function Field.get_prep_lookup(self, lookup_type, value)
     if value['_prepare'] then
         return value:_prepare(self)
     end
@@ -339,7 +340,7 @@ function Feild.get_prep_lookup(self, lookup_type, value)
     end
     return self:get_prep_value(value)
 end
-function Feild.get_db_prep_lookup(self, lookup_type, value, connection,prepared)
+function Field.get_db_prep_lookup(self, lookup_type, value, connection,prepared)
     -- Returns field's value prepared for database lookup.
     prepared = prepared or false
     if not prepared then
@@ -379,10 +380,10 @@ function Feild.get_db_prep_lookup(self, lookup_type, value, connection,prepared)
         return {value}
     end
 end
-function Feild.has_default(self)
+function Field.has_default(self)
     return self.default ~= NOT_PROVIDED
 end
-function Feild.get_default(self)
+function Field.get_default(self)
     if self:has_default() then
         if type(self.default) == 'function' then
             return self:default()
@@ -395,7 +396,7 @@ function Feild.get_default(self)
     return ""
 end
 local BLANK_CHOICE_DASH = {{"", "---------"}}
-function Feild.get_choices(self, include_blank, blank_choice, limit_choices_to)
+function Field.get_choices(self, include_blank, blank_choice, limit_choices_to)
     -- Returns choices with a default blank choices included, for use
     -- as SelectField choices for this field.
     if include_blank == nil then
@@ -440,22 +441,22 @@ function Feild.get_choices(self, include_blank, blank_choice, limit_choices_to)
     end
     return list(first_choice, lst)
 end
-function Feild.get_choices_default(self)
+function Field.get_choices_default(self)
     return self:get_choices()
 end
-function Feild.value_from_object(self, obj)
+function Field.value_from_object(self, obj)
     if obj ~= nil then
         return obj[self.attname]
     else
         return self:get_default()
     end
 end
-function Feild.value_to_string(self, obj)
+function Field.value_to_string(self, obj)
     -- Returns a string value of this field from the passed obj.
     -- This is used by the serialization framework.
     return self:value_from_object(obj)
 end
-function Feild.flatchoices(self)
+function Field.flatchoices(self)
     -- """Flattened version of choices tuple."""
     local flat = {}
     for i = 1, #self.choices do
@@ -469,7 +470,7 @@ function Feild.flatchoices(self)
     end
     return flat
 end
-function Feild.save_form_data(self, instance, data)
+function Field.save_form_data(self, instance, data)
     instance[self.name] = data
 end
 local valid_typed_kwargs = {
@@ -483,7 +484,7 @@ local valid_typed_kwargs = {
     help_text = true,
     error_messages = true,
     show_hidden_initial = true,}
-function Feild.formfield(self, form_class, choices_form_class, kwargs)
+function Field.formfield(self, form_class, choices_form_class, kwargs)
     -- Returns a form_Field instance for this database Field.
     local defaults = {required=not self.blank, label=self.verbose_name, help_text=self.help_text}
     if self:has_default() then
@@ -597,7 +598,7 @@ function BooleanField.instance(cls, attrs)
     return Field.instance(cls, attrs)
 end
 function BooleanField.check(self, kwargs)
-    local errors = Feild.check(self, kwargs)
+    local errors = Field.check(self, kwargs)
     errors[#errors+1] = self:_check_null(kwargs)
     return errors
 end
@@ -651,7 +652,7 @@ function BooleanField.formfield(self, kwargs)
         defaults = {form_class = form_field.BooleanField}
     end
     dict_update(defaults, kwargs)
-    return Feild.formfield(self, defaults)
+    return Field.formfield(self, defaults)
 end
 
 local CharField = Field:new{
@@ -660,7 +661,7 @@ local CharField = Field:new{
 function CharField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
     local v = self.validators
-    v[#v + 1] = validators.maxlen(self.maxlen)
+    v[#v + 1] = validator.maxlen(self.maxlen)
     return self
 end
 function CharField.check(self, kwargs)
@@ -762,7 +763,7 @@ function DateField.pre_save(self, model_instance, add)
     end
 end
 function DateField.contribute_to_class(self, cls, name, kwargs)
-    Feild.contribute_to_class(self, cls, name, kwargs)
+    Field.contribute_to_class(self, cls, name, kwargs)
     if not self.null then
         cls[string_format('get_next_by_%s', self.name)] = curry(
             cls._get_next_or_previous_by_FIELD, {field=self, is_next=true})
@@ -771,7 +772,7 @@ function DateField.contribute_to_class(self, cls, name, kwargs)
     end
 end
 function DateField.get_prep_value(self, value)
-    value = Feild.get_prep_value(self, value)
+    value = Field.get_prep_value(self, value)
     return self:to_lua(value)
 end
 function DateField.get_db_prep_value(self, value, connection, prepared)
@@ -859,7 +860,7 @@ function DateTimeField.formfield(self, kwargs)
 end
 
 local EmailField = CharField:new{
-    default_validators = {validators.validate_email}, 
+    default_validators = {validator.validate_email}, 
     description = "Email address" , 
 }
 function EmailField.instance(self, kwargs)

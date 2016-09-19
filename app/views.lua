@@ -75,9 +75,8 @@ function m.profile(request)
     return response.Template(request, 'profile.html', {navbar='profile'})
 end
 function m.q(kwargs)
-    local ret, err = query("show create table user;")
-    local form = forms.UserUpdateForm:instance{}
-    return response.Plain(repr(form)..repr(err))
+    local ret, err = query("select * from t;")
+    return response.Plain(type(ret[2].dict)..repr(ret[2].dict))
 end
 local function ran(step)
     step = step or 10
