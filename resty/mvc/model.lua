@@ -15,8 +15,10 @@ local ngx_ERR = ngx.ERR
 
 
 local Model = {
-    meta={auto_id=true, auto_update_time=true, auto_create_time=true, 
-    charset = 'utf8'}, 
+    meta={auto_id=true, 
+          auto_update_time=true, 
+          auto_create_time=true, 
+          charset = 'utf8'}, 
 }
 
 function Model.new(self, opts)
@@ -25,53 +27,30 @@ function Model.new(self, opts)
     return setmetatable(opts, self)
 end
 function Model.class(cls, attrs)
-    return cls:new(attrs):_resolve_fields():_resolve_row_class():_resolve_meta()
+    local subclass = cls:new(attrs)
+    subclass.row_class = Row:new{table_name=subclass.table_name, fields=subclass.fields}
+    for name, field in pairs(subclass.fields) do
+        field.name = name
+    end
+    -- field_order
+    if not subclass.field_order then
+        local field_order = {}
+        for k, v in pairs(subclass.fields) do
+            field_order[#field_order+1] = k
+        end
+        subclass.field_order = field_order
+    end
+    if rawget(subclass, 'meta') == nil then
+        subclass.meta = {}
+    end
+    local parent_meta = getmetatable(subclass).meta
+    setmetatable(subclass.meta, {__index=parent_meta})
+    return subclass
 end
 function Model.instance(cls, attrs)
     return cls.row_class:new(attrs)
 end
-function Model._resolve_row_class(self)
-    self.row_class = Row:new{table_name=self.table_name, fields=self.fields}
-    return self
-end
-function Model._resolve_meta(self)
-    if rawget(self, 'meta') == nil then
-        self.meta = {}
-    end
-    local parent_meta = getmetatable(self).meta
-    setmetatable(self.meta, {__index=parent_meta})
-    return self
-end
-function Model._resolve_fields(self)
-    -- for sugar: the hash table form of field defination
-    local fields = self.fields
-    if not fields then -- no fields to resolve, just return
-        return self
-    end
-    if fields[1]~=nil then -- array form
-        if self.field_order == nil then
-            local fo = {}
-            for i,v in ipairs(fields) do
-                fo[i] = v.name
-            end
-            self.field_order = fo
-        end
-    else --hash form, will be converted to array form
-        if self.field_order == nil then
-            local fo = {}
-            for name, v in pairs(fields) do
-                fo[#fo+1] = name
-            end
-            self.field_order = fo
-        end
-        local final_fields = {}
-        for name, field_maker in pairs(fields) do
-            final_fields[#final_fields+1] = field_maker{name=name}
-        end
-        self.fields = final_fields
-    end
-    return self
-end
+
 function Model._proxy_sql(self, method, params)
     local proxy = Manager:new{table_name=self.table_name, fields=self.fields, row_class=self.row_class}
     return proxy[method](proxy, params)

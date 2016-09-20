@@ -66,13 +66,11 @@ local views = {}
 return views
 ]], 
   models = [[local Model = require"resty.mvc.model"
-local Field = require"resty.mvc.field"
+local Field = require"resty.mvc.model_field"
 {*require_hooks*}
 
 local {*model_name*} = Model:class{table_name = "{*name*}", 
     fields = {
-        create_time = Field.DateTimeField{},
-        update_time = Field.DateTimeField{},
         {*fields*}
     }
 }
@@ -84,7 +82,7 @@ return {
   {*model_name*} = {*model_name*}, 
 }]], 
   forms = [[local Form = require"resty.mvc.form"
-local Field = require"resty.mvc.field"
+local Field = require"resty.mvc.form_field"
 local validator = require"resty.mvc.validator"
 local models = require"app.{*name*}.models"
 {*require_hooks*}
@@ -93,8 +91,6 @@ local {*model_name*} = models.{*model_name*}
 
 local {*model_name*}CreateForm = Form:class{model = {*model_name*}, 
     fields = {
-        create_time = Field.DateTimeField{},
-        update_time = Field.DateTimeField{},
         {*fields*}
     }, 
 }
@@ -106,8 +102,6 @@ local {*model_name*}CreateForm = Form:class{model = {*model_name*},
 
 local {*model_name*}UpdateForm = Form:class{model = {*model_name*}, 
     fields = {
-        create_time = Field.DateTimeField{},
-        update_time = Field.DateTimeField{},
         {*fields*}
     }, 
 }
@@ -171,7 +165,7 @@ local html_map = {
 
 local field_map = {
   string = "CharField", 
-  int = "IntergerField", 
+  int = "IntegerField", 
   text = "TextField", 
   float = "FloatField", 
   datetime = "DateTimeField", 

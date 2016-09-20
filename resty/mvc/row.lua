@@ -18,20 +18,37 @@ function Row.new(self, init)
     self.__index = self
     return setmetatable(init, self)
 end
+function Row.instance(cls, attrs)
+    -- attrs may be from db driver, try to use
+    -- `db_to_lua` if the field specified
+    local self = cls:new(attrs)
+    local fields = self.fields
+    for k,v in pairs(self) do
+        local f = fields[k]
+        if f and f.db_to_lua then
+            self[k] = f:db_to_lua(v)
+        end
+    end
+    return self
+end
 function Row.save(self)
     local valid_attrs = {}
     local all_errors = {}
     local errors, has_error;
-    for i, field in ipairs(self.fields) do
-        local value = rawget(self, field.name)
-        if value ~= nil then
+    local fields = self.fields
+    for name, value in pairs(self) do
+        local field = fields[name]
+        if field then
             value, errors = field:clean(value)
             if errors then
                 has_error = true
-                for i,v in ipairs(errors) do
+                for i, v in ipairs(errors) do
                     all_errors[#all_errors+1] = v
                 end
             else
+                if field.lua_to_db then
+                    value = field:lua_to_db(value)
+                end
                 valid_attrs[field.name] = value
             end
         end

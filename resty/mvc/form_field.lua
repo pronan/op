@@ -64,7 +64,7 @@ function Field.instance(cls, attrs)
         widget = widget:instance()
     end
     -- big different from Django: widget should be capable to refer to field
-    -- currently mainly for easy override of `choices` for widget of `Select` and `RadioSelect`
+    -- currently mainly for easy override of `choices` attribute of `Select` and `RadioSelect`
     widget.field = self 
     -- Let the widget know whether it should display as required.
     widget.is_required = self.required
@@ -86,7 +86,7 @@ end
 function Field.prepare_value(self, value)
     return value
 end
-function Field.to_lua(self, value)
+function Field.client_to_lua(self, value)
     return value
 end
 function Field.validate(self, value)
@@ -110,7 +110,7 @@ function Field.run_validators(self, value)
     end
 end
 function Field.clean(self, value)
-    local value, err = self:to_lua(value)
+    local value, err = self:client_to_lua(value)
     if value == nil and err ~= nil then
         return nil, {err}
     end
@@ -151,7 +151,7 @@ function CharField.instance(cls, attrs)
     end
     return self
 end
-function CharField.to_lua(self, value)
+function CharField.client_to_lua(self, value)
     if is_empty_value(value) then
         return ''
     end
@@ -183,7 +183,7 @@ function IntegerField.instance(cls, attrs)
     end
     return self
 end
-function IntegerField.to_lua(self, value)
+function IntegerField.client_to_lua(self, value)
     if is_empty_value(value) then
         return
     end
@@ -205,7 +205,7 @@ function IntegerField.widget_attrs(self, widget)
 end
 
 local FloatField = IntegerField:new{default_error_messages={invalid='Enter an number.'}}
-function FloatField.to_lua(self, value)
+function FloatField.client_to_lua(self, value)
     if is_empty_value(value) then
         return
     end
@@ -224,7 +224,7 @@ function FloatField.widget_attrs(self, widget)
 end
 
 local BaseTemporalField = Field:new{format_re=nil}
-function BaseTemporalField.to_lua(self, value)
+function BaseTemporalField.client_to_lua(self, value)
     if is_empty_value(value) then
         return
     end
@@ -259,7 +259,7 @@ local URLField = CharField:new{widget=Widget.URLInput}
 local TextareaField = CharField:new{widget=Widget.Textarea}
 
 local BooleanField = Field:new{widget=Widget.CheckboxInput}
-function BooleanField.to_lua(self, value)
+function BooleanField.client_to_lua(self, value)
     -- 这里的value是从widget的value_from_datadict传来的, 默认它只会传true或false
     -- 这里仍然检测是防止value_from_datadict被重写
     if not value or value == '' or value =='0' or value=='false' then
@@ -275,16 +275,7 @@ end
 
 local ChoiceField = Field:new{widget=Widget.Select, 
     default_error_messages={invalid_choice='%s is not one of the available choices.'},}
--- function ChoiceField.instance(cls, attrs)
---     local self = Field.instance(cls, attrs) 
---     self:set_choices(self.choices or {}) 
---     return self
--- end
--- function ChoiceField.set_choices(self, choices)
---     self.choices = choices
---     self.widget.choices = choices
--- end
-function ChoiceField.to_lua(self, value)
+function ChoiceField.client_to_lua(self, value)
     if is_empty_value(value) then
         return 
     end
@@ -319,12 +310,37 @@ function ChoiceField.valid_value(self, value)
     return false
 end
 
+local TypedChoiceField = ChoiceField:new{}
+function TypedChoiceField.instance(cls, attrs)
+    local self = cls:new(attrs)
+    self.coerce = self.coerce or function(self, value)return value end
+    if self.empty_value == nil then
+        self.empty_value = ''
+    end
+    return self
+end
+function TypedChoiceField._coerce(self, value)
+    -- Validate that the value can be coerced to the right type (if not empty).
+    if value == self.empty_value or is_empty_value(value) then
+        return self.empty_value
+    end
+    local value, errors = self:coerce(value)
+    return value, errors
+end
+function TypedChoiceField.clean(self, value)
+    local value, errors = ChoiceField.clean(self, value)
+    if value == nil then
+        return nil, errors
+    end
+    return self:_coerce(value)
+end
+
 local MultipleChoiceField = ChoiceField:new{widget = SelectMultiple, 
     default_error_messages = {
         invalid_choice='Select a valid choice. %s is not one of the available choices.',
         invalid_list='Enter a list of values.'}, 
 }
-function MultipleChoiceField.to_lua(self, value)
+function MultipleChoiceField.client_to_lua(self, value)
     -- 待定, reqargs将多选下拉框解析成的值是, 没选时直接忽略, 选1个的时候是字符串, 大于1个是table
     if not value then
         return {}

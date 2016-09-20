@@ -75,8 +75,9 @@ function m.profile(request)
     return response.Template(request, 'profile.html', {navbar='profile'})
 end
 function m.q(kwargs)
-    local ret, err = query("select * from t;")
-    return response.Plain(type(ret[2].dict)..repr(ret[2].dict))
+    local ret, err = query("select * from user;")
+    local u = ret[1]
+    return response.Plain(type(u.id)..repr(u.id))
 end
 local function ran(step)
     step = step or 10

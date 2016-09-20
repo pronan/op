@@ -21,7 +21,7 @@ local function make_file(fn, content)
 end
 
 local do_not_create = false
-local drop_existed_table = false
+local drop_existed_table = true
 local function simple_repr(s)
     if type(s)=='string' then
         s=string.format([["%s"]],s)
@@ -52,8 +52,20 @@ local function auto_models( ... )
                     fields[#fields+1] = 'update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
                 end
                 table_options[#table_options+1] = 'DEFAULT CHARSET='..meta.charset
-                for i, field in ipairs(model.fields) do
-                    local db_type = field.db_type
+                local lookup = {
+                        CharField = 'VARCHAR',
+                        TextField = 'TEXT',
+                        IntegerField = 'INT',
+                        FloatField = 'FLOAT',
+                        DateField = 'DATE',
+                        DateTimeField = 'DATETIME',
+                        TIMEField = 'TIME',
+                        FileField = 'VARCHAR',
+                        --ForeignKey = ForeignKey,
+                    }
+                -- loger(model)
+                for name, field in pairs(model.fields) do
+                    local db_type = lookup[field:get_internal_type()] or 'VARCHAR'
                     local field_string = nil
                     if field.name == 'create_time' and meta.auto_create_time then
                         -- pass this field because it is already created above
@@ -119,6 +131,7 @@ local function auto_models( ... )
     %s, 
     %s
 )%s;]], model.table_name, fields, field_options, table_options)
+                -- loger(table_create_defination)
                 if do_not_create then
                     -- loger(table_create_defination)
                 else
