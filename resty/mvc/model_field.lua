@@ -80,7 +80,7 @@ function Field.instance(cls, attrs)
     -- widget stuff
     local self = cls:new(attrs)
     self.help_text = self.help_text or ''
-    self.choices = self.choices or {}
+    self.choices = self.choices -- or {}
     self.validators = list(self.default_validators, self.validators)
     self.primary_key = self.primary_key or false
     self.blank = self.blank or false

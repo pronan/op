@@ -82,6 +82,7 @@ return {
   {*model_name*} = {*model_name*}, 
 }]], 
   forms = [[local Form = require"resty.mvc.form"
+local widget = require"resty.mvc.widget"
 local Field = require"resty.mvc.form_field"
 local validator = require"resty.mvc.validator"
 local models = require"app.{*name*}.models"
