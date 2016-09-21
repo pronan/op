@@ -142,7 +142,7 @@ function Select.render(self, name, value, attrs, choices)
 end
 function Select.render_options(self, choices, selected_choices)
     local output = {}
-    for i,v in ipairs(list(choices, self.choices)) do
+    for i,v in ipairs(list(choices, self.field.choices)) do
         local option_value, option_label = v[1], v[2]
         if type(option_label) == 'table' then
             table_insert(output, string_format('<optgroup label="%s">', option_value))

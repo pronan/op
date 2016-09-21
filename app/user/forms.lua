@@ -12,7 +12,7 @@ local UserCreateForm = Form:class{model = User,
         username = Field.CharField{maxlen=50},
         password = Field.CharField{maxlen=50},
         age = Field.IntegerField{},
-        class = Field.ChoiceField{maxlen=50, widget=widget.RadioSelect, choices={{'ty', '共青团员'}, {'dy', '中共党员'}},}
+        class = Field.ChoiceField{maxlen=50, widget=widget.Select, choices={{'ty', '共青团员'}, {'dy', '中共党员'}},}
     }, 
 }
 -- function UserCreateForm.clean_foobar(self, value)

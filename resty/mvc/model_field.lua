@@ -212,7 +212,7 @@ function Field.validate(self, value, model_instance)
                 return
             end
         end
-        return self.error_messages.invalid_choice
+        return string_format(self.error_messages.invalid_choice, value)
     end
     if not self.null and value == nil then
         return self.error_messages.null
