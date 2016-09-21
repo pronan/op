@@ -142,7 +142,8 @@ function Select.render(self, name, value, attrs, choices)
 end
 function Select.render_options(self, choices, selected_choices)
     local output = {}
-    for i,v in ipairs(list(choices, self.field.choices)) do
+    local choices_from_field = self.field and self.field.choices or {}
+    for i,v in ipairs(list(choices_from_field, self.choices, choices)) do
         local option_value, option_label = v[1], v[2]
         if type(option_label) == 'table' then
             table_insert(output, string_format('<optgroup label="%s">', option_value))
@@ -175,7 +176,9 @@ function Select.render_option(self, selected_choices, option_value, option_label
         if not self.allow_multiple_selected then
             -- why remove?
             -- Only allow for a single selection.
+            -- loger('before:', selected_choices)
             table_remove(selected_choices, j)
+            -- loger('after:', selected_choices)
         end
     end
     return string_format('<option value="%s"%s>%s</option>', 
@@ -309,7 +312,8 @@ local RendererMixin = {renderer=nil, _empty_value=nil}
 function RendererMixin.get_renderer(self, name, value, attrs, choices)
     -- Returns an instance of the renderer.
     -- big different from Django: use `self.field.choices` instead of `self.choices`
-    choices = list(choices, self.field.choices)
+    local choices_from_field = self.field and self.field.choices or {}
+    choices = list(choices_from_field, self.choices, choices)
     if value == nil then
         value = self._empty_value
     end

@@ -29,7 +29,6 @@ local UserUpdateForm = Form:class{model = User,
         class = Field.ChoiceField{maxlen=50, choices={{'ty', '共青团员'}, {'dy', '中共党员'}},}
     }, 
 }
-loger('UserUpdateForm', UserUpdateForm)
 -- function UserUpdateForm.clean_foobar(self, value)
 --     -- define your form method here like this
 --     return value
