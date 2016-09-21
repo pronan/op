@@ -5,7 +5,7 @@
   {% if object_list[1] then %}
     <tr>
       {%for k, v in pairs(object_list[1]) do%}
-        <th>{{k}}</th>
+      <th>{{k}}</th>
       {% end%}
       <th>EDIT</th>
       <th>DELETE</th>
@@ -15,8 +15,8 @@
       {%for k, v in pairs(object) do%}
       <td> {{v}} </td>
       {% end%}
-      <td><a href="/user/update/{{object.id}}" >edit</a></td>
-      <td><a href="/user/delete/{{object.id}}" >delete</a></td>
+      <td><a href="/{*name*}/update/{{object.id}}" >edit</a></td>
+      <td><a href="/{*name*}/delete/{{object.id}}" >delete</a></td>
     </tr>
     {% end%}
   {% else%}

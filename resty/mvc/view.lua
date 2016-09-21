@@ -251,7 +251,7 @@ function DeleteView.get(self, request)
     return response.Redirect(self:get_success_url())
 end
 function DeleteView.get_success_url(self)
-    return string.format('/%s/list', self.model.table_name)
+    return string.format('/%s/list/1', self.model.table_name)
 end
 
 local ListView = View:new{page_size=10, page_kwarg='page', order=false}

@@ -8,7 +8,7 @@
 -- SELECT "jiangan_hetong"."jtzycyqk", "accounts_user"."id", "accounts_user"."password" FROM "jiangan_hetong" INNER JOIN "accounts_user" ON ("jiangan_hetong"."creater_id" = "accounts_user"."id")
 -- WHERE ("jiangan_hetong"."check_status" = 1 AND "jiangan_hetong"."config" = 2 AND "jiangan_hetong"."bscj" > -1.0) ORDER BY "jiangan_hetong"."bkgw" ASC, "jiangan_hetong"."bscj" DESC
 local validator = require"resty.mvc.validator"
-local FormField = require"resty.mvc.form_field"
+local form_field = require"resty.mvc.form_field"
 local utils = require"resty.mvc.utils"
 local string_strip = utils.string_strip
 local is_empty_value = utils.is_empty_value
@@ -196,13 +196,11 @@ function Field.validate(self, value, model_instance)
         return
     end
     if self.choices and not is_empty_value(value) then
-        for i = 1, #self.choices do
-            local choice = self.choices[i]
+        for i, choice in ipairs(self.choices) do
             local option_key, option_value = choice[1], choice[2]
             if type(option_value) == 'table' then
                 -- This is an optgroup, so look inside the group for options.
-                for i = 1, #option_value do
-                    local option = option_value[i]
+                for i, option in ipairs(option_value) do
                     local optgroup_key, optgroup_value = option[1], option[2]
                     if value == optgroup_key then
                         return
@@ -241,15 +239,10 @@ end
 function Field.is_unique(self)
     return self.unique or self.primary_key
 end
-function Field.contribute_to_class(self, cls, name, virtual_only)
-    virtual_only = virtual_only or false
+function Field.contribute_to_class(self, cls, name)
     self:set_attributes_from_name(name)
     self.model = cls
-    if virtual_only then
-        cls._meta.add_field(self, true)
-    else
-        cls._meta.add_field(self)
-    end
+    cls._meta.add_field(self)
     if self.choices then
         cls[string_format('get_%s_display', self.name)] = curry(cls._get_FIELD_display, {field=self})   
     end
@@ -308,9 +301,6 @@ local compare_lookup_table = {
     lt = true,
     lte = true,}
 function Field.get_prep_lookup(self, lookup_type, value)
-    if value._prepare then
-        return value:_prepare(self)
-    end
     if string_lookup_table[lookup_type] then
         return value
     elseif compare_lookup_table[lookup_type]  then
@@ -325,7 +315,7 @@ function Field.get_prep_lookup(self, lookup_type, value)
     return self:lua_to_db(value)
 end
 function Field.has_default(self)
-    return self.default ~= NOT_PROVIDED
+    return self.default ~= nil
 end
 function Field.get_default(self)
     if self:has_default() then
@@ -351,7 +341,7 @@ function Field.get_choices(self, include_blank, blank_choice, limit_choices_to)
     end
     local blank_defined = false
     local choices = list(self.choices)
-    local named_groups = next(choices)~=nil and type(choices[0][1])=='table'
+    local named_groups = next(choices)~=nil and type(choices[1][2])=='table'
     if not named_groups then
         for i = 1, #choices do
             local val = choices[i][1]
@@ -387,8 +377,7 @@ end
 function Field.flatchoices(self)
     -- """Flattened version of choices tuple."""
     local flat = {}
-    for i = 1, #self.choices do
-        local e = self.choices[i]
+    for i, e in ipairs(self.choices) do
         local choice, value = e[1], e[2]
         if type(value) == 'table' then
             list_extend(flat, value)
@@ -412,8 +401,10 @@ local valid_typed_kwargs = {
     help_text = true,
     error_messages = true,
     show_hidden_initial = true,}
-function Field.formfield(self, form_class, choices_form_class, kwargs)
-    -- Returns a form_Field instance for this database Field.
+function Field.formfield(self, kwargs)
+    local form_class = kwargs.form_class 
+    local choices_form_class = kwargs.choices_form_class
+    -- Returns a form_field instance for this database Field.
     local defaults = {required=not self.blank, label=self.verbose_name, help_text=self.help_text}
     if self:has_default() then
         if type(self.default) == 'function' then
@@ -427,14 +418,15 @@ function Field.formfield(self, form_class, choices_form_class, kwargs)
         -- Fields with choices get special treatment.
         local include_blank = self.blank or not (self:has_default() or kwargs.initial~=nil)
         defaults.choices = self:get_choices(include_blank)
-        defaults.coerce = self.client_to_lua
+        -- defaults.coerce = self.client_to_lua
         if self.null then
             defaults.empty_value = nil
         end
         if choices_form_class ~= nil then
             form_class = choices_form_class
         else
-            form_class = form_field.TypedChoiceField
+            -- form_class = form_field.TypedChoiceField
+            form_class = form_field.ChoiceField
         end
         -- Many of the subclass-specific formfield arguments (min_value,
         -- max_value) don't apply for choice fields, so be sure to only pass
@@ -478,12 +470,13 @@ function AutoField.get_internal_type(self)
 end
 function AutoField.client_to_lua(self, value)
     if value == nil then
-        return value
+        return nil
     end
     value = tonumber(value)
     if not value or math_floor(value)~=value then
         return nil, self.error_messages.invalid
     end
+    return value
 end
 function AutoField.validate(self, value, model_instance)
 
@@ -493,7 +486,7 @@ function AutoField.lua_to_db(self, value)
     if value == nil then
         return nil
     end
-    return tonumber(value)
+    return math_floor(tonumber(value))
 end
 function AutoField.contribute_to_class(self, cls, name, kwargs)
     assert(not cls._meta.has_auto_field, "A model can't have more than one AutoField.")
@@ -580,8 +573,7 @@ local CharField = Field:new{
 }
 function CharField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
-    local v = self.validators
-    v[#v+1] = validator.maxlen(self.maxlen)
+    self.validators[#self.validators+1] = validator.maxlen(self.maxlen)
     return self
 end
 function CharField.check(self, kwargs)
@@ -592,7 +584,7 @@ end
 function CharField._check_max_length_attribute(self, kwargs)
     if self.maxlen == nil then
         return "CharFields must define a 'maxlen' attribute."
-    elseif not type(self.max_length) == 'number' or self.max_length <= 0 then
+    elseif not type(self.maxlen) == 'number' or self.maxlen <= 0 then
         return "'maxlen' must be a positive integer."
     end
 end
@@ -610,7 +602,7 @@ function CharField.lua_to_db(self, value)
     return self:client_to_lua(value)
 end
 function CharField.formfield(self, kwargs)
-    -- Passing max_length to forms.CharField means that the value's length
+    -- Passing maxlen to form_field.CharField means that the value's length
     -- will be validated twice. This is considered acceptable since we want
     -- the value in the form field (to pass into widget for example).
     local defaults = {maxlen = self.maxlen}
@@ -637,10 +629,11 @@ function DateTimeCheckMixin._check_mutually_exclusive_options(self)
     end
 end
 function DateTimeCheckMixin._check_fix_default_value(self)
-    return {}
+    return 
 end
 
 local DateField = Field:new{
+    format_re = [[^(19|20)\d\d-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$]], 
     empty_strings_allowed = false, 
     default_error_messages = {
         invalid="please use YYYY-MM-DD format.",
@@ -662,20 +655,9 @@ end
 function DateField.get_internal_type(self)
     return "DateField"
 end
-function DateField.client_to_lua(self, value)
-    if value == nil then
-        return nil
-    end
-    value = string_strip(value)
-    local res, err = ngx_re_match(value, [[^\d{4}-\d{1,2}-\d{1,2}$]], 'jo')
-    if not res then
-        return nil, self.error_messages.invalid
-    end
-    return value
-end
 function DateField.pre_save(self, model_instance, add)
     if self.auto_now or (self.auto_now_add and add) then
-        value = ngx.today()
+        local value = ngx.today()
         model_instance[self.attname] = value
         return value
     else
@@ -691,6 +673,17 @@ function DateField.contribute_to_class(self, cls, name, kwargs)
             cls._get_next_or_previous_by_FIELD, {field=self, is_next=false})            
     end
 end
+function DateField.client_to_lua(self, value)
+    if value == nil then
+        return nil
+    end
+    value = string_strip(value)
+    local res, err = ngx_re_match(value, self.format_re, 'jo')
+    if not res then
+        return nil, self.error_messages.invalid
+    end
+    return value
+end
 function DateField.lua_to_db(self, value)
     value = Field.lua_to_db(self, value)
     return self:client_to_lua(value)
@@ -704,11 +697,13 @@ function DateField.value_to_string(self, obj)
     end
 end
 function DateField.formfield(self, kwargs)
-    local defaults = {form_class=forms.DateField}
+    local defaults = {form_class=form_field.DateField}
     return Field.formfield(self, dict_update(defaults, kwargs))
 end
 
+
 local DateTimeField = DateField:new{
+    format_re = [[^(19|20)\d\d-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01]) [012]\d:[0-5]\d:[0-5]\d$]], 
     empty_strings_allowed = false, 
     default_error_messages = {
         invalid="please use YYYY-MM-DD HH:MM:SS format.",
@@ -727,7 +722,7 @@ function DateTimeField.client_to_lua(self, value)
         return nil
     end
     value = string_strip(value)
-    local res, err = ngx_re_match(value, [[^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$]], 'jo')
+    local res, err = ngx_re_match(value, self.format_re, 'jo')
     if not res then
         return nil, self.error_messages.invalid
     end
@@ -741,15 +736,16 @@ function DateTimeField.pre_save(self, model_instance, add)
     else
         return DateField.pre_save(self, model_instance, add)
     end
+end
 -- contribute_to_class is inherited from DateField, it registers
 -- get_next_by_FOO and get_prev_by_FOO
 
 -- get_prep_lookup is inherited from DateField
 
+function DateTimeField.lua_to_db(self, value)
+    local value = Field.lua_to_db(self, value)
+    return self:client_to_lua(value)
 end
--- function DateTimeField.lua_to_db(self, value)
-
--- end
 function DateTimeField.value_to_string(self, obj)
     local val = self:value_from_object(obj)
     if val == nil then
@@ -759,109 +755,13 @@ function DateTimeField.value_to_string(self, obj)
     end
 end
 function DateTimeField.formfield(self, kwargs)
-    local defaults = {form_class = forms.DateTimeField}
+    local defaults = {form_class = form_field.DateTimeField}
     return DateField.formfield(self, dict_update(defaults, kwargs))
 end
 
 
-local EmailField = CharField:new{
-    default_validators = {validator.validate_email}, 
-    description = "Email address" , 
-}
-function EmailField.instance(self, kwargs)
-    -- max_length=254 to be compliant with RFCs 3696 and 5321
-    kwargs.max_length = kwargs.max_length or 254
-    return CharField.instance(self, kwargs)
-end
-function EmailField.formfield(self, kwargs)
-    -- As with CharField, this will cause email validation to be performed twice.
-    local defaults = { form_class = forms.EmailField}
-    return CharField.formfield(self, dict_update(defaults, kwargs))
-end
-
-
-local FloatField = Field:new{
-    empty_strings_allowed = false, 
-    default_error_messages = {
-        invalid = "value must be a float.",
-    }, 
-    description = "Floating point number", 
-}
-function FloatField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
-    if value == nil then
-        return nil
-    end
-    return tonumber(value)
-end
-function FloatField.get_internal_type(self)
-    return "FloatField"
-end
-function FloatField.client_to_lua(self, value)
-    if value == nil then
-        return nil
-    end
-    value = tonumber(value)
-    if not value then
-        return nil, self.error_messages.invalid
-    end
-    return value
-end
-function FloatField.formfield(self, kwargs)
-    local defaults = {form_class=forms.FloatField}
-    return Field.formfield(self, dict_update(defaults, kwargs))
-end
-
-
-local IntegerField = Field:new{
-    empty_strings_allowed = false, 
-    default_error_messages = {
-        invalid = "value must be an integer.",
-    }, 
-    description = "Integer", 
-}
-function IntegerField.check(self, kwargs)
-    local errors = Field.check(self, kwargs)
-    errors[#errors+1] = self:_check_max_length_warning()
-    return errors
-end
-function IntegerField._check_max_length_warning(self)
-    if self.maxlen ~= nil then
-        return "'maxlen' is ignored when used with IntegerField"
-    end
-end
-function IntegerField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
-    if value == nil then
-        return nil
-    end
-    return math_floor(tonumber(value))
-end
-function IntegerField.get_prep_lookup(self, lookup_type, value)
-    if ((lookup_type == 'gte' or lookup_type == 'lt') and type(value) =='number') then
-        value = math_floor(value)
-    end
-    return Field.get_prep_lookup(self, lookup_type, value)
-end
-function IntegerField.get_internal_type(self)
-    return "IntegerField"
-end
-function IntegerField.client_to_lua(self, value)
-    if value == nil then
-        return nil
-    end
-    value = tonumber(value)
-    if not value or math_floor(value)~=value then
-        return nil, self.error_messages.invalid
-    end
-    return value
-end
-function IntegerField.formfield(self, kwargs)
-    local defaults = {form_class=forms.IntegerField}
-    return Field.formfield(self, dict_update(defaults, kwargs))
-end
-
 local TimeField = Field:new{
+    format_re = [[^[012]\d:[0-5]\d:[0-5]\d$]], 
     empty_strings_allowed = false, 
     default_error_messages = {
         invalid= "please use 00:00:00",
@@ -885,11 +785,15 @@ function TimeField.client_to_lua(self, value)
         return nil
     end
     value = string_strip(value)
-    local res, err = ngx_re_match(value, [[^\d{1,2}:\d{1,2}:\d{1,2}$]], 'jo')
+    local res, err = ngx_re_match(value, self.format_re, 'jo')
     if not res then
         return nil, self.error_messages.invalid
     end
     return value
+end
+function TimeField.lua_to_db(self, value)
+    local value = Field.lua_to_db(self, value)
+    return self:client_to_lua(value)
 end
 function TimeField.pre_save(self, model_instance, add)
     if self.auto_now or (self.auto_now_add and add) then
@@ -900,10 +804,6 @@ function TimeField.pre_save(self, model_instance, add)
         return Field.pre_save(self, model_instance, add)
     end
 end
-function TimeField.lua_to_db(self, value)
-    local value = Field.lua_to_db(self, value)
-    return self:client_to_lua(value)
-end
 function TimeField.value_to_string(self, obj)
     local val = self:value_from_object(obj)
     if val == nil then
@@ -913,9 +813,108 @@ function TimeField.value_to_string(self, obj)
     end
 end
 function TimeField.formfield(self, kwargs)
-    local defaults = {form_class=forms.TimeField}
+    local defaults = {form_class=form_field.TimeField}
     return Field.formfield(self, dict_update(defaults, kwargs))
 end
+
+
+local EmailField = CharField:new{
+    default_validators = {validator.validate_email}, 
+    description = "Email address" , 
+}
+function EmailField.instance(self, kwargs)
+    -- maxlen=254 to be compliant with RFCs 3696 and 5321
+    kwargs.maxlen = kwargs.maxlen or 254
+    return CharField.instance(self, kwargs)
+end
+function EmailField.formfield(self, kwargs)
+    -- As with CharField, this will cause email validation to be performed twice.
+    local defaults = { form_class = form_field.EmailField}
+    return CharField.formfield(self, dict_update(defaults, kwargs))
+end
+
+
+local IntegerField = Field:new{
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid = "value must be an integer.",
+    }, 
+    description = "Integer", 
+}
+function IntegerField.check(self, kwargs)
+    local errors = Field.check(self, kwargs)
+    errors[#errors+1] = self:_check_max_length_warning()
+    return errors
+end
+function IntegerField._check_max_length_warning(self)
+    if self.maxlen ~= nil then
+        return "'maxlen' is ignored when used with IntegerField"
+    end
+end
+function IntegerField.client_to_lua(self, value)
+    if value == nil then
+        return nil
+    end
+    value = tonumber(value)
+    if not value or math_floor(value)~=value then
+        return nil, self.error_messages.invalid
+    end
+    return value
+end
+function IntegerField.lua_to_db(self, value)
+    value = Field.lua_to_db(self, value)
+    if value == nil then
+        return nil
+    end
+    return math_floor(tonumber(value))
+end
+function IntegerField.get_prep_lookup(self, lookup_type, value)
+    if ((lookup_type == 'gte' or lookup_type == 'lt') and type(value) =='number') then
+        value = math_floor(value)
+    end
+    return Field.get_prep_lookup(self, lookup_type, value)
+end
+function IntegerField.get_internal_type(self)
+    return "IntegerField"
+end
+function IntegerField.formfield(self, kwargs)
+    local defaults = {form_class=form_field.IntegerField}
+    return Field.formfield(self, dict_update(defaults, kwargs))
+end
+
+
+local FloatField = Field:new{
+    empty_strings_allowed = false, 
+    default_error_messages = {
+        invalid = "value must be a float.",
+    }, 
+    description = "Floating point number", 
+}
+function FloatField.client_to_lua(self, value)
+    if value == nil then
+        return nil
+    end
+    value = tonumber(value)
+    if not value then
+        return nil, self.error_messages.invalid
+    end
+    return value
+end
+function FloatField.lua_to_db(self, value)
+    value = Field.lua_to_db(self, value)
+    if value == nil then
+        return nil
+    end
+    return tonumber(value)
+end
+function FloatField.get_internal_type(self)
+    return "FloatField"
+end
+function FloatField.formfield(self, kwargs)
+    local defaults = {form_class=form_field.FloatField}
+    return Field.formfield(self, dict_update(defaults, kwargs))
+end
+
 
 local ForeignKey = Field:new{template='<input %s />', type='file', db_type='FOREIGNKEY',
                             on_delete=0, on_update=0}
@@ -934,13 +933,17 @@ function ForeignKey.init(cls, attrs)
 end
 
 return{
+    AutoField = AutoField, 
+    BooleanField = BooleanField, 
     CharField = CharField,
-    TextField = TextField,
+    -- TextField = TextField,
     IntegerField = IntegerField,
     FloatField = FloatField,
+
     TimeField = TimeField,
     DateTimeField = DateTimeField,
     DateField = DateField,
-    FileField = FileField,
+
+    -- FileField = FileField,
     ForeignKey = ForeignKey,
 }

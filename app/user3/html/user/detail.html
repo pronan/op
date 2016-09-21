@@ -2,13 +2,13 @@
 
 {-content-}
 <table class="table">
-{% for k,v in pairs(object) do %}
+{%for k,v in pairs(object) do%}
   <tr>
     <th>{{k}}</th>
     <td>{{v}}</td>
   </tr>
-{% end %}
+{% end%}
 </table>
-<a href="/user/update/{{object.id}}" >edit</a>
+<a href="/{*name*}/update/{{object.id}}" >edit</a>
 
 {-content-}

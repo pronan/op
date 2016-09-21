@@ -406,18 +406,21 @@ end
 
 return{
     CharField = CharField, 
-    IntegerField = IntegerField, 
     TextField = TextField, 
     PasswordField = PasswordField, 
+
+    IntegerField = IntegerField, 
+    FloatField = FloatField, 
     
     DateField = DateField, 
     DateTimeField = DateTimeField, 
     TimeField = TimeField, 
-    HiddenField = HiddenField, 
-    FloatField = FloatField, 
+    
     ChoiceField = ChoiceField, 
     BooleanField = BooleanField, 
 
+    HiddenField = HiddenField, 
+    
     FileField = FileField,  -- todo
     MultipleChoiceField = MultipleChoiceField, -- todo
     ForeignKey = ForeignKey, -- to do
