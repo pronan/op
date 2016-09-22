@@ -45,12 +45,12 @@ local function auto_models( ... )
                 if meta.auto_id then
                     fields[#fields+1] = 'id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE'
                 end
-                if meta.auto_create_time then
-                    fields[#fields+1] = 'create_time DATETIME  DEFAULT CURRENT_TIMESTAMP'
-                end
-                if meta.auto_update_time then
-                    fields[#fields+1] = 'update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-                end
+                -- if meta.auto_create_time then
+                --     fields[#fields+1] = 'create_time DATETIME  DEFAULT CURRENT_TIMESTAMP'
+                -- end
+                -- if meta.auto_update_time then
+                --     fields[#fields+1] = 'update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+                -- end
                 table_options[#table_options+1] = 'DEFAULT CHARSET='..meta.charset
                 local lookup = {
                         CharField = 'VARCHAR',
@@ -67,11 +67,7 @@ local function auto_models( ... )
                 for name, field in pairs(model.fields) do
                     local db_type = lookup[field:get_internal_type()] or 'VARCHAR'
                     local field_string = nil
-                    if field.name == 'create_time' and meta.auto_create_time then
-                        -- pass this field because it is already created above
-                    elseif field.name == 'update_time' and meta.auto_update_time then
-                        -- pass this field because it is already created above
-                    elseif db_type =='FOREIGNKEY' then
+                    if db_type =='FOREIGNKEY' then
                         if not field_options.foreign_key then
                             field_options.foreign_key = {}
                         end

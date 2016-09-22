@@ -23,7 +23,7 @@ function Row.instance(cls, attrs)
     -- `db_to_lua` if the field specified
     local self = cls:new(attrs)
     local fields = self.fields
-    for k,v in pairs(self) do
+    for k, v in pairs(self) do
         local f = fields[k]
         if f and f.db_to_lua then
             self[k] = f:db_to_lua(v)

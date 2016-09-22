@@ -60,10 +60,10 @@ end
 function Manager.to_sql(self)
     if self._update_string then
         return string_format('UPDATE %s SET %s%s;', self.table_name, self._update_string,
-            self._where_string and ' WHERE '..self._where_string or self._where and ' WHERE '.._to_and(self._where) or '')
+            self._where_string and ' WHERE '..self._where_string or self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
     elseif self._update then
-        return string_format('UPDATE %s SET %s%s;', self.table_name, _to_kwarg_string(self._update),
-            self._where_string and ' WHERE '..self._where_string or self._where and ' WHERE '.._to_and(self._where) or '')
+        return string_format('UPDATE %s SET %s%s;', self.table_name, _to_kwarg_string(self._update, self.table_name),
+            self._where_string and ' WHERE '..self._where_string or self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
     elseif self._create_string then
         -- string form only apply to Mysql
         return string_format('INSERT INTO %s SET %s;', self.table_name, self._create_string)
@@ -77,24 +77,24 @@ function Manager.to_sql(self)
         return string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', '))
     -- delete always need WHERE clause in case truncate table    
     elseif self._delete_string then 
-        return string_format('DELETE FROM %s WHERE %s;', self.table_name, self._delete_string)
+        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, self._delete_string)
     elseif self._delete then 
-        return string_format('DELETE FROM %s WHERE %s;', self.table_name, _to_and(self._delete))
+        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, _to_and(self._delete, self.table_name))
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     else 
         self.is_select = true --for the `exec` method
-        return string_format('SELECT %s FROM %s%s%s%s%s%s;', 
+        return string_format('SELECT %s FROM `%s`%s%s%s%s%s;', 
             self._select_string or self._select and table_concat(self._select, ", ") or '*',  self.table_name, 
-            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '.._to_and(self._where)               or '', 
+            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '.._to_and(self._where, self.table_name)               or '', 
             self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '..table_concat(self._group, ", ") or '', 
-            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '.._to_and(self._having)             or '', 
+            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '.._to_and(self._having, self.table_name)             or '', 
             self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '..table_concat(self._order, ", ") or '', 
             self._page_string   and ' LIMIT '..self._page_string      or self._page   and ' LIMIT '..table_concat(self._page, ", ")     or '')
     end
 end
 -- function Manager.get_where_args(self)
 --     if self._where then 
---         return ' WHERE '.._to_and(self._where)
+--         return ' WHERE '.._to_and(self._where, self.table_name)
 --     elseif self._where_string then
 --         return ' WHERE '..self._where_string
 --     else
