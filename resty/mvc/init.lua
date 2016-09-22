@@ -16,14 +16,26 @@ local function _to_string(v)
     end
 end
 local function _get_name(name, table_name)
-    return string_format("'%s'.'%s'", table_name, name)
+    if table_name then
+        return string_format("`%s`.`%s`", table_name, name)
+    else
+        return "`"..name.."`"
+    end
 end
 M._to_string = _to_string
-function M._to_kwarg_string(tbl, tn)
-    -- convert table like {age=11, name='Tom'} to string `'table'.'age' = 11, 'table'.'name' = 'Tom'`
+function M._to_arg_string(tbl, table_name)
+    -- convert table like {'age', 'name'} to string: `table`.`age`, `table`.`name`
+    local res = {}
+    for i, v in ipairs(tbl) do
+        res[#res+1] = _get_name(v, table_name)
+    end
+    return table_concat(res, ", ")
+end
+function M._to_kwarg_string(tbl, table_name)
+    -- convert table like {age=11, name='Tom'} to string: `table`.`age` = 11, `table`.`name` = 'Tom'
     local res = {}
     for k, v in pairs(tbl) do
-        res[#res+1] = string_format('%s = %s', _get_name(k, tn), _to_string(v))
+        res[#res+1] = string_format('%s = %s', _get_name(k, table_name), _to_string(v))
     end
     return table_concat(res, ", ")
 end

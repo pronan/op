@@ -57,7 +57,7 @@ function Row.save(self)
         return nil, all_errors
     end
     if rawget(self, 'id') then
-        local stm  = string_format('UPDATE %s SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs), self.id)
+        local stm  = string_format('UPDATE %s SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs, self.table_name), self.id)
         local res, err = query(stm)
         if res then
             return self

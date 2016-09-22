@@ -275,6 +275,15 @@ end
 
 local ChoiceField = Field:new{widget=Widget.Select, 
     default_error_messages={invalid_choice='%s is not one of the available choices.'},}
+function ChoiceField.instance(cls, attrs)
+    attrs.choices = attrs.choices or {}
+    assert(type(attrs.choices) == 'table', "`choices` must be a table")
+    for i, choice in ipairs(attrs.choices) do
+        assert(type(choice) == 'table', 'the type of `choices` member must be table') 
+        assert(#choice == 2, 'the length of `choices` member must be 2')
+    end
+    return Field.instance(cls, attrs)
+end
 function ChoiceField.client_to_lua(self, value)
     if is_empty_value(value) then
         return 
@@ -308,31 +317,6 @@ function ChoiceField.valid_value(self, value)
         end
     end
     return false
-end
-
-local TypedChoiceField = ChoiceField:new{}
-function TypedChoiceField.instance(cls, attrs)
-    local self = cls:new(attrs)
-    self.coerce = self.coerce or function(self, value)return value end
-    if self.empty_value == nil then
-        self.empty_value = ''
-    end
-    return self
-end
-function TypedChoiceField._coerce(self, value)
-    -- Validate that the value can be coerced to the right type (if not empty).
-    if value == self.empty_value or is_empty_value(value) then
-        return self.empty_value
-    end
-    local value, errors = self:coerce(value)
-    return value, errors
-end
-function TypedChoiceField.clean(self, value)
-    local value, errors = ChoiceField.clean(self, value)
-    if value == nil then
-        return nil, errors
-    end
-    return self:_coerce(value)
 end
 
 local MultipleChoiceField = ChoiceField:new{widget = SelectMultiple, 
@@ -389,18 +373,17 @@ function FileField.clean(self, value)
     return value
 end
 
-local ForeignKey = Field:new{template='<input %s />', type='file', db_type='FOREIGNKEY', 
-                            on_delete=0, on_update=0}
+local ForeignKey = IntegerField:new{}
 function ForeignKey.instance(cls, attrs)
-    local self = cls:new(attrs)
+    local self = IntegerField.instance(cls, attrs)
     self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
-    local e = self.reference
-    assert(e.table_name and e.fields, 'It seems that you didnot provide a model')
-    self.id = self.id_prefix..self.name
-    self.label = self.label or self[2] or self.name
-    self.label_html = string_format('<label for="%s">%s%s</label>', self.id, 
-        self.label, self.label_suffix or '')
-    self.validators = self.validators or {}
+    local model = self.reference
+    assert(model.table_name and model.fields, 'It seems that you didnot provide a model')
+    -- local choices = {}
+    -- for i, e in ipairs(model:all()) do
+    --     choices[#choices+1] = {e.id, e.id}
+    -- end
+    -- self.choices = choices
     return self
 end
 

@@ -61,7 +61,7 @@ local function auto_models( ... )
                         DateTimeField = 'DATETIME',
                         TIMEField = 'TIME',
                         FileField = 'VARCHAR',
-                        --ForeignKey = ForeignKey,
+                        ForeignKey = 'FOREIGNKEY',
                     }
                 -- loger(model)
                 for name, field in pairs(model.fields) do

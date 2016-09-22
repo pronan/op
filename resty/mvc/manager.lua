@@ -2,6 +2,7 @@ local query = require"resty.mvc.query".single
 local Row = require"resty.mvc.row"
 local _to_string = require"resty.mvc.init"._to_string
 local _to_kwarg_string = require"resty.mvc.init"._to_kwarg_string
+local _to_arg_string = require"resty.mvc.init"._to_arg_string
 local _to_and = require"resty.mvc"._to_and
 local rawget = rawget
 local setmetatable = setmetatable
@@ -45,36 +46,32 @@ function Manager.exec_raw(self)
     return query(self:to_sql())
 end
 function Manager.exec(self)
-    local res, err = query(self:to_sql())
+    local statement = self:to_sql()
+    local res, err = query(statement)
     if not res then
         return nil, err
     end
     if self.is_select and not(self._group or self._group_string or self._having or self._having_string) then
         -- none-group SELECT clause, wrap the results
         for i, attrs in ipairs(res) do
-            res[i] = self.row_class:new(attrs)
+            res[i] = self.row_class:instance(attrs)
         end
     end
     return res
 end
 function Manager.to_sql(self)
     if self._update_string then
-        return string_format('UPDATE %s SET %s%s;', self.table_name, self._update_string,
-            self._where_string and ' WHERE '..self._where_string or self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
+        return string_format('UPDATE `%s` SET %s%s;', self.table_name, self._update_string,
+            self._where_string and ' WHERE '..self._where_string or 
+            self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
     elseif self._update then
-        return string_format('UPDATE %s SET %s%s;', self.table_name, _to_kwarg_string(self._update, self.table_name),
-            self._where_string and ' WHERE '..self._where_string or self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
+        return string_format('UPDATE `%s` SET %s%s;', self.table_name, _to_kwarg_string(self._update, self.table_name),
+            self._where_string and ' WHERE '..self._where_string or 
+            self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
     elseif self._create_string then
-        -- string form only apply to Mysql
-        return string_format('INSERT INTO %s SET %s;', self.table_name, self._create_string)
+        return string_format('INSERT INTO `%s` SET %s;', self.table_name, self._create_string)
     elseif self._create then
-        -- use the standard form for Postgresql
-        local cols, vals = {}, {}
-        for k, v in pairs(self._create) do
-            cols[#cols+1] = k
-            vals[#vals+1] = _to_string(v)
-        end
-        return string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', '))
+        return string_format('INSERT INTO `%s` SET %s;', self.table_name, _to_kwarg_string(self._create, self.table_name))
     -- delete always need WHERE clause in case truncate table    
     elseif self._delete_string then 
         return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, self._delete_string)
@@ -83,13 +80,15 @@ function Manager.to_sql(self)
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     else 
         self.is_select = true --for the `exec` method
-        return string_format('SELECT %s FROM `%s`%s%s%s%s%s;', 
-            self._select_string or self._select and table_concat(self._select, ", ") or '*',  self.table_name, 
-            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '.._to_and(self._where, self.table_name)               or '', 
-            self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '..table_concat(self._group, ", ") or '', 
-            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '.._to_and(self._having, self.table_name)             or '', 
-            self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '..table_concat(self._order, ", ") or '', 
-            self._page_string   and ' LIMIT '..self._page_string      or self._page   and ' LIMIT '..table_concat(self._page, ", ")     or '')
+        local stm = string_format('SELECT %s FROM `%s`%s%s%s%s%s;', 
+            self._select_string or self._select and _to_arg_string(self._select, self.table_name) or '*',  
+            self.table_name, 
+            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '.._to_and(self._where, self.table_name)   or '', 
+            self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '.._to_arg_string(self._group, self.table_name)      or '', 
+            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '.._to_and(self._having, self.table_name) or '', 
+            self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '.._to_arg_string(self._order, self.table_name)      or '', 
+            self._page_string   and ' LIMIT '..self._page_string      or self._page   and ' LIMIT '.._to_arg_string(self._page, self.table_name)          or '')
+        return stm
     end
 end
 -- function Manager.get_where_args(self)

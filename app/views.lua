@@ -7,6 +7,11 @@ local forms = require"app.forms"
 
 
 local m={}
+function m.q(kwargs)
+    local ret, err = query("select `user`.`name` as `u-name`, `pet`.`name` from user INNER JOIN pet ON (`user`.`id`=`pet`.`user`);")
+    -- local ret, err = User:where{name__startswith='婆'}:exec()
+    return response.Plain(repr(ret))
+end
 function m.register(request)
     if request.user then
         return response.Redirect('/profile')
@@ -73,11 +78,6 @@ function m.error(request)
 end
 function m.profile(request)
     return response.Template(request, 'profile.html', {navbar='profile'})
-end
-function m.q(kwargs)
-    local ret, err = query("select * from user;")
-    local u = ret[1]
-    return response.Plain(type(u.id)..repr(u.id))
 end
 local function ran(step)
     step = step or 10

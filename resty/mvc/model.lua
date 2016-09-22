@@ -65,9 +65,9 @@ end
 function Model.get(self, params)
     -- special process for `get`, params cannot be empty table
     if type(params) == 'table' then
-        params = _to_and(params)
+        params = _to_and(params, self.table_name)
     end
-    local res, err = query(string_format('SELECT * FROM %s WHERE %s LIMIT 1;', self.table_name, params))
+    local res, err = query(string_format('SELECT * FROM `%s` WHERE %s;', self.table_name, params))
     if not res then
         return nil, err
     end
@@ -78,7 +78,7 @@ function Model.get(self, params)
 end
 function Model.all(self)
     -- special process for `all`
-    local res, err = query(string_format('SELECT * FROM %s;', self.table_name))
+    local res, err = query(string_format('SELECT * FROM `%s`;', self.table_name))
     if not res then
         return nil, err
     end

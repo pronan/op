@@ -5,7 +5,9 @@
     -- 'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
     -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
     -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
--- SELECT "jiangan_hetong"."jtzycyqk", "accounts_user"."id", "accounts_user"."password" FROM "jiangan_hetong" INNER JOIN "accounts_user" ON ("jiangan_hetong"."creater_id" = "accounts_user"."id")
+-- SELECT "A"."a", "A"."b", "B"."c" 
+-- FROM "A" INNER JOIN "B" 
+-- ON ("jiangan_hetong"."creater_id" = "accounts_user"."id")
 -- WHERE ("jiangan_hetong"."check_status" = 1 AND "jiangan_hetong"."config" = 2 AND "jiangan_hetong"."bscj" > -1.0) ORDER BY "jiangan_hetong"."bkgw" ASC, "jiangan_hetong"."bscj" DESC
 local validator = require"resty.mvc.validator"
 local form_field = require"resty.mvc.form_field"
@@ -916,18 +918,15 @@ function FloatField.formfield(self, kwargs)
 end
 
 
-local ForeignKey = Field:new{template='<input %s />', type='file', db_type='FOREIGNKEY',
-                            on_delete=0, on_update=0}
-
-function ForeignKey.init(cls, attrs)
+local ForeignKey = Field:new{on_delete=0, on_update=0}
+function ForeignKey.get_internal_type(self)
+    return "ForeignKey"
+end
+function ForeignKey.instance(cls, attrs)
     local self = cls:new(attrs)
     self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
     local e = self.reference
     assert(e.table_name and e.fields, 'It seems that you didnot provide a model')
-    self.id = self.id_prefix..self.name
-    self.label = self.label or self[2] or self.name
-    self.label_html = string_format('<label for="%s">%s%s</label>', self.id,
-        self.label, self.label_suffix or '')
     self.validators = self.validators or {}
     return self
 end

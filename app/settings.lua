@@ -2,7 +2,7 @@ local M = {}
 M.DEBUG = true
 M.APP = {
     'user',
-    --'thread', 
+    'pet', 
 }
 
 M.DATABASES ={
