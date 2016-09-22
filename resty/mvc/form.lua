@@ -163,13 +163,21 @@ end
 function Form.save(self)
     local ins = self.model_instance
     if ins then
-        local form_ins = {id=ins.id}
-        for k,v in pairs(self.cleaned_data) do
-            form_ins[k] = v
+        for k, v in pairs(self.cleaned_data) do
+            ins[k] = v
         end
-        return setmetatable(form_ins, getmetatable(ins)):save()
+        local res, errors = ins:save()
+        if not res then
+            return nil, errors
+        end
+        return ins
     elseif self.model then
-        return self.model:create(self.cleaned_data)
+        local new_ins = self.cleaned_data
+        local res, errors = self.model:create(new_ins)
+        if not res then
+            return nil, errors
+        end
+        return new_ins
     else
         -- for consistent with Row:save and Model:create, error is returned as a table
         return nil, {'`model_instance` or `model` should be set'}

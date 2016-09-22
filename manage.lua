@@ -1,4 +1,4 @@
--- lua manage.lua user -fields username password avatar openid
+-- lua manage.lua user -fields username password create_time:datetime update_time:datetime
 -- lua manage.lua thread -fields user::User title content:text 
 
 

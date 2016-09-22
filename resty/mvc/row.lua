@@ -13,14 +13,13 @@ local string_format = string.format
 local table_concat = table.concat
 
 local Row = {}
-function Row.new(self, init)
-    init = init or {}
-    self.__index = self
-    return setmetatable(init, self)
+function Row.new(cls, attrs)
+    attrs = attrs or {}
+    cls.__index = cls
+    return setmetatable(attrs, cls)
 end
 function Row.instance(cls, attrs)
-    -- attrs may be from db driver, try to use
-    -- `db_to_lua` if the field specified
+    -- attrs may be from db driver, try to use `db_to_lua` if the field specified
     local self = cls:new(attrs)
     local fields = self.fields
     for k, v in pairs(self) do
@@ -31,17 +30,25 @@ function Row.instance(cls, attrs)
     end
     return self
 end
-function Row.save(self)
+function Row.save_add(self)
     local valid_attrs = {}
     local all_errors = {}
-    local errors, has_error;
     local fields = self.fields
-    for name, value in pairs(self) do
-        local field = fields[name]
-        if field then
-            value, errors = field:clean(value)
+    for name, field in pairs(fields) do
+        local value = self[name]
+        if value == nil then
+            if field.default then
+                if type(field.default) == 'function' then
+                    valid_attrs[name] = field.default()
+                else
+                    valid_attrs[name] = field.default
+                end
+            elseif field.auto_now or field.auto_now_add then
+                valid_attrs[name] = ngx.localtime()
+            end
+        else
+            local value, errors = field:clean(value)
             if errors then
-                has_error = true
                 for i, v in ipairs(errors) do
                     all_errors[#all_errors+1] = v
                 end
@@ -49,40 +56,65 @@ function Row.save(self)
                 if field.lua_to_db then
                     value = field:lua_to_db(value)
                 end
-                valid_attrs[field.name] = value
+                valid_attrs[name] = value
             end
         end
     end
-    if has_error then
+    if next(all_errors) then
         return nil, all_errors
     end
-    if rawget(self, 'id') then
-        local stm  = string_format('UPDATE %s SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs, self.table_name), self.id)
-        local res, err = query(stm)
-        if res then
-            return self
+    local res, err = query(string_format(
+        'INSERT INTO `%s` SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
+    if res then
+        self.id = res.insert_id
+        return res
+    else
+        return nil, {err}
+    end
+end
+function Row.save(self, add)
+    if add then
+        return self:save_add()
+    end
+    local valid_attrs = {}
+    local all_errors = {}
+    local fields = self.fields
+    for name, field in pairs(fields) do
+        -- auto set time to now regardless of value
+        if field.auto_now then
+            valid_attrs[name] = ngx.localtime()
         else
-            return nil, {err}
+            local value = self[name]
+            if value == nil then
+
+            else
+                local value, errors = field:clean(value)
+                if errors then
+                    for i, v in ipairs(errors) do
+                        all_errors[#all_errors+1] = v
+                    end
+                else
+                    if field.lua_to_db then
+                        value = field:lua_to_db(value)
+                    end
+                    valid_attrs[name] = value
+                end
+            end
         end
-    else-- use the standard form for Postgresql
-        local cols, vals = {}, {}
-        for k, v in pairs(valid_attrs) do
-            cols[#cols+1] = k
-            vals[#vals+1] = _to_string(v)
-        end
-        local stm=string_format('INSERT INTO %s (%s) VALUES (%s);', self.table_name, table_concat(cols, ', '), table_concat(vals, ', '))
-        local res, err = query(stm)
-        --local res, err = query(string_format('INSERT INTO %s SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
-        if res then
-            self.id = res.insert_id
-            return self
-        else
-            return nil, {err}
-        end
+    end
+    if next(all_errors) then
+        return nil, all_errors
+    end
+    local res, err = query(string_format(
+        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs), self.id))
+    if res then
+        return res
+    else
+        return nil, {err}
     end
 end
 function Row.delete(self)
-    return query(string_format('DELETE FROM %s WHERE id=%s;', self.table_name, self.id))
+    return query(string_format('DELETE FROM `%s` WHERE id=%s;', self.table_name, self.id))
 end
 
 return Row

@@ -644,7 +644,7 @@ local DateField = Field:new{
     description = "Date (without time)", 
 }
 function DateField.instance(cls, attrs)
-    local self = cls:new(attrs)
+    local self = Field.instance(cls, attrs)
     if self.auto_now or self.auto_now_add then
         self.editable = false
         self.blank = true
@@ -772,7 +772,7 @@ local TimeField = Field:new{
     description = "Time", 
 }
 function TimeField.instance(cls, attrs)
-    local self = cls:new(attrs)
+    local self = Field.instance(cls, attrs)
     if self.auto_now or self.auto_now_add then
         self.editable = false
         self.blank = true

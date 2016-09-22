@@ -65,7 +65,7 @@ end
 function Model.get(self, params)
     -- special process for `get`, params cannot be empty table
     if type(params) == 'table' then
-        params = _to_and(params, self.table_name)
+        params = _to_and(params)
     end
     local res, err = query(string_format('SELECT * FROM `%s` WHERE %s;', self.table_name, params))
     if not res then
@@ -74,7 +74,7 @@ function Model.get(self, params)
     if #res ~= 1 then
         return nil, '`get` method should return only one row, but now is '..#res
     end
-    return self.row_class:new(res[1])
+    return self.row_class:instance(res[1])
 end
 function Model.all(self)
     -- special process for `all`
@@ -84,12 +84,12 @@ function Model.all(self)
     end
     local row_class = self.row_class
     for i, attrs in ipairs(res) do
-        res[i] = row_class:new(attrs)
+        res[i] = row_class:instance(attrs)
     end
     return res
 end
 function Model.create(self, params)
     -- special process for `create`
-    return self.row_class:new(params):save()
+    return self.row_class:new(params):save(true)
 end
 return Model
