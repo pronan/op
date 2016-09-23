@@ -83,10 +83,7 @@ end
 function Field.widget_attrs(self, widget)
     return {}
 end
-function Field.prepare_value(self, value)
-    return value
-end
-function Field.client_to_lua(self, value)
+function Field.to_lua(self, value)
     return value
 end
 function Field.validate(self, value)
@@ -110,7 +107,7 @@ function Field.run_validators(self, value)
     end
 end
 function Field.clean(self, value)
-    local value, err = self:client_to_lua(value)
+    local value, err = self:to_lua(value)
     if value == nil and err ~= nil then
         return nil, {err}
     end
@@ -135,7 +132,9 @@ end
 function Field.get_bound_field(self, form, field_name)
     return BoundField:instance(form, self, field_name)
 end
-
+-- function Field.prepare_value(self, value)
+--     return value
+-- end
 
 --<input id="id_sfzh" maxlen="18" name="sfzh" placeholder="" type="text">
 --逻辑值 <input checked="checked" id="id_enable" name="enable" type="checkbox" />
@@ -151,7 +150,7 @@ function CharField.instance(cls, attrs)
     end
     return self
 end
-function CharField.client_to_lua(self, value)
+function CharField.to_lua(self, value)
     if is_empty_value(value) then
         return ''
     end
@@ -171,6 +170,7 @@ function CharField.widget_attrs(self, widget)
     return attrs
 end
 
+
 local IntegerField = Field:new{widget=Widget.NumberInput, 
     default_error_messages = {invalid='Enter an interger.'}}
 function IntegerField.instance(cls, attrs)
@@ -183,12 +183,12 @@ function IntegerField.instance(cls, attrs)
     end
     return self
 end
-function IntegerField.client_to_lua(self, value)
+function IntegerField.to_lua(self, value)
     if is_empty_value(value) then
         return
     end
     value = tonumber(value)
-    if not value or math_floor(value)~=value then
+    if not value or math_floor(value) ~= value then
         return nil, self.error_messages.invalid
     end
     return value
@@ -204,8 +204,10 @@ function IntegerField.widget_attrs(self, widget)
     return attrs
 end
 
-local FloatField = IntegerField:new{default_error_messages={invalid='Enter an number.'}}
-function FloatField.client_to_lua(self, value)
+local FloatField = IntegerField:new{
+    default_error_messages={invalid='Enter a float.'}, 
+}
+function FloatField.to_lua(self, value)
     if is_empty_value(value) then
         return
     end
@@ -224,7 +226,7 @@ function FloatField.widget_attrs(self, widget)
 end
 
 local BaseTemporalField = Field:new{format_re=nil}
-function BaseTemporalField.client_to_lua(self, value)
+function BaseTemporalField.to_lua(self, value)
     if is_empty_value(value) then
         return
     end
@@ -236,17 +238,29 @@ function BaseTemporalField.client_to_lua(self, value)
     return value
 end
 
-local DateTimeField = BaseTemporalField:new{widget=Widget.DateTimeInput, 
-    default_error_messages={invalid='Please use `0000-00-00 00:00:00`'}, 
-    format_re = [[^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$]]}
+local DateTimeField = BaseTemporalField:new{
+    widget = Widget.DateTimeInput, 
+    default_error_messages = {
+        invalid='Enter a valid datetime, e.g. 2010-01-01 09:30:00.', 
+    }, 
+    format_re = [[^(19|20)\d\d-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01]) [012]\d:[0-5]\d:[0-5]\d$]], 
+}
 
-local DateField = BaseTemporalField:new{widget=Widget.DateInput, 
-    default_error_messages={invalid='Please use `0000-00-00`'}, 
-    format_re = [[^\d{4}-\d{1,2}-\d{1,2}$]]}
+local DateField = BaseTemporalField:new{
+    widget=Widget.DateInput, 
+    default_error_messages = {
+        invalid='Enter a valid date, e.g. 2010-01-01.', 
+    }, 
+    format_re = [[^(19|20)\d\d-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$]], 
+}
 
-local TimeField = BaseTemporalField:new{widget=Widget.TimeInput, 
-    default_error_messages={invalid='Please use `00:00:00`'}, 
-    format_re = [[^\d{1,2}:\d{1,2}:\d{1,2}$]]}
+local TimeField = BaseTemporalField:new{
+    widget=Widget.TimeInput, 
+    default_error_messages = {
+        invalid='Enter a valid time, e.g. 09:30:00.', 
+    }, 
+    format_re = [[^[012]\d:[0-5]\d:[0-5]\d$]], 
+}
 
 local HiddenField = CharField:new{widget=Widget.HiddenInput}
 
@@ -259,10 +273,10 @@ local URLField = CharField:new{widget=Widget.URLInput}
 local TextareaField = CharField:new{widget=Widget.Textarea}
 
 local BooleanField = Field:new{widget=Widget.CheckboxInput}
-function BooleanField.client_to_lua(self, value)
+function BooleanField.to_lua(self, value)
     -- 这里的value是从widget的value_from_datadict传来的, 默认它只会传true或false
     -- 这里仍然检测是防止value_from_datadict被重写
-    if not value or value == '' or value =='0' or value=='false' then
+    if not value or value =='0' or value == 0 or value == '' or value=='false' then
         return false
     end
     return true
@@ -273,8 +287,12 @@ function BooleanField.validate(self, value)
     end
 end
 
-local ChoiceField = Field:new{widget=Widget.Select, 
-    default_error_messages={invalid_choice='%s is not one of the available choices.'},}
+local ChoiceField = Field:new{
+    widget = Widget.Select, 
+    default_error_messages = {
+        invalid_choice = '%s is not one of the available choices.', 
+    },
+}
 function ChoiceField.instance(cls, attrs)
     attrs.choices = attrs.choices or {}
     assert(type(attrs.choices) == 'table', "`choices` must be a table")
@@ -284,7 +302,7 @@ function ChoiceField.instance(cls, attrs)
     end
     return Field.instance(cls, attrs)
 end
-function ChoiceField.client_to_lua(self, value)
+function ChoiceField.to_lua(self, value)
     if is_empty_value(value) then
         return 
     end
@@ -319,12 +337,57 @@ function ChoiceField.valid_value(self, value)
     return false
 end
 
-local MultipleChoiceField = ChoiceField:new{widget = SelectMultiple, 
+-- file api is based on lua-resty-reqargs
+local FileField = Field:new{}
+function FileField.instance(cls, attrs)
+    local self = Field.instance(cls, attrs)
+    self.upload_to = self.upload_to or 'static/files/' -- assert(nil, 'upload_to is required for FileField')
+    local last_char = string_sub(self.upload_to, -1, -1)
+    if last_char ~= '/' and last_char ~= '\\' then
+        self.upload_to = self.upload_to..'/'
+    end
+    return self
+end
+function FileField.validate(self, value)
+    return Field.validate(self, value.file)
+end
+function FileField.clean(self, value)
+    local value, errors = Field.clean(self, value) 
+    if errors then
+        -- currently don't need to delete the error file because of `middlewares.post`
+        -- os_remove(value.temp) 
+        return nil, errors
+    end
+    value.save_path = self.upload_to..value.file
+    os_rename(value.temp, value.save_path)
+    return value
+end
+
+
+local ForeignKey = IntegerField:new{}
+function ForeignKey.instance(cls, attrs)
+    local self = IntegerField.instance(cls, attrs)
+    self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
+    local model = self.reference
+    assert(model.table_name and model.fields, 'It seems that you didnot provide a model')
+    -- can't do this in the init_worker_by_lua*, to do
+    -- local choices = {}
+    -- for i, e in ipairs(model:all()) do
+    --     choices[#choices+1] = {e.id, e.id}
+    -- end
+    -- self.choices = choices
+    return self
+end
+
+
+local MultipleChoiceField = ChoiceField:new{
+    widget = Widget.SelectMultiple, 
     default_error_messages = {
         invalid_choice='Select a valid choice. %s is not one of the available choices.',
-        invalid_list='Enter a list of values.'}, 
+        invalid_list='Enter a list of values.', 
+    }, 
 }
-function MultipleChoiceField.client_to_lua(self, value)
+function MultipleChoiceField.to_lua(self, value)
     -- 待定, reqargs将多选下拉框解析成的值是, 没选时直接忽略, 选1个的时候是字符串, 大于1个是table
     if not value then
         return {}
@@ -347,51 +410,11 @@ function MultipleChoiceField.validate(self, value)
     end
 end
 
-local FileField = Field:new{}
-function FileField.validate(self, value)
-    local value = value.file
-    if (value == nil or value == '') and self.required then
-        return 'this field is required.'
-    end 
-end
-function FileField.instance(cls, attrs)
-    local self = Field.instance(cls, attrs)
-    self.upload_to = self.upload_to or 'static/files/' -- assert(nil, 'upload_to is required for FileField')
-    local last_char = string_sub(self.upload_to, -1, -1)
-    if last_char ~= '/' and last_char ~= '\\' then
-        self.upload_to = self.upload_to..'/'
-    end
-    return self
-end
-function FileField.clean(self, value)
-    local value, errors = Field.clean(self, value) 
-    if errors then
-        return nil, errors
-    end
-    value.save_path = self.upload_to..value.file
-    os_rename(value.temp, value.save_path)
-    return value
-end
-
-local ForeignKey = IntegerField:new{}
-function ForeignKey.instance(cls, attrs)
-    local self = IntegerField.instance(cls, attrs)
-    self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
-    local model = self.reference
-    assert(model.table_name and model.fields, 'It seems that you didnot provide a model')
-    -- local choices = {}
-    -- for i, e in ipairs(model:all()) do
-    --     choices[#choices+1] = {e.id, e.id}
-    -- end
-    -- self.choices = choices
-    return self
-end
 
 return{
     CharField = CharField, 
     TextField = TextField, 
     PasswordField = PasswordField, 
-
     IntegerField = IntegerField, 
     FloatField = FloatField, 
     
@@ -404,7 +427,7 @@ return{
 
     HiddenField = HiddenField, 
     
-    FileField = FileField,  -- todo
+    FileField = FileField, 
     MultipleChoiceField = MultipleChoiceField, -- todo
     ForeignKey = ForeignKey, -- to do
 }

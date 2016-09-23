@@ -1,4 +1,5 @@
 local get_post = require"resty.reqargs"
+local os_remove = os.remove
 
 local function before(request)
     request.GET, request.POST, request.FILES = get_post{}
@@ -13,7 +14,7 @@ end
  --             },
 local function after(request)
     for k, v in pairs(request.FILES) do
-        os.remove(v.temp)
+        os_remove(v.temp)
     end
 end
 return { before=before, after=after}

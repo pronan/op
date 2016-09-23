@@ -2,28 +2,38 @@ import re
 import os
 
 
+targets = ['lua']
+
 def replace(go=False):
+    hits = {}
     for old, new in [
-        ('save_add','create'), 
-        # ('req, kwargs)','request)'), 
+        ('form_field','formfield'), 
+        ('model_field','modelfield'), 
+        ('client_to_lua','to_lua'), 
+        ('lua_to_db','to_db'), 
     ]:
-        arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
-                change = False
                 p = os.path.join(root,filespath)
-                if p[-4:] not in ['.lua','conf']:
+                if '.' not in p or p.rsplit('.', 1)[1] not in targets:
                     continue
-                with open(p,encoding='u8') as f:
-                    s = f.read()
-                    if old in s:
-                        change = True
+                res = []
+                with open(p, encoding='u8') as f:
+                    for line in f:
+                        if old in line:
+                            if p not in hits:
+                                hits[p] = []
+                            hits[p].append(line)
+                            line = line.replace(old, new)
+                        res.append(line)
+                if go:
+                    open(p,'w',encoding='u8').write(''.join(res))
 
-                if change:
-                    print(p)
-                    if go:
-                        open(p,'w',encoding='u8').write(s.replace(old, new))
-                        print('changed')
+    for path, lines in hits.items():
+        print(path)
+        for line in lines:
+            print('  ', line, end='')
+
                     
 
 def search():
@@ -46,7 +56,7 @@ def search():
 
 
 #search()
-replace(1)
+replace(0)
 
 
     
