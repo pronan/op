@@ -31,6 +31,8 @@ function Model.class(cls, attrs)
     subclass.row_class = Row:new{table_name=subclass.table_name, fields=subclass.fields}
     for name, field in pairs(subclass.fields) do
         field.name = name
+        local errors = field:check()
+        assert(not next(errors), name..' check fails:'..table_concat(errors, ', '))
     end
     -- field_order
     if not subclass.field_order then

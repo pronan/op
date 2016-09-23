@@ -141,8 +141,8 @@ function Field._check_choices(self)
     end
 end
 function Field._check_db_index(self)
-    if self.db_index ~= nil or self.db_index ~= true or self.db_index ~= false then
-        return "`db_index` must be nil, true or false."
+    if self.db_index ~= nil and self.db_index ~= true and self.db_index ~= false then
+        return "`db_index` must be nil, true or false"
     end
 end
 function Field._check_null_allowed_for_primary_keys(self)
@@ -643,6 +643,7 @@ local DateField = Field:new{
     }, 
     description = "Date (without time)", 
 }
+dict_update(DateField, DateTimeCheckMixin)
 function DateField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
     if self.auto_now or self.auto_now_add then
@@ -713,6 +714,7 @@ local DateTimeField = DateField:new{
     }, 
     description = "Date (with time)", 
 }
+dict_update(DateTimeField, DateTimeCheckMixin)
 function DateTimeField._check_fix_default_value(self)
 
 end
@@ -771,6 +773,7 @@ local TimeField = Field:new{
     }, 
     description = "Time", 
 }
+dict_update(TimeField, DateTimeCheckMixin)
 function TimeField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
     if self.auto_now or self.auto_now_add then
