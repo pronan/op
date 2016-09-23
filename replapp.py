@@ -3,7 +3,10 @@ import os
 
 
 def replace(go=False):
-    for old, new in [('request, kwargs)','request)'), ('req, kwargs)','request)')]:
+    for old, new in [
+        ('save_add','create'), 
+        # ('req, kwargs)','request)'), 
+    ]:
         arr = []
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:

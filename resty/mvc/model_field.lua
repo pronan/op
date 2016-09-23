@@ -162,9 +162,9 @@ function Field.get_pk_value_on_save(self, instance)
         return self:get_default()
     end
 end
-function Field.client_to_lua(self, value)
-    -- Converts the input value into the expected lua data type, raising
-    -- error if the data can't be converted.
+function Field.to_lua(self, value)
+    -- Converts the input value or value returned by lua-resty-mysql 
+    -- into the expected lua data type, raising error if the data can't be converted.
     -- Returns the converted value. Subclasses should override this.
     return value
 end
@@ -222,7 +222,7 @@ function Field.validate(self, value, model_instance)
     end
 end
 function Field.clean(self, value, model_instance)
-    local value, err = self:client_to_lua(value)
+    local value, err = self:to_lua(value)
     if value == nil and err ~= nil then
         return nil, {err}
     end
@@ -420,7 +420,7 @@ function Field.formfield(self, kwargs)
         -- Fields with choices get special treatment.
         local include_blank = self.blank or not (self:has_default() or kwargs.initial~=nil)
         defaults.choices = self:get_choices(include_blank)
-        -- defaults.coerce = self.client_to_lua
+        -- defaults.coerce = self.to_lua
         if self.null then
             defaults.empty_value = nil
         end
@@ -470,7 +470,7 @@ end
 function AutoField.get_internal_type(self)
     return "AutoField"
 end
-function AutoField.client_to_lua(self, value)
+function AutoField.to_lua(self, value)
     if value == nil then
         return nil
     end
@@ -525,7 +525,7 @@ end
 function BooleanField.get_internal_type(self)
     return "BooleanField"
 end
-function BooleanField.client_to_lua(self, value)
+function BooleanField.to_lua(self, value)
     if value == true or value == false then
         return value
     end
@@ -593,7 +593,7 @@ end
 function CharField.get_internal_type(self)
     return "CharField"
 end
-function CharField.client_to_lua(self, value)
+function CharField.to_lua(self, value)
     if type(value)=='string' or value == nil then
         return value
     end
@@ -601,7 +601,7 @@ function CharField.client_to_lua(self, value)
 end
 function CharField.lua_to_db(self, value)
     value = Field.lua_to_db(self, value)
-    return self:client_to_lua(value)
+    return self:to_lua(value)
 end
 function CharField.formfield(self, kwargs)
     -- Passing maxlen to form_field.CharField means that the value's length
@@ -675,7 +675,7 @@ function DateField.contribute_to_class(self, cls, name, kwargs)
             cls._get_next_or_previous_by_FIELD, {field=self, is_next=false})            
     end
 end
-function DateField.client_to_lua(self, value)
+function DateField.to_lua(self, value)
     if value == nil then
         return nil
     end
@@ -688,7 +688,7 @@ function DateField.client_to_lua(self, value)
 end
 function DateField.lua_to_db(self, value)
     value = Field.lua_to_db(self, value)
-    return self:client_to_lua(value)
+    return self:to_lua(value)
 end
 function DateField.value_to_string(self, obj)
     local val = self:value_from_object(obj)
@@ -719,7 +719,7 @@ end
 function DateTimeField.get_internal_type(self)
     return "DateTimeField"
 end
-function DateTimeField.client_to_lua(self, value)
+function DateTimeField.to_lua(self, value)
     if value == nil then
         return nil
     end
@@ -746,7 +746,7 @@ end
 
 function DateTimeField.lua_to_db(self, value)
     local value = Field.lua_to_db(self, value)
-    return self:client_to_lua(value)
+    return self:to_lua(value)
 end
 function DateTimeField.value_to_string(self, obj)
     local val = self:value_from_object(obj)
@@ -782,7 +782,7 @@ end
 function TimeField.get_internal_type(self)
     return "TimeField"
 end
-function TimeField.client_to_lua(self, value)
+function TimeField.to_lua(self, value)
     if value == nil then
         return nil
     end
@@ -795,7 +795,7 @@ function TimeField.client_to_lua(self, value)
 end
 function TimeField.lua_to_db(self, value)
     local value = Field.lua_to_db(self, value)
-    return self:client_to_lua(value)
+    return self:to_lua(value)
 end
 function TimeField.pre_save(self, model_instance, add)
     if self.auto_now or (self.auto_now_add and add) then
@@ -853,7 +853,7 @@ function IntegerField._check_max_length_warning(self)
         return "'maxlen' is ignored when used with IntegerField"
     end
 end
-function IntegerField.client_to_lua(self, value)
+function IntegerField.to_lua(self, value)
     if value == nil then
         return nil
     end
@@ -892,7 +892,7 @@ local FloatField = Field:new{
     }, 
     description = "Floating point number", 
 }
-function FloatField.client_to_lua(self, value)
+function FloatField.to_lua(self, value)
     if value == nil then
         return nil
     end

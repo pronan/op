@@ -15,10 +15,10 @@ local ngx_ERR = ngx.ERR
 
 
 local Model = {
-    meta={auto_id=true, 
-          auto_update_time=true, 
-          auto_create_time=true, 
-          charset = 'utf8'}, 
+    meta = {
+        auto_id=true, 
+        charset = 'utf8', 
+    }, 
 }
 
 function Model.new(self, opts)

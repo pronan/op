@@ -11,6 +11,7 @@ local tostring = tostring
 local type = type
 local string_format = string.format
 local table_concat = table.concat
+local ngx_localtime = ngx.localtime
 
 local Row = {}
 function Row.new(cls, attrs)
@@ -30,7 +31,7 @@ function Row.instance(cls, attrs)
     end
     return self
 end
-function Row.save_add(self)
+function Row.create(self, skip_clean)
     local valid_attrs = {}
     local all_errors = {}
     local fields = self.fields
@@ -38,13 +39,9 @@ function Row.save_add(self)
         local value = self[name]
         if value == nil then
             if field.default then
-                if type(field.default) == 'function' then
-                    valid_attrs[name] = field.default()
-                else
-                    valid_attrs[name] = field.default
-                end
+                valid_attrs[name] = field:get_default()
             elseif field.auto_now or field.auto_now_add then
-                valid_attrs[name] = ngx.localtime()
+                valid_attrs[name] = ngx_localtime()
             end
         else
             local value, errors = field:clean(value)
@@ -74,7 +71,7 @@ function Row.save_add(self)
 end
 function Row.save(self, add)
     if add then
-        return self:save_add()
+        return self:create()
     end
     local valid_attrs = {}
     local all_errors = {}
@@ -82,7 +79,7 @@ function Row.save(self, add)
     for name, field in pairs(fields) do
         -- auto set time to now regardless of value
         if field.auto_now then
-            valid_attrs[name] = ngx.localtime()
+            valid_attrs[name] = ngx_localtime()
         else
             local value = self[name]
             if value == nil then
