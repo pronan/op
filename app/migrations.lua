@@ -26,7 +26,13 @@ local function simple_repr(s)
     if type(s)=='string' then
         s=string.format([["%s"]],s)
     end
-    return tostring(s)
+    if s == false then
+        return 0
+    elseif s == true then
+        return 1
+    else
+        return tostring(s)
+    end
 end
 local function auto_models( ... )
     for i, name in ipairs(settings.APP) do
@@ -42,25 +48,15 @@ local function auto_models( ... )
                 local table_options = {}
                 local fields = {}
                 local meta = model.meta
+                local pk_not_done = true
                 if meta.auto_id then
                     fields[#fields+1] = 'id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY'
+                    pk_not_done = false
                 end
                 table_options[#table_options+1] = 'DEFAULT CHARSET='..meta.charset
-                local lookup = {
-                        CharField = 'VARCHAR',
-                        TextField = 'TEXT',
-                        IntegerField = 'INT',
-                        FloatField = 'FLOAT',
-                        DateField = 'DATE',
-                        DateTimeField = 'DATETIME',
-                        TIMEField = 'TIME',
-                        FileField = 'VARCHAR',
-                        ForeignKey = 'FOREIGNKEY',
-                    }
-                -- loger(model)
                 for name, field in pairs(model.fields) do
-                    local db_type = lookup[field:get_internal_type()] or 'VARCHAR'
-                    local field_string = nil
+                    local db_type = field.db_type
+                    local field_string
                     if db_type =='FOREIGNKEY' then
                         if not field_options.foreign_key then
                             field_options.foreign_key = {}
@@ -68,9 +64,13 @@ local function auto_models( ... )
                         table.insert(field_options.foreign_key, string.format(
                             'FOREIGN KEY (%s) REFERENCES %s(id)', field.name, field.reference.table_name))
                         field_string = string.format('%s INT UNSIGNED NOT NULL', field.name)
+                    elseif db_type == 'PRIMARYKEY' then
+                        assert(pk_not_done, 'you could set only one primary key')
+                        field_string = string.format('%s INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY', field.name)
+                        pk_not_done = false
                     else
                         if db_type =='VARCHAR' then
-                            db_type = string.format('VARCHAR(%s)', field.maxlen) --for utf-8 
+                            db_type = string.format('VARCHAR(%s)', field.maxlen)
                         end
                         if field.index then
                             if not field_options.index then
@@ -78,7 +78,7 @@ local function auto_models( ... )
                             end        
                             table.insert(field_options.index, string.format('INDEX (%s)', field.name))
                         end                
-                        if field.default~=nil then
+                        if field.default ~= nil then
                             db_type = db_type..' DEFAULT '..simple_repr(field.default)
                         end
                         if field.unique then
@@ -90,14 +90,13 @@ local function auto_models( ... )
                             db_type = db_type..' NOT NULL'
                         end    
                         if field.primary_key then
-                            assert(not field_options.primary_key, 'you could set only one primary key')
+                            assert(pk_not_done, 'you could set only one primary key')
+                            pk_not_done = false
                             field_options.primary_key = string.format('PRIMARY KEY (%s)', field.name)
                         end
                         field_string = string.format('%s %s', field.name, db_type)
                     end
-                    if field_string then
-                        fields[#fields+1] = field_string
-                    end
+                    fields[#fields+1] = field_string
                 end
                 local _op = {}
                 for k,v in pairs(field_options) do -- flatten field_options
@@ -111,12 +110,14 @@ local function auto_models( ... )
                 end
                 local fields = table.concat(fields, joiner)
                 local field_options = table.concat(_op, joiner)
+                if field_options ~= '' then
+                    field_options = ',\n    '..field_options
+                end
                 local table_options = table.concat(table_options, ' ')
                 local table_create_defination = string.format(
 [[CREATE TABLE %s 
 (
-    %s, 
-    %s
+    %s%s
 )%s;]], model.table_name, fields, field_options, table_options)
                 -- loger(table_create_defination)
                 if do_not_create then

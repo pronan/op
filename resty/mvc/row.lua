@@ -22,20 +22,19 @@ end
 function Row.instance(cls, attrs)
     -- attrs may be from db driver, try to use `db_to_lua` if the field specified
     local self = cls:new(attrs)
-    local fields = self.fields
-    for k, v in pairs(self) do
-        local f = fields[k]
-        if f and f.db_to_lua then
-            self[k] = f:db_to_lua(v)
-        end
-    end
+    -- local fields = self.fields
+    -- for k, v in pairs(self) do
+    --     local f = fields[k]
+    --     if f and f.db_to_lua then
+    --         self[k] = f:db_to_lua(v)
+    --     end
+    -- end
     return self
 end
-function Row.create(self, skip_clean)
+function Row.create(self)
     local valid_attrs = {}
     local all_errors = {}
-    local fields = self.fields
-    for name, field in pairs(fields) do
+    for name, field in pairs(self.fields) do
         local value = self[name]
         if value == nil then
             if field.default then
@@ -50,8 +49,8 @@ function Row.create(self, skip_clean)
                     all_errors[#all_errors+1] = v
                 end
             else
-                if field.lua_to_db then
-                    value = field:lua_to_db(value)
+                if field.to_db then
+                    value = field:to_db(value)
                 end
                 valid_attrs[name] = value
             end
@@ -69,21 +68,44 @@ function Row.create(self, skip_clean)
         return nil, {err}
     end
 end
-function Row.save(self, add)
-    if add then
-        return self:create()
+function Row.create_without_clean(self)
+    local valid_attrs = {}
+    for name, field in pairs(self.fields) do
+        local value = self[name]
+        if value == nil then
+            if field.default then
+                valid_attrs[name] = field:get_default()
+            elseif field.auto_now or field.auto_now_add then
+                valid_attrs[name] = ngx_localtime()
+            end
+        else
+            if field.to_db then
+                value = field:to_db(value)
+            end
+            valid_attrs[name] = value
+        end
     end
+    local res, err = query(string_format(
+        'INSERT INTO `%s` SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
+    if res then
+        self.id = res.insert_id
+        return res
+    else
+        return nil, {err}
+    end
+end
+function Row.update(self)
     local valid_attrs = {}
     local all_errors = {}
-    local fields = self.fields
-    for name, field in pairs(fields) do
-        -- auto set time to now regardless of value
+    for name, field in pairs(self.fields) do
         if field.auto_now then
+            -- when update, always update the time if this should be done
+            -- according to the field defination
             valid_attrs[name] = ngx_localtime()
         else
             local value = self[name]
             if value == nil then
-
+                -- do nothing 
             else
                 local value, errors = field:clean(value)
                 if errors then
@@ -91,8 +113,8 @@ function Row.save(self, add)
                         all_errors[#all_errors+1] = v
                     end
                 else
-                    if field.lua_to_db then
-                        value = field:lua_to_db(value)
+                    if field.to_db then
+                        value = field:to_db(value)
                     end
                     valid_attrs[name] = value
                 end
@@ -101,6 +123,33 @@ function Row.save(self, add)
     end
     if next(all_errors) then
         return nil, all_errors
+    end
+    local res, err = query(string_format(
+        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs), self.id))
+    if res then
+        return res
+    else
+        return nil, {err}
+    end
+end
+function Row.update_without_clean(self)
+    local valid_attrs = {}
+    for name, field in pairs(self.fields) do
+        if field.auto_now then
+            -- when update, always update the time if this should be done
+            -- according to the field defination
+            valid_attrs[name] = ngx_localtime()
+        else
+            local value = self[name]
+            if value == nil then
+                -- do nothing 
+            else
+                if field.to_db then
+                    value = field:to_db(value)
+                end
+                valid_attrs[name] = value
+            end
+        end
     end
     local res, err = query(string_format(
         'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs), self.id))

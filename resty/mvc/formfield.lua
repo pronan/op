@@ -132,9 +132,9 @@ end
 function Field.get_bound_field(self, form, field_name)
     return BoundField:instance(form, self, field_name)
 end
--- function Field.prepare_value(self, value)
---     return value
--- end
+function Field.prepare_value(self, value)
+    return value
+end
 
 --<input id="id_sfzh" maxlen="18" name="sfzh" placeholder="" type="text">
 --逻辑值 <input checked="checked" id="id_enable" name="enable" type="checkbox" />

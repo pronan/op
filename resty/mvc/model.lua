@@ -92,6 +92,6 @@ function Model.all(self)
 end
 function Model.create(self, params)
     -- special process for `create`
-    return self.row_class:new(params):save(true)
+    return self.row_class:new(params):create()
 end
 return Model

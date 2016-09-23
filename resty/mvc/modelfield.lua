@@ -1,5 +1,5 @@
 local Validator = require"resty.mvc.validator"
-local FormField = require"resty.mvc.form_field"
+local FormField = require"resty.mvc.formfield"
 local Widget = require"resty.mvc.widget"
 local utils = require"resty.mvc.utils"
 local string_strip = utils.string_strip
@@ -474,7 +474,7 @@ function CharField.formfield(self, kwargs)
     -- Passing maxlen to FormField.CharField means that the value's length
     -- will be validated twice. This is considered acceptable since we want
     -- the value in the form field (to pass into widget for example).
-    local defaults = {maxlen = self.maxlen}
+    local defaults = {maxlen = self.maxlen, minlen = self.minlen}
     if self.maxlen > 255 then
         -- bigger than 255 will be considered as a text field
         defaults.widget = Widget.Textarea
@@ -515,7 +515,7 @@ function TextField.formfield(self, kwargs)
     -- Passing maxlen to FormField.CharField means that the value's length
     -- will be validated twice. This is considered acceptable since we want
     -- the value in the form field (to pass into widget for example).
-    local defaults = {maxlen = self.maxlen, widget=Widget.Textarea}
+    local defaults = {maxlen = self.maxlen, minlen = self.minlen, widget=Widget.Textarea}
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
@@ -780,7 +780,8 @@ function IntegerField.get_internal_type(self)
     return "IntegerField"
 end
 function IntegerField.formfield(self, kwargs)
-    local defaults = {form_class=FormField.IntegerField}
+    local defaults = { min=self.min, max=self.max, 
+        form_class=FormField.IntegerField,}
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
@@ -827,13 +828,14 @@ function FloatField.get_internal_type(self)
     return "FloatField"
 end
 function FloatField.formfield(self, kwargs)
-    local defaults = {form_class = FormField.FloatField}
+    local defaults = { min = self.min, max = self.max, 
+        form_class = FormField.FloatField}
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 
 local AutoField = Field:new{
-    db_type = 'INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY', 
+    db_type = 'PRIMARYKEY', 
     description = "Primary Key, from 0 to 4294967295.",
     empty_strings_allowed = false,
     default_error_messages = {

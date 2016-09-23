@@ -10,6 +10,7 @@ def replace(go=False):
         ('form_field','formfield'), 
         ('model_field','modelfield'), 
         ('client_to_lua','to_lua'), 
+        ('db_to_lua','to_lua'), 
         ('lua_to_db','to_db'), 
     ]:
         for root,dirs,files in os.walk(os.getcwd()):
@@ -56,7 +57,7 @@ def search():
 
 
 #search()
-replace(0)
+replace()
 
 
     
