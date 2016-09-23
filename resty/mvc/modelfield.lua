@@ -315,122 +315,7 @@ function Field.flatchoices(self)
     end
     return flat
 end
--- A guide to Field parameters:
---   * name:      The name of the field specified in the model.
---   * attname:   The attribute to use on the model object. This is the same as
---                "name", except in the case of ForeignKeys, where "_id" is
---                appended.
---   * db_column: The db_column specified in the model (or None).
---   * column:    The database column for this field. This is the same as
---                "attname", except if db_column is specified.
 
--- Code that introspects values, or does other dynamic things, should use
--- attname. For example, this gets the primary key value of object "obj":
-
---     getattr(obj, opts.pk.attname)
-
--- verbose_name=None, name=None,
-
--- function Field.get_validators(self)
---     -- Some validators can't be created at field initialization time.
---     -- This method provides a way to delay their creation until required.
---     -- (I doubt it ..)
---     return list(self.default_validators, self.validators)
--- end
--- function Field.clone(self)
---     return Field:new(dict(self))
--- end
--- function Field.get_pk_value_on_save(self, instance)
---     -- Hook to generate new PK values on save. This method is called when
---     -- saving instances with no primary key value set. If this method returns
---     -- something else than None, then the returned value is used when saving
---     -- the new instance.
---     if self.default then
---         return self:get_default()
---     end
--- end
--- local string_lookup_table = {
---     iexact = true,
---     contains = true,
---     icontains = true,
---     startswith = true,
---     istartswith = true,
---     endswith = true,
---     iendswith = true,
---     isnull = true,
---     search = true,
---     regex = true,
---     iregex = true,}
--- local compare_lookup_table = {
---     exact = true,
---     gt = true,
---     gte = true,
---     lt = true,
---     lte = true,}
--- function Field.get_prep_lookup(self, lookup_type, value)
---     if string_lookup_table[lookup_type] then
---         return value
---     elseif compare_lookup_table[lookup_type]  then
---         return self:to_db(value)
---     elseif lookup_type == 'range' or lookup_type == 'in' then
---         local res = {}
---         for i, v in ipairs(value) do
---             res[#res+1] = self:to_db(v)
---         end
---         return res
---     end
---     return self:to_db(value)
--- end
--- function Field.contribute_to_class(self, cls, name)
---     self:set_attributes_from_name(name)
---     self.model = cls
---     cls._meta.add_field(self)
---     if self.choices then
---         cls[string_format('get_%s_display', self.name)] = curry(cls._get_FIELD_display, {field=self})   
---     end
--- end
--- function Field.set_attributes_from_name(self, name)
---     if not self.name then
---         self.name = name
---     end
---     self.attname, self.column = self:get_attname_column()
---     self.concrete = self.column ~= nil
---     if self.verbose_name == nil and self.name then
---         self.verbose_name = self.name:gsub('_', ' ')
---     end
--- end
--- function Field.get_attname_column(self)
---     local attname = sel:get_attname()
---     local column = self.db_column or attname
---     return attname, column
--- end
--- function Field.get_attname(self)
---     return self.name
--- end
--- function Field.get_filter_kwargs_for_object(self, obj)
---     -- Return a dict that when passed as kwargs to self.model.where(), would
---     -- yield all instances having the same value for this field as obj has.
---     return {[self.name]=obj[self.attname]}
--- end
--- function Field.pre_save(self, model_instance, add)
---     -- Returns field's value just before saving.
---     return model_instance[self.attname]
--- end
--- function Field.value_from_object(self, obj)
---     if obj ~= nil then
---         return obj[self.attname]
---     else
---         return self:get_default()
---     end
--- end
--- function Field.value_to_string(self, obj)
---     -- Returns a string value of this field from the passed obj.
---     -- This is used by the serialization framework.
---     return self:value_from_object(obj)
--- end
--- function Field.save_form_data(self, instance, data)
---     instance[self.name] = data
--- end
 
 local CharField = Field:new{
     db_type = 'VARCHAR', 
@@ -451,7 +336,8 @@ function CharField.to_lua(self, value)
     return tostring(value)
 end
 function CharField.to_db(self, value)
-    return self:to_lua(value)
+    -- escape ' and \
+    return self:to_lua(value):gsub("\\", "\\\\"):gsub("'", "\\'")
 end
 function CharField.check(self, kwargs)
     local errors = Field.check(self, kwargs)
@@ -506,7 +392,7 @@ function TextField.to_lua(self, value)
     return tostring(value)
 end
 function TextField.to_db(self, value)
-    return self:to_lua(value)
+    return self:to_lua(value):gsub("\\", "\\\\"):gsub("'", "\\'")
 end
 function TextField.get_internal_type(self)
     return "TextField"
@@ -587,33 +473,6 @@ function DateField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
--- function DateField.value_to_string(self, obj)
---     local val = self:value_from_object(obj)
---     if val == nil then
---         return ''  
---     else
---         return val:isoformat()
---     end
--- end
--- function DateField.pre_save(self, model_instance, add)
---     if self.auto_now or (self.auto_now_add and add) then
---         local value = ngx.today()
---         model_instance[self.attname] = value
---         return value
---     else
---         return Field.pre_save(self, model_instance, add)
---     end
--- end
--- function DateField.contribute_to_class(self, cls, name, kwargs)
---     Field.contribute_to_class(self, cls, name, kwargs)
---     if not self.null then
---         cls[string_format('get_next_by_%s', self.name)] = curry(
---             cls._get_next_or_previous_by_FIELD, {field=self, is_next=true})
---         cls[string_format('get_previous_by_%s', self.name)] = curry(
---             cls._get_next_or_previous_by_FIELD, {field=self, is_next=false})            
---     end
--- end
-
 
 local DateTimeField = DateField:new{
     db_type = 'DATETIME', 
@@ -637,23 +496,6 @@ function DateTimeField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return DateField.formfield(self, defaults)
 end
--- function DateTimeField.pre_save(self, model_instance, add)
---     if self.auto_now or (self.auto_now_add and add) then
---         local value = ngx.localtime() -- ngx.utctime
---         model_instance[self.attname] = value
---         return value
---     else
---         return DateField.pre_save(self, model_instance, add)
---     end
--- end
--- function DateTimeField.value_to_string(self, obj)
---     local val = self:value_from_object(obj)
---     if val == nil then
---         return ''
---     else
---         return val:isoformat()
---     end
--- end
 
 
 local TimeField = Field:new{
@@ -697,23 +539,7 @@ function TimeField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
--- function TimeField.pre_save(self, model_instance, add)
---     if self.auto_now or (self.auto_now_add and add) then
---         local value = now()
---         model_instance[self.attname] = value
---         return value
---     else
---         return Field.pre_save(self, model_instance, add)
---     end
--- end
--- function TimeField.value_to_string(self, obj)
---     local val = self:value_from_object(obj)
---     if val == nil then
---         return ''
---     else
---         return val:isoformat()
---     end
--- end
+
 
 local EmailField = CharField:new{
     default_validators = {Validator.validate_email}, 
@@ -785,12 +611,6 @@ function IntegerField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
--- function IntegerField.get_prep_lookup(self, lookup_type, value)
---     if ((lookup_type == 'gte' or lookup_type == 'lt') and type(value) =='number') then
---         value = math_floor(value)
---     end
---     return Field.get_prep_lookup(self, lookup_type, value)
--- end
 
 
 local FloatField = Field:new{
@@ -833,6 +653,7 @@ function FloatField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
+
 
 local AutoField = Field:new{
     db_type = 'PRIMARYKEY', 
@@ -882,12 +703,6 @@ end
 function AutoField.formfield(self, kwargs)
     return nil
 end
--- function AutoField.contribute_to_class(self, cls, name, kwargs)
---     assert(not cls._meta.has_auto_field, "A model can't have more than one AutoField.")
---     Field.contribute_to_class(self, cls, name, kwargs)
---     cls._meta.has_auto_field = true
---     cls._meta.auto_field = self
--- end
 
 
 local BooleanField = Field:new{
@@ -956,18 +771,6 @@ function BooleanField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
--- function BooleanField.get_prep_lookup(self, lookup_type, value)
---     -- Special-case handling for filters coming from a Web request (e.g. the
---     -- admin interface). Only works for scalar values (not lists). If you're
---     -- passing in a list, you might as well make things the right type when
---     -- constructing the list.
---     if value == '1' then
---         value = true
---     elseif value == '0' then
---         value = false
---     end
---     return Field.get_prep_lookup(self, lookup_type, value)
--- end
 
 
 local ForeignKey = Field:new{
@@ -984,6 +787,7 @@ function ForeignKey.instance(cls, attrs)
     self.validators = self.validators or {}
     return self
 end
+
 
 return {
     CharField = CharField,

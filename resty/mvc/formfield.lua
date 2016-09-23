@@ -27,14 +27,6 @@ local os_rename = os.rename
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
 
--- 'Field', 'CharField', 'IntegerField',
--- 'DateField', 'TimeField', 'DateTimeField', 'DurationField',
--- 'RegexField', 'EmailField', 'FileField', 'ImageField', 'URLField',
--- 'BooleanField', 'NullBooleanField', 'ChoiceField', 'MultipleChoiceField',
--- 'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
--- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
--- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
-
 
 local function ClassCaller(cls, attrs)
     return cls:instance(attrs)
@@ -136,8 +128,6 @@ function Field.prepare_value(self, value)
     return value
 end
 
---<input id="id_sfzh" maxlen="18" name="sfzh" placeholder="" type="text">
---逻辑值 <input checked="checked" id="id_enable" name="enable" type="checkbox" />
 
 local CharField = Field:new{maxlen=nil, minlen=nil, strip=true}
 function CharField.instance(cls, attrs)
@@ -204,6 +194,7 @@ function IntegerField.widget_attrs(self, widget)
     return attrs
 end
 
+
 local FloatField = IntegerField:new{
     default_error_messages={invalid='Enter a float.'}, 
 }
@@ -224,6 +215,7 @@ function FloatField.widget_attrs(self, widget)
     end
     return attrs
 end
+
 
 local BaseTemporalField = Field:new{format_re=nil}
 function BaseTemporalField.to_lua(self, value)
@@ -274,8 +266,11 @@ local TextareaField = CharField:new{widget=Widget.Textarea}
 
 local BooleanField = Field:new{widget=Widget.CheckboxInput}
 function BooleanField.to_lua(self, value)
-    -- 这里的value是从widget的value_from_datadict传来的, 默认它只会传true或false
-    -- 这里仍然检测是防止value_from_datadict被重写
+    -- lua-resty-reqargs will parse selected input value to string 'on',
+    -- and simply doesn't send the value if unselected. so we check 'on' or nil first
+    if value == 'on' then
+        return true
+    end 
     if not value or value =='0' or value == 0 or value == '' or value=='false' then
         return false
     end
