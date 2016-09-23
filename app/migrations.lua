@@ -43,14 +43,8 @@ local function auto_models( ... )
                 local fields = {}
                 local meta = model.meta
                 if meta.auto_id then
-                    fields[#fields+1] = 'id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE'
+                    fields[#fields+1] = 'id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY'
                 end
-                -- if meta.auto_create_time then
-                --     fields[#fields+1] = 'create_time DATETIME  DEFAULT CURRENT_TIMESTAMP'
-                -- end
-                -- if meta.auto_update_time then
-                --     fields[#fields+1] = 'update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-                -- end
                 table_options[#table_options+1] = 'DEFAULT CHARSET='..meta.charset
                 local lookup = {
                         CharField = 'VARCHAR',
@@ -104,9 +98,6 @@ local function auto_models( ... )
                     if field_string then
                         fields[#fields+1] = field_string
                     end
-                end
-                if not field_options.primary_key then
-                    field_options.primary_key = string.format('PRIMARY KEY (id)')
                 end
                 local _op = {}
                 for k,v in pairs(field_options) do -- flatten field_options

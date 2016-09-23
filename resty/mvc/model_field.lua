@@ -1,14 +1,3 @@
-    -- 'Field', 'CharField', 'IntegerField',
-    -- 'DateField', 'TimeField', 'DateTimeField', 'DurationField',
-    -- 'RegexField', 'EmailField', 'FileField', 'ImageField', 'URLField',
-    -- 'BooleanField', 'NullBooleanField', 'ChoiceField', 'MultipleChoiceField',
-    -- 'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
-    -- 'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
-    -- 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'UUIDField',
--- SELECT "A"."a", "A"."b", "B"."c" 
--- FROM "A" INNER JOIN "B" 
--- ON ("jiangan_hetong"."creater_id" = "accounts_user"."id")
--- WHERE ("jiangan_hetong"."check_status" = 1 AND "jiangan_hetong"."config" = 2 AND "jiangan_hetong"."bscj" > -1.0) ORDER BY "jiangan_hetong"."bkgw" ASC, "jiangan_hetong"."bscj" DESC
 local validator = require"resty.mvc.validator"
 local form_field = require"resty.mvc.form_field"
 local utils = require"resty.mvc.utils"
@@ -36,9 +25,6 @@ local os_rename = os.rename
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
 
--- super\((\w+?), self\)\.(\w+?)\((.+?)\)
--- Field.\2(self, \3)
-
 local function ClassCaller(cls, attrs)
     return cls:instance(attrs)
 end
@@ -56,21 +42,6 @@ local Field = setmetatable({
     hidden = false,
 } , {__call=ClassCaller})
 
--- A guide to Field parameters:
---   * name:      The name of the field specified in the model.
---   * attname:   The attribute to use on the model object. This is the same as
---                "name", except in the case of ForeignKeys, where "_id" is
---                appended.
---   * db_column: The db_column specified in the model (or None).
---   * column:    The database column for this field. This is the same as
---                "attname", except if db_column is specified.
-
--- Code that introspects values, or does other dynamic things, should use
--- attname. For example, this gets the primary key value of object "obj":
-
---     getattr(obj, opts.pk.attname)
-
--- verbose_name=None, name=None,
 local NOT_PROVIDED = {}
 function Field.new(cls, self)
     self = self or {}
@@ -151,21 +122,15 @@ function Field._check_null_allowed_for_primary_keys(self)
     end
 end
 function Field.clone(self)
-    return Field:instance(dict(self))
-end
-function Field.get_pk_value_on_save(self, instance)
-    -- Hook to generate new PK values on save. This method is called when
-    -- saving instances with no primary key value set. If this method returns
-    -- something else than None, then the returned value is used when saving
-    -- the new instance.
-    if self.default then
-        return self:get_default()
-    end
+    return Field:new(dict(self))
 end
 function Field.to_lua(self, value)
     -- Converts the input value or value returned by lua-resty-mysql 
-    -- into the expected lua data type, raising error if the data can't be converted.
-    -- Returns the converted value. Subclasses should override this.
+    -- into the expected lua data type.
+    return value
+end
+function Field.to_db(self, value)
+    -- get value prepared to be saved to db.
     return value
 end
 function Field.get_validators(self)
@@ -241,80 +206,8 @@ end
 function Field.is_unique(self)
     return self.unique or self.primary_key
 end
-function Field.contribute_to_class(self, cls, name)
-    self:set_attributes_from_name(name)
-    self.model = cls
-    cls._meta.add_field(self)
-    if self.choices then
-        cls[string_format('get_%s_display', self.name)] = curry(cls._get_FIELD_display, {field=self})   
-    end
-end
-function Field.set_attributes_from_name(self, name)
-    if not self.name then
-        self.name = name
-    end
-    self.attname, self.column = self:get_attname_column()
-    self.concrete = self.column ~= nil
-    if self.verbose_name == nil and self.name then
-        self.verbose_name = self.name:gsub('_', ' ')
-    end
-end
-function Field.get_attname_column(self)
-    local attname = sel:get_attname()
-    local column = self.db_column or attname
-    return attname, column
-end
-function Field.get_attname(self)
-    return self.name
-end
-function Field.get_filter_kwargs_for_object(self, obj)
-    -- Return a dict that when passed as kwargs to self.model.where(), would
-    -- yield all instances having the same value for this field as obj has.
-    return {[self.name]=obj[self.attname]}
-end
 function Field.get_internal_type(self)
     return 'Field'
-end
-function Field.pre_save(self, model_instance, add)
-    -- Returns field's value just before saving.
-    return model_instance[self.attname]
-end
-
-function Field.lua_to_db(self, value)
-    -- Perform preliminary non-db specific value checks and conversions.
-    return value
-end
-local string_lookup_table = {
-    iexact = true,
-    contains = true,
-    icontains = true,
-    startswith = true,
-    istartswith = true,
-    endswith = true,
-    iendswith = true,
-    isnull = true,
-    search = true,
-    regex = true,
-    iregex = true,}
-local compare_lookup_table = {
-    exact = true,
-    gt = true,
-    gte = true,
-    lt = true,
-    lte = true,}
-function Field.get_prep_lookup(self, lookup_type, value)
-    if string_lookup_table[lookup_type] then
-        return value
-    elseif compare_lookup_table[lookup_type]  then
-        return self:lua_to_db(value)
-    elseif lookup_type == 'range' or lookup_type == 'in' then
-        local res = {}
-        for i, v in ipairs(value) do
-            res[#res+1] = self:lua_to_db(v)
-        end
-        return res
-    end
-    return self:lua_to_db(value)
 end
 function Field.has_default(self)
     return self.default ~= nil
@@ -332,7 +225,7 @@ function Field.get_default(self)
     return ""
 end
 local BLANK_CHOICE_DASH = {{"", "---------"}}
-function Field.get_choices(self, include_blank, blank_choice, limit_choices_to)
+function Field.get_choices(self, include_blank, blank_choice)
     -- Returns choices with a default blank choices included, for use
     -- as SelectField choices for this field.
     if include_blank == nil then
@@ -363,34 +256,6 @@ function Field.get_choices(self, include_blank, blank_choice, limit_choices_to)
 end
 function Field.get_choices_default(self)
     return self:get_choices()
-end
-function Field.value_from_object(self, obj)
-    if obj ~= nil then
-        return obj[self.attname]
-    else
-        return self:get_default()
-    end
-end
-function Field.value_to_string(self, obj)
-    -- Returns a string value of this field from the passed obj.
-    -- This is used by the serialization framework.
-    return self:value_from_object(obj)
-end
-function Field.flatchoices(self)
-    -- """Flattened version of choices tuple."""
-    local flat = {}
-    for i, e in ipairs(self.choices) do
-        local choice, value = e[1], e[2]
-        if type(value) == 'table' then
-            list_extend(flat, value)
-        else
-            flat[#flat+1] = {choice, value}
-        end
-    end
-    return flat
-end
-function Field.save_form_data(self, instance, data)
-    instance[self.name] = data
 end
 local valid_typed_kwargs = {
     coerce = true,
@@ -445,9 +310,130 @@ function Field.formfield(self, kwargs)
     end
     return form_class:instance(defaults)
 end
+function Field.flatchoices(self)
+    -- """Flattened version of choices tuple."""
+    local flat = {}
+    for i, e in ipairs(self.choices) do
+        local choice, value = e[1], e[2]
+        if type(value) == 'table' then
+            list_extend(flat, value)
+        else
+            flat[#flat+1] = {choice, value}
+        end
+    end
+    return flat
+end
+-- A guide to Field parameters:
+--   * name:      The name of the field specified in the model.
+--   * attname:   The attribute to use on the model object. This is the same as
+--                "name", except in the case of ForeignKeys, where "_id" is
+--                appended.
+--   * db_column: The db_column specified in the model (or None).
+--   * column:    The database column for this field. This is the same as
+--                "attname", except if db_column is specified.
+
+-- Code that introspects values, or does other dynamic things, should use
+-- attname. For example, this gets the primary key value of object "obj":
+
+--     getattr(obj, opts.pk.attname)
+
+-- verbose_name=None, name=None,
+-- function Field.get_pk_value_on_save(self, instance)
+--     -- Hook to generate new PK values on save. This method is called when
+--     -- saving instances with no primary key value set. If this method returns
+--     -- something else than None, then the returned value is used when saving
+--     -- the new instance.
+--     if self.default then
+--         return self:get_default()
+--     end
+-- end
+-- local string_lookup_table = {
+--     iexact = true,
+--     contains = true,
+--     icontains = true,
+--     startswith = true,
+--     istartswith = true,
+--     endswith = true,
+--     iendswith = true,
+--     isnull = true,
+--     search = true,
+--     regex = true,
+--     iregex = true,}
+-- local compare_lookup_table = {
+--     exact = true,
+--     gt = true,
+--     gte = true,
+--     lt = true,
+--     lte = true,}
+-- function Field.get_prep_lookup(self, lookup_type, value)
+--     if string_lookup_table[lookup_type] then
+--         return value
+--     elseif compare_lookup_table[lookup_type]  then
+--         return self:to_db(value)
+--     elseif lookup_type == 'range' or lookup_type == 'in' then
+--         local res = {}
+--         for i, v in ipairs(value) do
+--             res[#res+1] = self:to_db(v)
+--         end
+--         return res
+--     end
+--     return self:to_db(value)
+-- end
+-- function Field.contribute_to_class(self, cls, name)
+--     self:set_attributes_from_name(name)
+--     self.model = cls
+--     cls._meta.add_field(self)
+--     if self.choices then
+--         cls[string_format('get_%s_display', self.name)] = curry(cls._get_FIELD_display, {field=self})   
+--     end
+-- end
+-- function Field.set_attributes_from_name(self, name)
+--     if not self.name then
+--         self.name = name
+--     end
+--     self.attname, self.column = self:get_attname_column()
+--     self.concrete = self.column ~= nil
+--     if self.verbose_name == nil and self.name then
+--         self.verbose_name = self.name:gsub('_', ' ')
+--     end
+-- end
+-- function Field.get_attname_column(self)
+--     local attname = sel:get_attname()
+--     local column = self.db_column or attname
+--     return attname, column
+-- end
+-- function Field.get_attname(self)
+--     return self.name
+-- end
+-- function Field.get_filter_kwargs_for_object(self, obj)
+--     -- Return a dict that when passed as kwargs to self.model.where(), would
+--     -- yield all instances having the same value for this field as obj has.
+--     return {[self.name]=obj[self.attname]}
+-- end
+-- function Field.pre_save(self, model_instance, add)
+--     -- Returns field's value just before saving.
+--     return model_instance[self.attname]
+-- end
+-- function Field.value_from_object(self, obj)
+--     if obj ~= nil then
+--         return obj[self.attname]
+--     else
+--         return self:get_default()
+--     end
+-- end
+-- function Field.value_to_string(self, obj)
+--     -- Returns a string value of this field from the passed obj.
+--     -- This is used by the serialization framework.
+--     return self:value_from_object(obj)
+-- end
+-- function Field.save_form_data(self, instance, data)
+--     instance[self.name] = data
+-- end
+
 
 local AutoField = Field:new{
-    description = "Integer",
+    db_type = 'INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY', 
+    description = "Primary Key, from 0 to 4294967295.",
     empty_strings_allowed = false,
     default_error_messages = {
         invalid = "value must be an integer.",
@@ -475,42 +461,71 @@ function AutoField.to_lua(self, value)
         return nil
     end
     value = tonumber(value)
-    if not value or math_floor(value)~=value then
+    if not value or math_floor(value) ~= value then
         return nil, self.error_messages.invalid
     end
     return value
 end
-function AutoField.validate(self, value, model_instance)
-
-end
-function AutoField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
+function AutoField.to_db(self, value)
+    -- e.g. 12.0, 12.01, '12.0', '12.01' will be 12
     if value == nil then
         return nil
     end
-    return math_floor(tonumber(value))
+    return math_floor(value)
 end
-function AutoField.contribute_to_class(self, cls, name, kwargs)
-    assert(not cls._meta.has_auto_field, "A model can't have more than one AutoField.")
-    Field.contribute_to_class(self, cls, name, kwargs)
-    cls._meta.has_auto_field = true
-    cls._meta.auto_field = self
+function AutoField.validate(self, value, model_instance)
+    return
 end
 function AutoField.formfield(self, kwargs)
     return nil
 end
+-- function AutoField.contribute_to_class(self, cls, name, kwargs)
+--     assert(not cls._meta.has_auto_field, "A model can't have more than one AutoField.")
+--     Field.contribute_to_class(self, cls, name, kwargs)
+--     cls._meta.has_auto_field = true
+--     cls._meta.auto_field = self
+-- end
 
 
 local BooleanField = Field:new{
-    description = "Boolean (Either True or false)",
+    db_type = 'TINYINT', 
+    description = "Boolean (Either true or false)",
     empty_strings_allowed = false,
     default_error_messages = {
-        invalid = "'%s' value must be either true or false.",
+        invalid = "value must be either true or false.",
     },
 }
 function BooleanField.instance(cls, attrs)
     attrs.blank = true
     return Field.instance(cls, attrs)
+end
+local BOOLEAN_TABLE = {
+    [true] = true, 
+    [false] = false, 
+    ['1'] = true, 
+    ['0'] = false, 
+    [1] = true, 
+    [0] = false, 
+    ['true'] = true, 
+    ['false'] = false, 
+}
+function BooleanField.to_lua(self, value)
+    value = BOOLEAN_TABLE[value]
+    if value ~= nil then
+        return value
+    end
+    return nil, self.error_messages.invalid
+end
+function BooleanField.to_db(self, value)
+    value = BOOLEAN_TABLE[value]
+    if value == nil then
+        return nil
+    end
+    if value then
+        return 1
+    else
+        return 0
+    end
 end
 function BooleanField.check(self, kwargs)
     local errors = Field.check(self, kwargs)
@@ -525,37 +540,6 @@ end
 function BooleanField.get_internal_type(self)
     return "BooleanField"
 end
-function BooleanField.to_lua(self, value)
-    if value == true or value == false then
-        return value
-    end
-    if value == 'true' or value == '1' or value == 't' then
-        return true
-    end
-    if value == 'false' or value == '0' or value == 'f' then
-        return false
-    end
-    return nil, string_format(self.error_messages.invalid, value)
-end
-function BooleanField.get_prep_lookup(self, lookup_type, value)
-    -- Special-case handling for filters coming from a Web request (e.g. the
-    -- admin interface). Only works for scalar values (not lists). If you're
-    -- passing in a list, you might as well make things the right type when
-    -- constructing the list.
-    if value == '1' then
-        value = true
-    elseif value == '0' then
-        value = false
-    end
-    return Field.get_prep_lookup(self, lookup_type, value)
-end
-function BooleanField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
-    if value == nil then
-        return nil
-    end
-    return not not value
-end
 function BooleanField.formfield(self, kwargs)
     -- Unlike most fields, BooleanField figures out include_blank from
     -- self.null instead of self.blank.
@@ -569,14 +553,37 @@ function BooleanField.formfield(self, kwargs)
     dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
+-- function BooleanField.get_prep_lookup(self, lookup_type, value)
+--     -- Special-case handling for filters coming from a Web request (e.g. the
+--     -- admin interface). Only works for scalar values (not lists). If you're
+--     -- passing in a list, you might as well make things the right type when
+--     -- constructing the list.
+--     if value == '1' then
+--         value = true
+--     elseif value == '0' then
+--         value = false
+--     end
+--     return Field.get_prep_lookup(self, lookup_type, value)
+-- end
+
 
 local CharField = Field:new{
-    description = "String",
+    db_type = 'VARCHAR', 
+    description = "String, 65535 characters at most",
 }
 function CharField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
     self.validators[#self.validators+1] = validator.maxlen(self.maxlen)
     return self
+end
+function CharField.to_lua(self, value)
+    if type(value) == 'string' or value == nil then
+        return value
+    end
+    return tostring(value)
+end
+function CharField.to_db(self, value)
+    return self:to_lua(value)
 end
 function CharField.check(self, kwargs)
     local errors = Field.check(self, kwargs)
@@ -592,16 +599,6 @@ function CharField._check_max_length_attribute(self, kwargs)
 end
 function CharField.get_internal_type(self)
     return "CharField"
-end
-function CharField.to_lua(self, value)
-    if type(value)=='string' or value == nil then
-        return value
-    end
-    return tostring(value)
-end
-function CharField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
-    return self:to_lua(value)
 end
 function CharField.formfield(self, kwargs)
     -- Passing maxlen to form_field.CharField means that the value's length
@@ -687,8 +684,8 @@ function DateField.to_lua(self, value)
     end
     return value
 end
-function DateField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
+function DateField.to_db(self, value)
+    value = Field.to_db(self, value)
     return self:to_lua(value)
 end
 function DateField.value_to_string(self, obj)
@@ -746,8 +743,8 @@ end
 
 -- get_prep_lookup is inherited from DateField
 
-function DateTimeField.lua_to_db(self, value)
-    local value = Field.lua_to_db(self, value)
+function DateTimeField.to_db(self, value)
+    local value = Field.to_db(self, value)
     return self:to_lua(value)
 end
 function DateTimeField.value_to_string(self, obj)
@@ -796,8 +793,8 @@ function TimeField.to_lua(self, value)
     end
     return value
 end
-function TimeField.lua_to_db(self, value)
-    local value = Field.lua_to_db(self, value)
+function TimeField.to_db(self, value)
+    local value = Field.to_db(self, value)
     return self:to_lua(value)
 end
 function TimeField.pre_save(self, model_instance, add)
@@ -866,8 +863,8 @@ function IntegerField.to_lua(self, value)
     end
     return value
 end
-function IntegerField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
+function IntegerField.to_db(self, value)
+    value = Field.to_db(self, value)
     if value == nil then
         return nil
     end
@@ -905,8 +902,8 @@ function FloatField.to_lua(self, value)
     end
     return value
 end
-function FloatField.lua_to_db(self, value)
-    value = Field.lua_to_db(self, value)
+function FloatField.to_db(self, value)
+    value = Field.to_db(self, value)
     if value == nil then
         return nil
     end
