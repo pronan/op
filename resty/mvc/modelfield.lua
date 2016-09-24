@@ -43,7 +43,7 @@ local Field = setmetatable({
     hidden = false,
 } , {__call=ClassCaller})
 
-local NOT_PROVIDED = {}
+-- local NOT_PROVIDED = {}
 function Field.new(cls, self)
     self = self or {}
     cls.__index = cls
@@ -122,15 +122,15 @@ function Field._check_null_allowed_for_primary_keys(self)
         return 'Primary keys must not have null=true.'
     end
 end
-function Field.to_lua(self, value)
-    -- Converts the input value or value returned by lua-resty-mysql 
-    -- into the expected lua data type.
-    return value
-end
-function Field.to_db(self, value)
-    -- get value prepared to be saved to db.
-    return value
-end
+-- function Field.to_lua(self, value)
+--     -- Converts the input value or value returned by lua-resty-mysql 
+--     -- into the expected lua data type.
+--     return value
+-- end
+-- function Field.to_db(self, value)
+--     -- get value prepared for database.
+--     return value
+-- end
 function Field.run_validators(self, value)
     if is_empty_value(value) then
         return
