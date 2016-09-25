@@ -2,14 +2,14 @@ local json = require "cjson.safe"
 local query = require"resty.mvc.query".single
 local response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
-local User = require"app.models".User
+local User = require"app.user.models".User
 local forms = require"app.forms"
 
 
 local m={}
 function m.q(kwargs)
     -- local ret, err = query("select `user`.`name` as `u-name`, `pet`.`name` from user INNER JOIN pet ON (`user`.`id`=`pet`.`user`);")
-    -- local ret, err = User:where{name__startswith='婆'}:exec()
+    local ret, err = User:where{name__contains="\\"}:exec()
     return response.Plain(repr(ret))
 end
 function m.register(request)

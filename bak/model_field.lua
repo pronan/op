@@ -455,7 +455,7 @@ function Field.value_from_object(self, obj)
         return self:get_default()
     end
 end
-function Field.value_to_string(self, obj)
+function Field.valueserialize_basetype(self, obj)
     -- Returns a string value of this field from the passed obj.
     -- This is used by the serialization framework.
     return self:value_from_object(obj)
@@ -787,7 +787,7 @@ function DateField.get_db_prep_value(self, value, connection, prepared)
     end
     return connection.ops:adapt_datefield_value(value)
 end
-function DateField.value_to_string(self, obj)
+function DateField.valueserialize_basetype(self, obj)
     local val = self:value_from_object(obj)
     if val == nil then
         return ''  
@@ -850,7 +850,7 @@ function DateTimeField.get_db_prep_value(self, value, connection, prepared)
     end
     return connection.ops.adapt_datetimefield_value(value)
 end
-function DateTimeField.value_to_string(self, obj)
+function DateTimeField.valueserialize_basetype(self, obj)
     local val = self:value_from_object(obj)
     if val == nil then
         return ''
@@ -1010,7 +1010,7 @@ function TimeField.get_db_prep_value(self, value, connection, prepared)
     end
     return connection.ops.adapt_timefield_value(value)
 end
-function TimeField.value_to_string(self, obj)
+function TimeField.valueserialize_basetype(self, obj)
     local val = self:value_from_object(obj)
     if val == nil then
         return ''

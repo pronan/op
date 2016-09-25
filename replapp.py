@@ -7,11 +7,12 @@ targets = ['lua']
 def replace(go=False):
     hits = {}
     for old, new in [
-        ('form_field','formfield'), 
-        ('model_field','modelfield'), 
-        ('client_to_lua','to_lua'), 
-        ('db_to_lua','to_lua'), 
-        ('lua_to_db','to_db'), 
+    ('loger','serialize_basetype'), 
+        # ('_to_string','serialize_basetype'), 
+        # ('_to_arg_string','serialize_columns'), 
+        # ('_to_kwarg_string','serialize_attrs'), 
+        # ('_to_and','serialize_andkwargs'), 
+        # ('lua_to_db','to_db'), 
     ]:
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
@@ -20,11 +21,11 @@ def replace(go=False):
                     continue
                 res = []
                 with open(p, encoding='u8') as f:
-                    for line in f:
+                    for i, line in enumerate(f):
                         if old in line:
                             if p not in hits:
                                 hits[p] = []
-                            hits[p].append(line)
+                            hits[p].append((i, line))
                             line = line.replace(old, new)
                         res.append(line)
                 if go:
@@ -32,8 +33,8 @@ def replace(go=False):
 
     for path, lines in hits.items():
         print(path)
-        for line in lines:
-            print('  ', line, end='')
+        for i, line in lines:
+            print(i, line, end='')
 
                     
 

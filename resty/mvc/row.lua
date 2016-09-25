@@ -1,6 +1,6 @@
 local query = require"resty.mvc.query".single
-local _to_string = require"resty.mvc.init"._to_string
-local _to_kwarg_string = require"resty.mvc.init"._to_kwarg_string
+local serialize_basetype = require"resty.mvc.utils".serialize_basetype
+local serialize_attrs = require"resty.mvc.utils".serialize_attrs
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -17,18 +17,18 @@ function Row.new(cls, attrs)
     cls.__index = cls
     return setmetatable(attrs, cls)
 end
-function Row.instance(cls, attrs)
-    -- attrs may be from db driver, try to use `db_to_lua` if the field specified
-    local self = cls:new(attrs)
-    -- local fields = self.fields
-    -- for k, v in pairs(self) do
-    --     local f = fields[k]
-    --     if f and f.db_to_lua then
-    --         self[k] = f:db_to_lua(v)
-    --     end
-    -- end
-    return self
-end
+-- function Row.instance(cls, attrs)
+--     -- attrs may be from db driver, try to use `db_to_lua` if the field specified
+--     local self = cls:new(attrs)
+--     local fields = self.fields
+--     for k, v in pairs(self) do
+--         local f = fields[k]
+--         if f and f.db_to_lua then
+--             self[k] = f:db_to_lua(v)
+--         end
+--     end
+--     return self
+-- end
 function Row.create(self)
     local valid_attrs = {}
     local all_errors = {}
@@ -58,33 +58,7 @@ function Row.create(self)
         return nil, all_errors
     end
     local res, err = query(string_format(
-        'INSERT INTO `%s` SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
-    if res then
-        self.id = res.insert_id
-        return res
-    else
-        return nil, {err}
-    end
-end
-function Row.create_without_clean(self)
-    local valid_attrs = {}
-    for name, field in pairs(self.fields) do
-        local value = self[name]
-        if value == nil then
-            if field.default then
-                valid_attrs[name] = field:get_default()
-            elseif field.auto_now or field.auto_now_add then
-                valid_attrs[name] = ngx_localtime()
-            end
-        else
-            if field.to_db then
-                value = field:to_db(value)
-            end
-            valid_attrs[name] = value
-        end
-    end
-    local res, err = query(string_format(
-        'INSERT INTO `%s` SET %s;', self.table_name, _to_kwarg_string(valid_attrs)))
+        'INSERT INTO `%s` SET %s;', self.table_name, serialize_attrs(valid_attrs)))
     if res then
         self.id = res.insert_id
         return res
@@ -123,8 +97,36 @@ function Row.update(self)
         return nil, all_errors
     end
     local res, err = query(string_format(
-        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs), self.id))
+        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, serialize_attrs(valid_attrs), self.id))
     if res then
+        return res
+    else
+        return nil, {err}
+    end
+end
+-- *_without_clean is used when you're sure no need to perform validations, 
+-- e.g. when the data comes from `resty.mvc.form` cleaned_data.
+function Row.create_without_clean(self)
+    local valid_attrs = {}
+    for name, field in pairs(self.fields) do
+        local value = self[name]
+        if value == nil then
+            if field.default then
+                valid_attrs[name] = field:get_default()
+            elseif field.auto_now or field.auto_now_add then
+                valid_attrs[name] = ngx_localtime()
+            end
+        else
+            if field.to_db then
+                value = field:to_db(value)
+            end
+            valid_attrs[name] = value
+        end
+    end
+    local res, err = query(string_format(
+        'INSERT INTO `%s` SET %s;', self.table_name, serialize_attrs(valid_attrs)))
+    if res then
+        self.id = res.insert_id
         return res
     else
         return nil, {err}
@@ -150,7 +152,7 @@ function Row.update_without_clean(self)
         end
     end
     local res, err = query(string_format(
-        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, _to_kwarg_string(valid_attrs), self.id))
+        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, serialize_attrs(valid_attrs), self.id))
     if res then
         return res
     else

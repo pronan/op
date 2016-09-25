@@ -97,6 +97,7 @@ function Textarea.render(self, name, value, attrs)
         value = ''
     end
     local final_attrs = self:build_attrs(attrs, {name=name})
+    -- todo: is value need to escapte double quote? -- value:gsub('"', '&quot;')
     return string_format('<textarea%s>\n%s</textarea>', to_html_attrs(final_attrs), value)
 end
 

@@ -1,9 +1,9 @@
 local query = require"resty.mvc.query".single
 local Row = require"resty.mvc.row"
-local _to_string = require"resty.mvc.init"._to_string
-local _to_kwarg_string = require"resty.mvc.init"._to_kwarg_string
-local _to_arg_string = require"resty.mvc.init"._to_arg_string
-local _to_and = require"resty.mvc"._to_and
+local serialize_basetype = require"resty.mvc.utils".serialize_basetype
+local serialize_attrs = require"resty.mvc.utils".serialize_attrs
+local serialize_columns = require"resty.mvc.utils".serialize_columns
+local serialize_andkwargs = require"resty.mvc.utils".serialize_andkwargs
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -14,6 +14,21 @@ local string_format = string.format
 local table_concat = table.concat
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
+
+-- Table 10.1 Special Character Escape Sequences
+
+-- Escape Sequence Character Represented by Sequence
+-- \0  An ASCII NUL (X'00') character
+-- \'  A single quote (“'”) character
+-- \"  A double quote (“"”) character
+-- \b  A backspace character
+-- \n  A newline (linefeed) character
+-- \r  A carriage return character
+-- \t  A tab character
+-- \Z  ASCII 26 (Control+Z); see note following the table
+-- \\  A backslash (“\”) character
+-- \%  A “%” character; see note following the table
+-- \_  A “_” character; see note following the table
 
 local function execer(t) 
     return t:exec() 
@@ -54,7 +69,7 @@ function Manager.exec(self)
     if self.is_select and not(self._group or self._group_string or self._having or self._having_string) then
         -- none-group SELECT clause, wrap the results
         for i, attrs in ipairs(res) do
-            res[i] = self.row_class:instance(attrs)
+            res[i] = self.row_class:new(attrs)
         end
     end
     return res
@@ -63,44 +78,54 @@ function Manager.to_sql(self)
     if self._update_string then
         return string_format('UPDATE `%s` SET %s%s;', self.table_name, self._update_string,
             self._where_string and ' WHERE '..self._where_string or 
-            self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
+            self._where and ' WHERE '..serialize_andkwargs(self._where, self.table_name) or '')
     elseif self._update then
-        return string_format('UPDATE `%s` SET %s%s;', self.table_name, _to_kwarg_string(self._update, self.table_name),
+        return string_format('UPDATE `%s` SET %s%s;', self.table_name, serialize_attrs(self._update, self.table_name),
             self._where_string and ' WHERE '..self._where_string or 
-            self._where and ' WHERE '.._to_and(self._where, self.table_name) or '')
+            self._where and ' WHERE '..serialize_andkwargs(self._where, self.table_name) or '')
     elseif self._create_string then
         return string_format('INSERT INTO `%s` SET %s;', self.table_name, self._create_string)
     elseif self._create then
-        return string_format('INSERT INTO `%s` SET %s;', self.table_name, _to_kwarg_string(self._create, self.table_name))
+        return string_format('INSERT INTO `%s` SET %s;', self.table_name, serialize_attrs(self._create, self.table_name))
     -- delete always need WHERE clause in case truncate table    
     elseif self._delete_string then 
         return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, self._delete_string)
     elseif self._delete then 
-        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, _to_and(self._delete, self.table_name))
+        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, serialize_andkwargs(self._delete, self.table_name))
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     else 
         self.is_select = true --for the `exec` method
         local stm = string_format('SELECT %s FROM `%s`%s%s%s%s%s;', 
-            self._select_string or self._select and _to_arg_string(self._select, self.table_name) or '*',  
+            self._select_string or self._select and serialize_columns(self._select, self.table_name) or '*',  
             self.table_name, 
-            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '.._to_and(self._where, self.table_name)   or '', 
-            self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '.._to_arg_string(self._group, self.table_name)      or '', 
-            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '.._to_and(self._having, self.table_name) or '', 
-            self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '.._to_arg_string(self._order, self.table_name)      or '', 
-            self._page_string   and ' LIMIT '..self._page_string      or self._page   and ' LIMIT '.._to_arg_string(self._page, self.table_name)          or '')
+            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '..serialize_andkwargs(self._where, self.table_name)   or '', 
+            self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '..serialize_columns(self._group, self.table_name)      or '', 
+            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '..serialize_andkwargs(self._having, self.table_name) or '', 
+            self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '..serialize_columns(self._order, self.table_name)      or '', 
+            self._page_string   and ' LIMIT '..self._page_string      or '')
         return stm
     end
 end
--- function Manager.get_where_args(self)
---     if self._where then 
---         return ' WHERE '.._to_and(self._where, self.table_name)
---     elseif self._where_string then
---         return ' WHERE '..self._where_string
---     else
---         return ''
---     end
--- end
-
+function Manager.clean_params(self, params)
+    -- params passed to `create` and `update` need to:
+    -- 1) delete it or raise an error if a key is not in self.fields (currently delete it).
+    -- 2) call `to_db` method(if exists) to get value prepared for being saved to database
+    --    e.g. lua literal `true` or `false` may be passed to a BooleanField, which 
+    --    should be converted to 1 or 0 for database. Also in the future, a lua datetime object
+    --    may be passed to a DateTimeField, which should be converted to string for database. e.g.
+    --    params = {bool_field=true, datetime_field={year=2010, month=10, day=10, hour=0, minute=0, second=0}}
+    --    -> {bool_field=1, datetime_field='2010-10-10 00:00:00'}
+    -- 3) For more validation checks, use api `create` or `update` of `resty.mvc.row`
+    for k,v in pairs(params) do
+        local f = self.fields[k]
+        if not f then
+            params[k] = nil
+        elseif f.to_db then
+            params[k] = f:to_db(v)
+        end
+    end
+    return params
+end
 -- chain methods
 function Manager.create(self, params)
     if type(params) == 'table' then
@@ -108,7 +133,7 @@ function Manager.create(self, params)
             self._create = {}
         end
         local res = self._create
-        for k, v in pairs(params) do
+        for k, v in pairs(self:clean_params(params)) do
             res[k] = v
         end
     else
@@ -122,7 +147,7 @@ function Manager.update(self, params)
             self._update = {}
         end
         local res = self._update
-        for k, v in pairs(params) do
+        for k, v in pairs(self:clean_params(params)) do
             res[k] = v
         end
     else
@@ -219,17 +244,8 @@ function Manager.having(self, params)
     return self
 end
 function Manager.page(self, params)
-    if type(params) == 'table' then
-        if self._page == nil then
-            self._page = {}
-        end
-        local res = self._page
-        for i, v in ipairs(params) do
-            res[#res+1] = v
-        end
-    else
-        self._page_string = params
-    end
+    -- only accept string
+    self._page_string = params
     return self
 end
 return Manager

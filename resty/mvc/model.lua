@@ -1,7 +1,7 @@
 local query = require"resty.mvc.query".single
 local Row = require"resty.mvc.row"
 local Manager = require"resty.mvc.manager" 
-local _to_and = require"resty.mvc.init"._to_and
+local serialize_andkwargs = require"resty.mvc.utils".serialize_andkwargs
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -67,7 +67,7 @@ end
 function Model.get(self, params)
     -- special process for `get`, params cannot be empty table
     if type(params) == 'table' then
-        params = _to_and(params)
+        params = serialize_andkwargs(params)
     end
     local res, err = query(string_format('SELECT * FROM `%s` WHERE %s;', self.table_name, params))
     if not res then
@@ -76,7 +76,7 @@ function Model.get(self, params)
     if #res ~= 1 then
         return nil, '`get` method should return only one row, but now is '..#res
     end
-    return self.row_class:instance(res[1])
+    return self.row_class:new(res[1])
 end
 function Model.all(self)
     -- special process for `all`
@@ -86,7 +86,7 @@ function Model.all(self)
     end
     local row_class = self.row_class
     for i, attrs in ipairs(res) do
-        res[i] = row_class:instance(attrs)
+        res[i] = row_class:new(attrs)
     end
     return res
 end

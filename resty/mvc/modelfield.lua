@@ -19,7 +19,6 @@ local pairs = pairs
 local assert = assert
 local math_floor = math.floor
 local string_format = string.format
-local string_sub = string.sub
 local table_concat = table.concat
 local table_insert = table.insert
 local os_rename = os.rename
@@ -336,8 +335,7 @@ function CharField.to_lua(self, value)
     return tostring(value)
 end
 function CharField.to_db(self, value)
-    -- escape ' and \
-    return self:to_lua(value):gsub("\\", "\\\\"):gsub("'", "\\'")
+    return self:to_lua(value)
 end
 function CharField.check(self, kwargs)
     local errors = Field.check(self, kwargs)
@@ -392,7 +390,7 @@ function TextField.to_lua(self, value)
     return tostring(value)
 end
 function TextField.to_db(self, value)
-    return self:to_lua(value):gsub("\\", "\\\\"):gsub("'", "\\'")
+    return self:to_lua(value)
 end
 function TextField.get_internal_type(self)
     return "TextField"
