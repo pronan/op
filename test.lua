@@ -46,11 +46,18 @@ struct tm {
   long int gmtoff;	 /* Seconds east of UTC.  */
   const char* zone;	 /* Timezone abbreviation.  */
 };
+struct tm* gmtime_r(const time_t*, struct tm*);
 struct tm* localtime_r(const time_t*, struct tm*);
 char* asctime_r(const struct tm*, char*);
 time_t mktime(struct tm*);
 ]]
 
+local function gmtime(timep)
+    local timep_ptr = ffi.new("time_t[1]", timep)
+    local tm = ffi.new("struct tm[1]")
+    ffi.C.gmtime_r(timep_ptr, tm)
+    return tm[0]
+end
 local function localtime(timep)
     local timep_ptr = ffi.new("time_t[1]", timep)
     local tm = ffi.new("struct tm[1]")
@@ -71,12 +78,16 @@ local function asctime(struct)
     ffi.C.asctime_r(struct, buf)
     return buf
 end
-local function table_to_tm(t)
-    return ffi.new("struct tm", t)
+local function strfmt(tm)
+  return string.format('%s-%s-%s %s:%s:%s', tm.year, tm.month, tm.day, 
+    tm.hour, tm.minute, tm.second)
 end
 
 local res = localtime(1474739796)
-print(type(res.zone))
+print(strfmt(res))
+local res = gmttime(0)
+print(strfmt(res))
+
 local t = {
     year=res.year, 
     mon=res.mon, 
