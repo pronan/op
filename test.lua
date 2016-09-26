@@ -1,145 +1,218 @@
--- https://linux.die.net/man/3/localtime_r
+local encode = require"cjson".encode
+local Model = require"resty.mvc.model"
+local Query = require"resty.mvc.query".single
+local Field = require"resty.mvc.modelfield"
 
--- The localtime() function converts the calendar time timestamp to broken-down time 
--- representation, expressed relative to the user's specified timezone. The function 
--- acts as if it called tzset(3) and sets the external variables tzname with information 
--- about the current timezone, timezone with the difference between Coordinated 
--- Universal Time (UTC) and local standard time in seconds, and daylight to a 
--- nonzero value if daylight savings time rules apply during some part of the 
--- year. The return value points to a statically allocated struct which might be 
--- overwritten by subsequent calls to any of the date and time functions. 
--- The localtime_r() function does the same, but stores the data in a user-supplied 
--- struct. It need not set tzname, timezone, and daylight.
-
--- The asctime() function converts the broken-down time value tm into a null-terminated 
--- string with the same format as ctime(). The return value points to a statically 
--- allocated string which might be overwritten by subsequent calls to any of the 
--- date and time functions. The asctime_r() function does the same, but stores 
--- the string in a user-supplied buffer which should have room for at least 26 bytes.
-
--- The mktime() function modifies the fields of the tm structure as follows: 
--- tm_wday and tm_yday are set to values determined from the contents of the other 
--- fields; if structure members are outside their valid interval, they will be 
--- normalized (so that, for example, 40 October is changed into 9 November); 
--- tm_isdst is set (regardless of its initial value) to a positive value or to 0, 
--- respectively, to indicate whether DST is or is not in effect at the specified 
--- time. Calling mktime() also sets the external variable tzname with information 
--- about the current timezone.
-
--- If the specified broken-down time cannot be represented as calendar time 
--- (seconds since the Epoch), mktime() returns (time_t) -1 and does not alter the 
--- members of the broken-down time structure.
-
-local ffi = require("ffi")
-ffi.cdef[[
-typedef uint32_t time_t;
-typedef struct tm {
-  int second;        /* Seconds. [0-60] (1 leap second) */
-  int minute;        /* Minutes. [0-59] */
-  int hour;          /* Hours.   [0-23] */
-  int day;           /* Day.     [1-31] */
-  int month;         /* Month.   [0-11] */
-  int year;          /* Year - 1900.  */
-  int wday;          /* Day of week. [0-6] */
-  int yday;          /* Days in year.[0-365] */
-  int isdst;         /* DST.     [-1/0/1]*/
-  long int gmtoff;   /* Seconds east of UTC.  */
-  const char* zone;  /* Timezone abbreviation.  */
-} tm;
-struct tm* gmtime_r   (const time_t*, struct tm*);
-struct tm* localtime_r(const time_t*, struct tm*);
-char*      asctime_r  (const struct tm*, char*);
-time_t     mktime     (struct tm*);
-]]
-
-local tm_ptr_constructor = ffi.typeof("struct tm[1]")
-local time_t_ptr_constructor = ffi.typeof("time_t[1]")
-local function gmtime(timestamp)
-    local timestamp_ptr = ffi.new("time_t[1]", timestamp)
-    local tm_ptr = ffi.new("struct tm[1]")
-    ffi.C.gmtime_r(timestamp_ptr, tm_ptr)
-    return tm_ptr[0]
-end
-local function gmtime1(timestamp)
-    local timestamp_ptr = time_t_ptr_constructor(timestamp)
-    local tm_ptr = tm_ptr_constructor()
-    ffi.C.gmtime_r(timestamp_ptr, tm_ptr)
-    return tm_ptr[0]
-end
-local function gmtime2(timestamp)
-    local timestamp_ptr = ffi.new("time_t[1]", timestamp)
-    local tm = ffi.new("struct tm")
-    ffi.C.gmtime_r(timestamp_ptr, tm)
-    return tm
-end
-local function localtime(timestamp)
-    local timestamp_ptr = ffi.new("time_t[1]", timestamp)
-    local tm_ptr = ffi.new("struct tm[1]")
-    ffi.C.localtime_r(timestamp_ptr, tm_ptr)
-    return tm_ptr[0]
-end
-local function mktime(tm)
-    if type(tm)~='cdata' then
-        tm = ffi.new("struct tm", tm)
+local M = {}
+local function sametable(a, b)
+    for k,v in pairs(a) do
+        if type(b[k])~=type(v) then
+            return
+        end
+        if type(v)=='table' then
+            if not sametable(b[k],v) then
+                return
+            end
+        else
+            if b[k]~=v then
+                return
+            end
+        end
     end
-    local tm_ptr = ffi.new("struct tm[1]", tm)
-    return ffi.C.mktime(tm_ptr)
-end
-local function asctime(tm)
-    -- 25 seems to be the min number that doesn't cause segmentation fault,
-    -- here use 26 for safety.
-    local buf = ffi.new("uint8_t[?]", 26)
-    local tm_ptr = ffi.new("struct tm[1]",tm)
-    ffi.C.asctime_r(tm_ptr, buf)
-    return ffi.string(buf)
-end
-local function zerofill(num)
-    if num < 10 then
-        return string.format('0%d',num)
+    for k,v in pairs(b) do
+        if type(a[k])~=type(v) then
+            return
+        end
+        if type(v)=='table' then
+            if not sametable(a[k],v) then
+                return
+            end
+        else
+            if a[k]~=v then
+                return
+            end
+        end
     end
-    return tostring(num)
+    return true
 end
-local function strfmt(tm)
-  return string.format('%d-%s-%s %s:%s:%s', 
-      tm.year+1900, 
-      zerofill(tm.month+1), 
-      zerofill(tm.day), 
-      zerofill(tm.hour), 
-      zerofill(tm.minute), 
-      zerofill(tm.second))
+local data = {
+    {'apple',  'fruit',     8, 4,  '2016/3/3 12:22'}, 
+    {'potato', 'vegetable', 3, 5,  '2016/3/4 8:02'}, 
+    {'apple',  'fruit',     9, 2,  '2016/3/4 14:02'}, 
+    {'orange', 'fruit',     6, 13, '2016/3/4 15:02'}, 
+    {'potato', 'vegetable', 4, 4,  '2016/3/4 16:02'}, 
+    {'pear',   'fruit',     8, 4,  '2016/3/5 15:12'}, 
+    {'carrot', 'vegetable', 4, 3,  '2016/3/6 1:11'}, 
+    {'orange', 'fruit',     6, 23, '2016/3/6 19:12'}, 
+    {'grape',  'fruit',     8, 4,  '2016/3/6 9:12'}, 
+    {'apple',  'fruit',     5, 9,  '2016/3/14 22:02'}, 
+    {'grape',  'fruit',     5, 20, '2016/3/14 23:00'}, 
+    {'tomato', 'vegetable', 8, 200,'2016/3/24 23:12'}, 
+}
+local Sale = Model:class{table_name='sales', 
+    fields = {
+        id = Field.IntegerField{ min=1}, 
+        name = Field.CharField{ maxlen=50},
+        catagory = Field.CharField{maxlen=15},  
+        price = Field.IntegerField{ min=0}, 
+        weight = Field.IntegerField{ min=1}, 
+        time = Field.CharField{ maxlen=50}, 
+    }, 
+}
+M[#M+1]=function ()
+    local res, err = Query("drop table if exists sales")
+    if not res then
+        return err
+    end
+    res, err = Query([[create table sales(
+        id       serial primary key,
+        name     varchar(50), 
+        catagory varchar(15), 
+        price    integer,  
+        weight   float, 
+        time     datetime);]])
+    if not res then
+        return err
+    end
+    for i,v in ipairs(data) do
+        local ins = Sale:instance{name=v[1], catagory=v[2], price=v[3], weight=v[4], time=v[5]}
+        local res, err = ins:create()
+        if not res then
+            return err
+        end
+    end
 end
 
-t1=os.time()
- for i=1,51344444 do
-    r=gmtime(i)
- end
-t2=os.time()
-print(t2-t1)
+M[#M+1]=function( ... )
+    local a = Sale:all()
+    local b = Sale:all()
+    if not sametable(a, b) then
+        return 'the table returned from `-Sale:where{}` doesnot equal the one from `Sale:all()`'
+    end
+    if #a ~= #data then 
+        return '`Sale:all()` doesnot return all objects'
+    end
+end
+M[#M+1]=function (self)
+    local res, err = Sale:select{'name', 'id'}:where'id=1':exec()
+    if not res then
+        return err
+    end
+    if #res ~= 1 then
+        return 'should return only one row, but get '..#res
+    end
+    local obj = res[1]
+    if type(obj)~='table' then
+        return 'select clause should return a table'
+    end
+    for k,v in pairs(obj) do
+        if k~='name' and k~='id' then
+            return 'key `'..k..'` should not exists'
+        end
+    end
+    if obj.id ~= '1' then
+        return 'id doesnot equal 1'
+    end
+end
 
-t1=os.time()
- for i=1,51344444 do
-    r=gmtime2(i)
- end
-t2=os.time()
-print(t2-t1)
--- local res = localtime(1474739796)
--- print(strfmt(res))
--- local res = gmtime(0)
--- print(strfmt(res))
+M[#M+1]=function(self)
+    local res = Sale:where{id__lte=5}:exec()
+    if #res~=5 then
+        return 'the count of rows should be 5'
+    end
+    local res = Sale:where{id__lt=5}:exec()
+    if #res~=4 then
+        return 'the count of rows should be 4'
+    end
+end
+M[#M+1]=function(self)
+    local res = Sale:where{name='apple'}:where{time__gt='2016-03-11 23:59:00'}:exec()
+    if #res~=1 then
+        return 'the count of rows should be 1'
+    end
+end
+M[#M+1]=function(self)
+    local res = Sale:where'catagory="fruit" and (weight>10 or price=8)':order'time':exec()
+    if #res~=6 then
+        return 'the count of rows should be 6'
+    end
+end
+M[#M+1]=function(self)
+    local res, err = Sale:select'name, count(*) as cnt':group'name':order'cnt desc':exec()
+    if not res then
+        return err
+    end
+    if res[1].name~='apple' then
+        return 'the amount of apple should be the most'
+    end
+end
+M[#M+1]=function(self)
+    local res = Sale:select'name, price*weight as value':order'value':exec()
+    if res[1].name~='carrot' then
+        return 'the value of carrot should be the least'
+    end
+end
+M[#M+1]=function(self)
+    local res = Sale:select'catagory, sum(weight) as total_weight':group'catagory':order'total_weight desc':exec()
+    if res[1].catagory~='vegetable' then
+        return 'the weight of vegetable should be the most'
+    end
+end
+M[#M+1]=function(self)
+    local res, err = Sale:select{'name', 'sum(weight*price) as value'}:group{'name'}:having{value__gte=200}:order'value desc':exec()
+    if not res then
+        return err
+    end
+    if #res~=2 then
+        return 'there should only be two names that have revenue greater than 200'
+    end
+end
+M[#M+1]=function(self)
+    --update test
+    local statement=Sale:where'id<5'
+    for i,v in ipairs(statement:exec()) do
+        v.blaaa = 'sdfd'
+        v.blablabla = 123 --attribute that is not in fields
+        v.price=10+i
+        v:update()
+    end
+    for i,v in ipairs(statement:exec()) do
+        if v.price~=10+i then
+            return 'price update doesnot work as expected'
+        end
+    end
+    --create test
+    local v = Sale:instance{name='newcomer', catagory='fruit', time='2016-03-29 23:12:00', price=12, weight=15}
+    v:create()
+    local res = Sale:all()
+    if res[#res].name~=v.name then
+        return 'the name of the last element should be newcomer'
+    end
+    v.catagory='wwwww'
+    v:update()
+    v=Sale:get{name='newcomer'}
+    if v.catagory~='wwwww' then 
+        return 'the catagory of the last element should be wwwww'
+    end
+    v = Sale:get'catagory = "wwwww"'
+    v.price=-2
+    local res,errs=v:update()
+    if errs==nil then
+        return 'should be some errors.'
+    end
+    v:delete()
+    if #Sale:where"catagory = 'wwwww'":exec()~=0 then
+        return 'delete clause doesnot work. '
+    end
+    v = Sale:instance{name='newcomer2', catagory='fruit', time='2016-03-29 23:12:00', price=12, weight=150}
+    v:create()
+    v = Sale:get{name='newcomer2'}
+    if v.weight~=150 then
+        return 'newcomer2 weight should be 150'
+    end
+end
+return M
 
--- local t = {
---     year=res.year, 
---     month=res.month, 
---     day=res.day, 
---     hour=res.hour, 
---     minute=res.minute, 
---     second=res.second, 
---     -- wday=res.wday, 
---     -- yday=res.yday, 
---     -- isdst=res.isdst,
---     -- zone=ffi.string(res.zone), 
---     -- gmtoff=res.gmtoff
--- }
--- print(mktime( res))
--- print(mktime( t))
--- print( asctime(res))
+    
+
+

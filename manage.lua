@@ -65,9 +65,9 @@ return {
   {'^/<*name*>/delete/(?<id>\\d+?)$', ClassView.DeleteView:as_view{model=<*model_name*>}}, 
 }]], 
   views = [[local json = require "cjson.safe"
-local query = require"resty.mvc.query".single
-local response = require"resty.mvc.response"
+local Response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
+local query = require"resty.mvc.query".single
 local models = require"app.<*name*>.models"
 local forms = require"app.<*name*>.forms"
 
@@ -75,7 +75,7 @@ local <*model_name*> = models.<*model_name*>
 local views = {}
 
 -- function views.foobar(request)
---     return response.Template("/")
+--     return Response.Template("/")
 -- end
 
 return views
@@ -97,9 +97,9 @@ return {
   <*model_name*> = <*model_name*>, 
 }]], 
   forms = [[local Form = require"resty.mvc.form"
-local widget = require"resty.mvc.widget"
+local Widget = require"resty.mvc.widget"
 local Field = require"resty.mvc.formfield"
-local validator = require"resty.mvc.validator"
+local Validator = require"resty.mvc.validator"
 local models = require"app.<*name*>.models"
 <*require_hooks*>
 

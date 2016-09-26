@@ -47,7 +47,24 @@ http {
         }
 
         location = /test {
-            content_by_lua_block{require"test"()}
+            content_by_lua_block{
+                local test_funcs = require"test"
+                ngx.header['Content-Type'] = "text/plain; charset=utf-8"
+                local errors = {}
+                for i, callback in ipairs(test_funcs) do
+                    local err  = callback()
+                    if err then
+                        errors[#errors+1] = {i, err}
+                    end
+                end
+                if next(errors) then
+                    for i, v in ipairs(errors) do
+                        ngx.say(string.format('%sth test function failed: %s', v[1], v[2]))
+                    end
+                else
+                    ngx.print('All tests are passed!!')
+                end
+            }
         }
 
         location = /favicon.ico {

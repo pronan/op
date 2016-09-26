@@ -117,7 +117,8 @@ function Form.is_valid(self)
     return self.is_bound and next(self:errors()) == nil
 end
 function Form._clean_fields(self)
-    for name, field in pairs(self.fields) do
+    for i, name in ipairs(self.field_order) do
+        local field = self.fields[name]
         local value;
         if field.disabled then
             value = self.initial[name] or field.initial

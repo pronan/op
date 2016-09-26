@@ -98,7 +98,7 @@ function Manager.to_sql(self)
             self.table_name, 
             self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '..utils.serialize_andkwargs(self._where, self.table_name)   or '', 
             self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '..utils.serialize_columns(self._group, self.table_name)      or '', 
-            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '..utils.serialize_andkwargs(self._having, self.table_name) or '', 
+            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '..utils.serialize_andkwargs(self._having) or '', 
             self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '..utils.serialize_columns(self._order, self.table_name)      or '', 
             self._page_string   and ' LIMIT '..self._page_string      or '')
         return stm
