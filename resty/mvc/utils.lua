@@ -266,7 +266,6 @@ return {
     walk_metatables = walk_metatables, 
     sorted = sorted, 
     curry = curry, 
-
     serialize_basetype = serialize_basetype, 
     serialize_andkwargs = serialize_andkwargs, 
     serialize_attrs = serialize_attrs, 

@@ -7,12 +7,22 @@ targets = ['lua']
 def replace(go=False):
     hits = {}
     for old, new in [
-    ('loger','serialize_basetype'), 
-        # ('_to_string','serialize_basetype'), 
-        # ('_to_arg_string','serialize_columns'), 
-        # ('_to_kwarg_string','serialize_attrs'), 
-        # ('_to_and','serialize_andkwargs'), 
-        # ('lua_to_db','to_db'), 
+(r'\bdict\b','utils.dict'), 
+(r'\blist\b','utils.list'), 
+(r'\btable_has\b','utils.table_has'), 
+(r'\bto_html_attrs\b','utils.to_html_attrs'), 
+(r'\bstring_strip\b','utils.string_strip'), 
+(r'\bis_empty_value\b','utils.is_empty_value'), 
+(r'\bdict_update\b','utils.dict_update'), 
+(r'\blist_extend\b','utils.list_extend'), 
+(r'\breversed_metatables\b','utils.reversed_metatables'), 
+(r'\bwalk_metatables\b','utils.walk_metatables'), 
+(r'\bsorted\b','utils.sorted'), 
+(r'\bcurry\b','utils.curry'), 
+(r'\bserialize_basetype\b','utils.serialize_basetype'), 
+(r'\bserialize_andkwargs\b','utils.serialize_andkwargs'), 
+(r'\bserialize_attrs\b','utils.serialize_attrs'), 
+(r'\bserialize_columns\b','utils.serialize_columns'), 
     ]:
         for root,dirs,files in os.walk(os.getcwd()):
             for filespath in files:
@@ -22,7 +32,7 @@ def replace(go=False):
                 res = []
                 with open(p, encoding='u8') as f:
                     for i, line in enumerate(f):
-                        if old in line:
+                        if re.search(old, line):
                             if p not in hits:
                                 hits[p] = []
                             hits[p].append((i, line))

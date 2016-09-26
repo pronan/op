@@ -16,9 +16,8 @@ local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
 
 -- Although `Manager` can be used alone with `table_name`, `fields` and `row_class` specified, 
--- it is mainly used as a proxy for the `Model` api.
--- Besides, `Manager` is mainly performs little checks such as whether a field is valid or a value is valid for a
--- field, 
+-- it is mainly used as a proxy for the `Model` api. Besides, `Manager` performs little checks 
+-- such as whether a field is valid or a value is valid for a field.
 
 -- Table 10.1 Special Character Escape Sequences
 

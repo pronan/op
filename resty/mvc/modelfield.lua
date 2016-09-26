@@ -735,9 +735,9 @@ end
 function BooleanField.to_db(self, value)
     value = BOOLEAN_TABLE[value]
     if not value then
-        return 1
-    else
         return 0
+    else
+        return 1
     end
 end
 function BooleanField.check(self, kwargs)

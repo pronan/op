@@ -117,12 +117,12 @@ function CheckboxInput.value_from_datadict(self, data, files, name)
 end
 function CheckboxInput.render(self, name, value, attrs)
     local final_attrs = self:build_attrs(attrs, {type='checkbox', name=name})
-    if not (value==false or value==nil or value =='') then
+    if not (value==0 or value==false or value==nil or value =='') then
         final_attrs.checked = 'checked'
     end
-    if not (value==true or value==false or value==nil or value =='') then
-        final_attrs.value = value
-    end 
+    -- if not (value==true or value==false or value==nil or value =='') then
+    --     final_attrs.value = value
+    -- end 
     return string_format('<input%s />', to_html_attrs(final_attrs))
 end
 

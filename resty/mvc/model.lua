@@ -53,7 +53,7 @@ function Model.instance(cls, attrs, commit)
     local ins = cls.row_class:new(attrs)
     if commit then
         local res, errors = ins:create()
-        if not res
+        if not res then
             return nil, errors
         else
             return ins
@@ -67,7 +67,7 @@ function Model._proxy_sql(self, method, params)
     local proxy = Manager:new{table_name=self.table_name, fields=self.fields, row_class=self.row_class}
     return proxy[method](proxy, params)
 end
-local chain_methods = {"select", "update", "group", "order", "having", "where", "create", "delete", "page"}
+local chain_methods = {"select", "where", "update", "create", "delete", "group", "order", "having", "page"}
 -- define methods by a loop, `create` will be override
 for i, method_name in ipairs(chain_methods) do
     Model[method_name] = function(self, params)
@@ -84,7 +84,7 @@ function Model.get(self, params)
         return nil, err
     end
     if #res ~= 1 then
-        return nil, '`get` method should return only one row, but now is '..#res
+        return nil, '`get` method should return only one row, not '..#res
     end
     return self.row_class:new(res[1])
 end
