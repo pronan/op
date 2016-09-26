@@ -15,6 +15,9 @@ local table_concat = table.concat
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
 
+-- Although `Manager` can be used to create, update or delete a database record (you should use `Row`),
+-- it is mainly for reading data from database, i.e. the sql `select` stuff. 
+
 -- Table 10.1 Special Character Escape Sequences
 
 -- Escape Sequence Character Represented by Sequence
@@ -35,13 +38,16 @@ local function execer(t)
 end
 
 local Manager = {}
-function Manager.new(self, init)
-    init = init or {}
-    self.__index = self
-    self.__unm = execer
-    return setmetatable(init, self)
+function Manager.new(cls, attrs)
+    attrs = attrs or {}
+    cls.__index = cls
+    cls.__unm = execer
+    return setmetatable(attrs, cls)
 end
-local chain_methods = {"select", "update", "group", "order", "having", "where", "create", "delete", "page"}
+local chain_methods = {
+    "select", "where", "group", "having", "order", "page", 
+    "create", "update", "delete", 
+}
 function Manager.flush(self)
     for i,v in ipairs(chain_methods) do
         self['_'..v] = nil
@@ -50,13 +56,6 @@ function Manager.flush(self)
     self.is_select = nil
     return self
 end
-    -- insert_id   0   number --0代表是update 或 delete
-    -- server_status   2   number
-    -- warning_count   0   number
-    -- affected_rows   1   number
-    -- message   (Rows matched: 1  Changed: 0  Warnings: 0   string
-    -- insert_id   1006   number --大于0代表成功的insert
-
 function Manager.exec_raw(self)
     return query(self:to_sql())
 end
@@ -66,7 +65,8 @@ function Manager.exec(self)
     if not res then
         return nil, err
     end
-    if self.is_select and not(self._group or self._group_string or self._having or self._having_string) then
+    if self.is_select and not(
+        self._group or self._group_string or self._having or self._having_string) then
         -- none-group SELECT clause, wrap the results
         for i, attrs in ipairs(res) do
             res[i] = self.row_class:new(attrs)
