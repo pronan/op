@@ -81,9 +81,9 @@ function Row.update(self)
     local all_errors = {}
     for name, field in pairs(self.fields) do
         if field.auto_now then
-            -- note we check the existence of `auto_now` 
-            -- when update, always update the time if this should be done
-            -- according to the field defination
+            -- note we check the existence of `auto_now` before the value
+            -- this is different from Row.create, becuase we want to update the time 
+            -- to now every time we update a row even if a value is provided for this field
             valid_attrs[name] = ngx_localtime()
         else
             local value = self[name]
@@ -107,8 +107,8 @@ function Row.update(self)
     if next(all_errors) then
         return nil, all_errors
     end
-    local res, err = query(string_format(
-        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, serialize_attrs(valid_attrs), self.id))
+    local res, err = query(string_format( 'UPDATE `%s` SET %s WHERE id=%s;', 
+        self.table_name, serialize_attrs(valid_attrs), self.id))
     if res then
         return res
     else
@@ -116,7 +116,8 @@ function Row.update(self)
     end
 end
 -- *_without_clean is used when you're sure no need to perform validations, 
--- e.g. when the data comes from `resty.mvc.form` cleaned_data.
+-- e.g. when the a string comes from `resty.mvc.form` cleaned_data. 
+-- note, `to_db` is still used to ensure correct type saved to database.
 function Row.create_without_clean(self)
     local valid_attrs = {}
     for name, field in pairs(self.fields) do
@@ -134,8 +135,8 @@ function Row.create_without_clean(self)
             valid_attrs[name] = value
         end
     end
-    local res, err = query(string_format(
-        'INSERT INTO `%s` SET %s;', self.table_name, serialize_attrs(valid_attrs)))
+    local res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
+        self.table_name, serialize_attrs(valid_attrs)))
     if res then
         self.id = res.insert_id
         return res
@@ -147,8 +148,6 @@ function Row.update_without_clean(self)
     local valid_attrs = {}
     for name, field in pairs(self.fields) do
         if field.auto_now then
-            -- when update, always update the time if this should be done
-            -- according to the field defination
             valid_attrs[name] = ngx_localtime()
         else
             local value = self[name]
@@ -162,8 +161,26 @@ function Row.update_without_clean(self)
             end
         end
     end
-    local res, err = query(string_format(
-        'UPDATE `%s` SET %s WHERE id=%s;', self.table_name, serialize_attrs(valid_attrs), self.id))
+    local res, err = query(string_format('UPDATE `%s` SET %s WHERE id=%s;', 
+        self.table_name, serialize_attrs(valid_attrs), self.id))
+    if res then
+        return res
+    else
+        return nil, {err}
+    end
+end
+function Row.direct_save(self, add)
+    -- directly pass the key/value to database without any validations or type checks.
+    -- cautions to this api, you should use it internally
+    local res, err
+    if add then
+        res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
+            self.table_name, serialize_attrs(self)))
+        self.id = res.insert_id
+    else
+        res, err = query(string_format('UPDATE `%s` SET %s WHERE id=%s;', 
+            self.table_name, serialize_attrs(self), self.id))    
+    end
     if res then
         return res
     else
@@ -171,6 +188,9 @@ function Row.update_without_clean(self)
     end
 end
 function Row.delete(self)
+    if not self.id then
+        return nil, 'No id to delete'
+    end
     return query(string_format('DELETE FROM `%s` WHERE id=%s;', self.table_name, self.id))
 end
 

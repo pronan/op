@@ -15,8 +15,10 @@ local table_concat = table.concat
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
 
--- Although `Manager` can be used to create, update or delete a database record (you should use `Row`),
--- it is mainly for reading data from database, i.e. the sql `select` stuff. 
+-- Although `Manager` can be used alone with `table_name`, `fields` and `row_class` specified, 
+-- it is mainly used as a proxy for the `Model` api.
+-- Besides, `Manager` is mainly performs little checks such as whether a field is valid or a value is valid for a
+-- field, 
 
 -- Table 10.1 Special Character Escape Sequences
 
@@ -106,34 +108,62 @@ function Manager.to_sql(self)
         return stm
     end
 end
-function Manager.clean_params(self, params)
-    -- params passed to `create` and `update` need to:
-    -- 1) delete it or raise an error if a key is not in self.fields (currently delete it).
-    -- 2) call `to_db` method(if exists) to get value prepared for being saved to database
-    --    e.g. lua literal `true` or `false` may be passed to a BooleanField, which 
-    --    should be converted to 1 or 0 for database. Also in the future, a lua datetime object
-    --    may be passed to a DateTimeField, which should be converted to string for database. e.g.
-    --    params = {bool_field=true, datetime_field={year=2010, month=10, day=10, hour=0, minute=0, second=0}}
-    --    -> {bool_field=1, datetime_field='2010-10-10 00:00:00'}
-    -- 3) For more validation checks, use api `create` or `update` of `resty.mvc.row`
-    for k,v in pairs(params) do
-        local f = self.fields[k]
-        if not f then
-            params[k] = nil
-        elseif f.to_db then
-            params[k] = f:to_db(v)
-        end
-    end
-    return params
-end
--- chain methods
+-- function Manager.clean_params(self, params)
+--     -- params passed to `create` and `update` need to:
+--     -- 1) delete it or raise an error if a key is not in self.fields (currently delete it).
+--     -- 2) call `to_db` method(if exists) to get value prepared for being saved to database
+--     --    e.g. lua literal `true` or `false` may be passed to a BooleanField, which 
+--     --    should be converted to 1 or 0 for database. Also in the future, a lua datetime object
+--     --    may be passed to a DateTimeField, which should be converted to string for database. e.g.
+--     --    params = {bool_field=true, datetime_field={year=2010, month=10, day=10, hour=0, minute=0, second=0}}
+--     --    -> {bool_field=1, datetime_field='2010-10-10 00:00:00'}
+--     -- 3) For more validation checks or auto-value settings, use api `create` or `update` of `resty.mvc.row`
+--     for k,v in pairs(params) do
+--         local f = self.fields[k]
+--         if not f then
+--             params[k] = nil
+--         elseif f.to_db then
+--             params[k] = f:to_db(v)
+--         end
+--     end
+--     return params
+-- end
+
+-- local dict_methods =  {
+--     "create", "update", "delete", "where","having",
+-- }
+-- local list_methods =  {
+--     "select",  "group", 
+--     -- "order",  
+-- }
+-- for i, name in ipairs(dict_methods) do
+--     local function _method_defined_by_loop(self, params)
+--         if type(params) == 'table' then
+--             local m = '_'..name
+--             if self[m] == nil then
+--                 self[m] = {}
+--             end
+--             for k, v in pairs(params) do
+--                 self[m][k] = v
+--             end
+--         else
+--             self['_'..name..'_string'] = params
+--         end
+--         return self
+--     end
+--     Manager[name] = _method_defined_by_loop
+-- end
+
+-- chain methods. They look the same, but to be friendly for debugging and
+-- to be easy for further custom logic writing, we decide not to define these
+-- methods by a loop.
 function Manager.create(self, params)
     if type(params) == 'table' then
         if self._create == nil then
             self._create = {}
         end
         local res = self._create
-        for k, v in pairs(self:clean_params(params)) do
+        for k, v in pairs(params) do
             res[k] = v
         end
     else
@@ -147,7 +177,7 @@ function Manager.update(self, params)
             self._update = {}
         end
         local res = self._update
-        for k, v in pairs(self:clean_params(params)) do
+        for k, v in pairs(params) do
             res[k] = v
         end
     else
@@ -166,6 +196,34 @@ function Manager.delete(self, params)
         end
     else
         self._delete_string = params
+    end
+    return self
+end
+function Manager.where(self, params)
+    if type(params) == 'table' then
+        if self._where == nil then
+            self._where = {}
+        end
+        local res = self._where
+        for k, v in pairs(params) do
+            res[k] = v
+        end
+    else
+        self._where_string = params
+    end
+    return self
+end
+function Manager.having(self, params)
+    if type(params) == 'table' then
+        if self._having == nil then
+            self._having = {}
+        end
+        local res = self._having
+        for k, v in pairs(params) do
+            res[k] = v
+        end
+    else
+        self._having_string = params
     end
     return self
 end
@@ -212,34 +270,6 @@ function Manager.order(self, params)
         end
     else
         self._order_string = params
-    end
-    return self
-end
-function Manager.where(self, params)
-    if type(params) == 'table' then
-        if self._where == nil then
-            self._where = {}
-        end
-        local res = self._where
-        for k, v in pairs(params) do
-            res[k] = v
-        end
-    else
-        self._where_string = params
-    end
-    return self
-end
-function Manager.having(self, params)
-    if type(params) == 'table' then
-        if self._having == nil then
-            self._having = {}
-        end
-        local res = self._having
-        for k, v in pairs(params) do
-            res[k] = v
-        end
-    else
-        self._having_string = params
     end
     return self
 end

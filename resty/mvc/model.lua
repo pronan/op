@@ -49,8 +49,18 @@ function Model.class(cls, attrs)
     setmetatable(subclass.meta, {__index=parent_meta})
     return subclass
 end
-function Model.instance(cls, attrs)
-    return cls.row_class:new(attrs)
+function Model.instance(cls, attrs, commit)
+    local ins = cls.row_class:new(attrs)
+    if commit then
+        local res, errors = ins:create()
+        if not res
+            return nil, errors
+        else
+            return ins
+        end
+    else
+        return ins
+    end
 end
 
 function Model._proxy_sql(self, method, params)
@@ -65,7 +75,7 @@ for i, method_name in ipairs(chain_methods) do
     end
 end
 function Model.get(self, params)
-    -- special process for `get`, params cannot be empty table
+    -- params cannot be empty table
     if type(params) == 'table' then
         params = serialize_andkwargs(params)
     end
@@ -89,9 +99,5 @@ function Model.all(self)
         res[i] = row_class:new(attrs)
     end
     return res
-end
-function Model.create(self, params)
-    -- special process for `create`
-    return self.row_class:new(params):create()
 end
 return Model

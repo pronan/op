@@ -456,7 +456,7 @@ function DateField.to_lua(self, value)
     if value == nil then
         return nil
     end
-    value = string_strip(tostring(value))
+    value = tostring(value)
     local res, err = ngx_re_match(value, self.format_re, 'jo')
     if not res then
         return nil, self.error_messages.invalid
@@ -522,7 +522,7 @@ function TimeField.to_lua(self, value)
     if value == nil then
         return nil
     end
-    value = string_strip(tostring(value))
+    value = tostring(value)
     local res, err = ngx_re_match(value, self.format_re, 'jo')
     if not res then
         return nil, self.error_messages.invalid
@@ -734,10 +734,7 @@ function BooleanField.to_lua(self, value)
 end
 function BooleanField.to_db(self, value)
     value = BOOLEAN_TABLE[value]
-    if value == nil then
-        return nil
-    end
-    if value then
+    if not value then
         return 1
     else
         return 0
