@@ -127,7 +127,7 @@ function BoundField.label_tag(self, contents, attrs, label_suffix)
             end
         end
         if attrs then
-            attrs = to_html_attrs(attrs)  
+            attrs = utils.to_html_attrs(attrs)  
         else 
             attrs = ''
         end

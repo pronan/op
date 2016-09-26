@@ -1,9 +1,6 @@
 local query = require"resty.mvc.query".single
 local Row = require"resty.mvc.row"
-local serialize_basetype = require"resty.mvc.utils".serialize_basetype
-local serialize_attrs = require"resty.mvc.utils".serialize_attrs
-local serialize_columns = require"resty.mvc.utils".serialize_columns
-local serialize_andkwargs = require"resty.mvc.utils".serialize_andkwargs
+local utils = require"resty.mvc.utils"
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -79,30 +76,30 @@ function Manager.to_sql(self)
     if self._update_string then
         return string_format('UPDATE `%s` SET %s%s;', self.table_name, self._update_string,
             self._where_string and ' WHERE '..self._where_string or 
-            self._where and ' WHERE '..serialize_andkwargs(self._where, self.table_name) or '')
+            self._where and ' WHERE '..utils.serialize_andkwargs(self._where, self.table_name) or '')
     elseif self._update then
-        return string_format('UPDATE `%s` SET %s%s;', self.table_name, serialize_attrs(self._update, self.table_name),
+        return string_format('UPDATE `%s` SET %s%s;', self.table_name, utils.serialize_attrs(self._update, self.table_name),
             self._where_string and ' WHERE '..self._where_string or 
-            self._where and ' WHERE '..serialize_andkwargs(self._where, self.table_name) or '')
+            self._where and ' WHERE '..utils.serialize_andkwargs(self._where, self.table_name) or '')
     elseif self._create_string then
         return string_format('INSERT INTO `%s` SET %s;', self.table_name, self._create_string)
     elseif self._create then
-        return string_format('INSERT INTO `%s` SET %s;', self.table_name, serialize_attrs(self._create, self.table_name))
+        return string_format('INSERT INTO `%s` SET %s;', self.table_name, utils.serialize_attrs(self._create, self.table_name))
     -- delete always need WHERE clause in case truncate table    
     elseif self._delete_string then 
         return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, self._delete_string)
     elseif self._delete then 
-        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, serialize_andkwargs(self._delete, self.table_name))
+        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, utils.serialize_andkwargs(self._delete, self.table_name))
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     else 
         self.is_select = true --for the `exec` method
         local stm = string_format('SELECT %s FROM `%s`%s%s%s%s%s;', 
-            self._select_string or self._select and serialize_columns(self._select, self.table_name) or '*',  
+            self._select_string or self._select and utils.serialize_columns(self._select, self.table_name) or '*',  
             self.table_name, 
-            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '..serialize_andkwargs(self._where, self.table_name)   or '', 
-            self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '..serialize_columns(self._group, self.table_name)      or '', 
-            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '..serialize_andkwargs(self._having, self.table_name) or '', 
-            self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '..serialize_columns(self._order, self.table_name)      or '', 
+            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '..utils.serialize_andkwargs(self._where, self.table_name)   or '', 
+            self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '..utils.serialize_columns(self._group, self.table_name)      or '', 
+            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '..utils.serialize_andkwargs(self._having, self.table_name) or '', 
+            self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '..utils.serialize_columns(self._order, self.table_name)      or '', 
             self._page_string   and ' LIMIT '..self._page_string      or '')
         return stm
     end

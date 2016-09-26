@@ -3,10 +3,8 @@ import os
 
 
 targets = ['lua']
-
-def replace(go=False):
-    hits = {}
-    for old, new in [
+exclude = ['base.lua', 'urls.lua', 'utils.lua', 'manage.lua', 'view.lua']
+repls = [
 (r'\bdict\b','utils.dict'), 
 (r'\blist\b','utils.list'), 
 (r'\btable_has\b','utils.table_has'), 
@@ -23,51 +21,41 @@ def replace(go=False):
 (r'\bserialize_andkwargs\b','utils.serialize_andkwargs'), 
 (r'\bserialize_attrs\b','utils.serialize_attrs'), 
 (r'\bserialize_columns\b','utils.serialize_columns'), 
-    ]:
-        for root,dirs,files in os.walk(os.getcwd()):
-            for filespath in files:
-                p = os.path.join(root,filespath)
-                if '.' not in p or p.rsplit('.', 1)[1] not in targets:
-                    continue
-                res = []
-                with open(p, encoding='u8') as f:
-                    for i, line in enumerate(f):
-                        if re.search(old, line):
+    ]
+def replace(go=False):
+    hits = {}
+    for root,dirs,files in os.walk(os.getcwd()):
+        for filespath in files:
+            p = os.path.join(root,filespath)
+            if '.' not in p or p.rsplit('.', 1)[1] not in targets:
+                continue
+            if filespath in exclude:
+                continue
+            if 'bak\\' in p or 'utils\\' in p:
+                continue
+            res = []
+            with open(p, encoding='u8') as f:
+                for i, line in enumerate(f):
+                    if 'local ' in line or '--' in line:
+                        res.append(line)
+                        continue
+                    for pat, new in repls:
+                        if re.search(pat, line):
                             if p not in hits:
                                 hits[p] = []
                             hits[p].append((i, line))
-                            line = line.replace(old, new)
-                        res.append(line)
-                if go:
-                    open(p,'w',encoding='u8').write(''.join(res))
+                            line = re.sub(pat, new, line)
+                            break
+                    res.append(line)
+            if go:
+                open(p,'w',encoding='u8').write(''.join(res))
 
     for path, lines in hits.items():
         print(path)
         for i, line in lines:
-            print(i, line, end='')
-
-                    
-
-def search():
-    for old in ['kwargs)']:
-        arr = []
-        for root,dirs,files in os.walk(os.getcwd()):
-            for filespath in files:
-                p = os.path.join(root,filespath)
-                if p[-3:] not in ['lua','tml']:
-                    continue
-                with open(p,encoding='u8') as f:
-                    e = 0
-                    for line in f :
-                        if old in line:
-                            e = 1
-                            print(line, end='')
-                    if e:
-                        print(p)
+            print(str(i+1).rjust(6), line.strip())
 
 
-
-#search()
 replace()
 
 

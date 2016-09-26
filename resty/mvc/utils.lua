@@ -36,8 +36,8 @@ local function to_html_attrs(tbl)
 end
 local function list(...)
     local total = {}
-    for i, list in next, {...}, nil do -- not `ipairs` in case of sparse {...}
-        for i, v in ipairs(list) do
+    for i, t in next, {...}, nil do -- not `ipairs` in case of sparse {...}
+        for i, v in ipairs(t) do
             total[#total+1] = v
         end
     end
@@ -45,24 +45,24 @@ local function list(...)
 end
 local function dict(...)
     local total = {}
-    for i, dict in next, {...}, nil do
-        for k, v in pairs(dict) do
+    for i, t in next, {...}, nil do
+        for k, v in pairs(t) do
             total[k] = v
         end
     end
     return total
 end
 local function dict_update(t, ...)
-    for i, dict in next, {...}, nil do
-        for k, v in pairs(dict) do
+    for i, d in next, {...}, nil do
+        for k, v in pairs(d) do
             t[k] = v
         end
     end
     return t
 end
 local function list_extend(t, ...)
-    for i, list in next, {...}, nil do -- not `ipairs` in case of sparse {...}
-        for i, v in ipairs(list) do
+    for i, l in next, {...}, nil do 
+        for i, v in ipairs(l) do
             t[#t+1] = v
         end
     end
@@ -107,7 +107,6 @@ local function table_has(t, e)
     end
     return false
 end
-
 local function sorted(t, func)
     local keys = {}
     for k, v in pairs(t) do

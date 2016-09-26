@@ -1,6 +1,5 @@
 local query = require"resty.mvc.query".single
-local serialize_basetype = require"resty.mvc.utils".serialize_basetype
-local serialize_attrs = require"resty.mvc.utils".serialize_attrs
+local utils = require"resty.mvc.utils"
 local rawget = rawget
 local setmetatable = setmetatable
 local pairs = pairs
@@ -68,7 +67,7 @@ function Row.create(self)
         return nil, all_errors
     end
     local res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
-        self.table_name, serialize_attrs(valid_attrs)))
+        self.table_name, utils.serialize_attrs(valid_attrs)))
     if res then
         self.id = res.insert_id
         return res
@@ -108,7 +107,7 @@ function Row.update(self)
         return nil, all_errors
     end
     local res, err = query(string_format( 'UPDATE `%s` SET %s WHERE id=%s;', 
-        self.table_name, serialize_attrs(valid_attrs), self.id))
+        self.table_name, utils.serialize_attrs(valid_attrs), self.id))
     if res then
         return res
     else
@@ -136,7 +135,7 @@ function Row.create_without_clean(self)
         end
     end
     local res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
-        self.table_name, serialize_attrs(valid_attrs)))
+        self.table_name, utils.serialize_attrs(valid_attrs)))
     if res then
         self.id = res.insert_id
         return res
@@ -162,7 +161,7 @@ function Row.update_without_clean(self)
         end
     end
     local res, err = query(string_format('UPDATE `%s` SET %s WHERE id=%s;', 
-        self.table_name, serialize_attrs(valid_attrs), self.id))
+        self.table_name, utils.serialize_attrs(valid_attrs), self.id))
     if res then
         return res
     else
@@ -175,11 +174,11 @@ function Row.direct_save(self, add)
     local res, err
     if add then
         res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
-            self.table_name, serialize_attrs(self)))
+            self.table_name, utils.serialize_attrs(self)))
         self.id = res.insert_id
     else
         res, err = query(string_format('UPDATE `%s` SET %s WHERE id=%s;', 
-            self.table_name, serialize_attrs(self), self.id))    
+            self.table_name, utils.serialize_attrs(self), self.id))    
     end
     if res then
         return res

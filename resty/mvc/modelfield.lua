@@ -2,14 +2,6 @@ local Validator = require"resty.mvc.validator"
 local FormField = require"resty.mvc.formfield"
 local Widget = require"resty.mvc.widget"
 local utils = require"resty.mvc.utils"
-local string_strip = utils.string_strip
-local is_empty_value = utils.is_empty_value
-local to_html_attrs = utils.to_html_attrs
-local list = utils.list
-local dict = utils.dict
-local dict_update = utils.dict_update
-local list_extend = utils.dict_update
-local reversed_metatables = utils.reversed_metatables
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -54,7 +46,7 @@ function Field.instance(cls, attrs)
     local self = cls:new(attrs)
     self.help_text = self.help_text or ''
     self.choices = self.choices -- or {}
-    self.validators = list(self.default_validators, self.validators)
+    self.validators = utils.list(self.default_validators, self.validators)
     self.primary_key = self.primary_key or false
     self.blank = self.blank or false
     self.null = self.null or false
@@ -70,10 +62,10 @@ function Field.instance(cls, attrs)
     self.is_relation = self.remote_field ~= nil
     self.default = self.default 
     local messages = {}
-    for parent in reversed_metatables(self) do
-        dict_update(messages, parent.default_error_messages)
+    for parent in utils.reversed_metatables(self) do
+        utils.dict_update(messages, parent.default_error_messages)
     end
-    self.error_messages = dict_update(messages, self.error_messages)
+    self.error_messages = utils.dict_update(messages, self.error_messages)
     return self
 end
 function Field.check(self, kwargs)
@@ -131,7 +123,7 @@ end
 --     return value
 -- end
 function Field.run_validators(self, value)
-    if is_empty_value(value) then
+    if utils.is_empty_value(value) then
         return
     end
     local errors = {}
@@ -153,7 +145,7 @@ function Field.validate(self, value, model_instance)
         -- Skip validation for non-editable fields.
         return
     end
-    if self.choices and not is_empty_value(value) then
+    if self.choices and not utils.is_empty_value(value) then
         for i, choice in ipairs(self.choices) do
             local option_key, option_value = choice[1], choice[2]
             if type(option_value) == 'table' then
@@ -173,7 +165,7 @@ function Field.validate(self, value, model_instance)
     if not self.null and value == nil then
         return self.error_messages.null
     end
-    if not self.blank and is_empty_value(value) then
+    if not self.blank and utils.is_empty_value(value) then
         return self.error_messages.blank
     end
 end
@@ -226,7 +218,7 @@ function Field.get_choices(self, include_blank, blank_choice)
         blank_choice = BLANK_CHOICE_DASH
     end
     local blank_defined = false
-    local choices = list(self.choices)
+    local choices = utils.list(self.choices)
     local named_groups = next(choices)~=nil and type(choices[1][2])=='table'
     if not named_groups then
         for i = 1, #choices do
@@ -243,7 +235,7 @@ function Field.get_choices(self, include_blank, blank_choice)
     else
         first_choice = {}
     end
-    return list(first_choice, choices)
+    return utils.list(first_choice, choices)
 end
 function Field.get_choices_default(self)
     return self:get_choices()
@@ -295,7 +287,7 @@ function Field.formfield(self, kwargs)
             end
         end
     end
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     if form_class == nil then
         form_class = FormField.CharField
     end
@@ -307,7 +299,7 @@ function Field.flatchoices(self)
     for i, e in ipairs(self.choices) do
         local choice, value = e[1], e[2]
         if type(value) == 'table' then
-            list_extend(flat, value)
+            utils.list_extend(flat, value)
         else
             flat[#flat+1] = {choice, value}
         end
@@ -363,7 +355,7 @@ function CharField.formfield(self, kwargs)
         -- bigger than 255 will be considered as a text field
         defaults.widget = Widget.Textarea
     end
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 
@@ -400,7 +392,7 @@ function TextField.formfield(self, kwargs)
     -- will be validated twice. This is considered acceptable since we want
     -- the value in the form field (to pass into widget for example).
     local defaults = {maxlen = self.maxlen, minlen = self.minlen, widget=Widget.Textarea}
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 
@@ -437,7 +429,7 @@ local DateField = Field:new{
         invalid_date="invalid date.",
     }, 
 }
-dict_update(DateField, DateTimeCheckMixin)
+utils.dict_update(DateField, DateTimeCheckMixin)
 function DateField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
     if self.auto_now or self.auto_now_add then
@@ -468,7 +460,7 @@ function DateField.to_db(self, value)
 end
 function DateField.formfield(self, kwargs)
     local defaults = {form_class=FormField.DateField}
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 
@@ -482,7 +474,7 @@ local DateTimeField = DateField:new{
     }, 
     description = "Date (with time)", 
 }
-dict_update(DateTimeField, DateTimeCheckMixin)
+utils.dict_update(DateTimeField, DateTimeCheckMixin)
 function DateTimeField._check_fix_default_value(self)
 
 end
@@ -491,7 +483,7 @@ function DateTimeField.get_internal_type(self)
 end
 function DateTimeField.formfield(self, kwargs)
     local defaults = {form_class = FormField.DateTimeField}
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return DateField.formfield(self, defaults)
 end
 
@@ -506,7 +498,7 @@ local TimeField = Field:new{
     }, 
     description = "Time", 
 }
-dict_update(TimeField, DateTimeCheckMixin)
+utils.dict_update(TimeField, DateTimeCheckMixin)
 function TimeField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
     if self.auto_now or self.auto_now_add then
@@ -534,7 +526,7 @@ function TimeField.to_db(self, value)
 end
 function TimeField.formfield(self, kwargs)
     local defaults = {form_class=FormField.TimeField}
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 
@@ -551,7 +543,7 @@ end
 function EmailField.formfield(self, kwargs)
     -- As with CharField, this will cause email validation to be performed twice.
     local defaults = { form_class = FormField.EmailField}
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return CharField.formfield(self, defaults)
 end
 
@@ -606,7 +598,7 @@ end
 function IntegerField.formfield(self, kwargs)
     local defaults = { min=self.min, max=self.max, 
         form_class=FormField.IntegerField,}
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 
@@ -648,7 +640,7 @@ end
 function FloatField.formfield(self, kwargs)
     local defaults = { min = self.min, max = self.max, 
         form_class = FormField.FloatField}
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 
@@ -763,7 +755,7 @@ function BooleanField.formfield(self, kwargs)
     else
         defaults = {form_class = FormField.BooleanField}
     end
-    dict_update(defaults, kwargs)
+    utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end
 

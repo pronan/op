@@ -1,9 +1,5 @@
 -- https://docs.djangoproject.com/en/1.10/ref/forms/widgets/#django.forms.SelectMultiple
 local utils = require"resty.mvc.utils"
-local to_html_attrs = utils.to_html_attrs
-local list = utils.list
-local dict = utils.dict
-local dict_update = utils.dict_update
 local string_format = string.format
 local pairs = pairs
 local setmetatable = setmetatable
@@ -21,7 +17,7 @@ end
 function Widget.instance(cls, attrs)
     local self = cls:new()
     if attrs ~= nil then
-        self.attrs = dict(attrs)
+        self.attrs = utils.dict(attrs)
     else
         self.attrs = {}
     end
@@ -38,7 +34,7 @@ function Widget.render(self, name, value, attrs)
     assert(nil, 'subclasses of Widget must provide a render() method')
 end
 function Widget.build_attrs(self, extra_attrs, kwargs)
-    return dict(self.attrs, extra_attrs, kwargs)
+    return utils.dict(self.attrs, extra_attrs, kwargs)
 end
 function Widget.value_from_datadict(self, data, files, name)
     return data[name]
@@ -59,7 +55,7 @@ function Input.render(self, name, value, attrs)
     if value ~= '' then
         final_attrs['value'] = self:_format_value(value)
     end
-    return string_format('<input%s />', to_html_attrs(final_attrs))
+    return string_format('<input%s />', utils.to_html_attrs(final_attrs))
 end
 
 local TextInput = Input:new{type='text'}
@@ -90,7 +86,7 @@ end
 
 local Textarea = Widget:new{default_attrs={cols=40, rows=10}}
 function Textarea.instance(cls, attrs)
-    return Widget.instance(cls, dict(cls.default_attrs, attrs))
+    return Widget.instance(cls, utils.dict(cls.default_attrs, attrs))
 end
 function Textarea.render(self, name, value, attrs)
     if not value then
@@ -98,7 +94,7 @@ function Textarea.render(self, name, value, attrs)
     end
     local final_attrs = self:build_attrs(attrs, {name=name})
     -- todo: is value need to escapte double quote? -- value:gsub('"', '&quot;')
-    return string_format('<textarea%s>\n%s</textarea>', to_html_attrs(final_attrs), value)
+    return string_format('<textarea%s>\n%s</textarea>', utils.to_html_attrs(final_attrs), value)
 end
 
 local DateInput = TextInput:new{format_key=''}
@@ -123,7 +119,7 @@ function CheckboxInput.render(self, name, value, attrs)
     -- if not (value==true or value==false or value==nil or value =='') then
     --     final_attrs.value = value
     -- end 
-    return string_format('<input%s />', to_html_attrs(final_attrs))
+    return string_format('<input%s />', utils.to_html_attrs(final_attrs))
 end
 
 local Select = Widget:new{allow_multiple_selected=false}
@@ -138,13 +134,13 @@ function Select.render(self, name, value, attrs, choices)
         value = ''
     end
     local final_attrs = self:build_attrs(attrs, {name=name})
-    return string_format('<select%s>%s</select>', to_html_attrs(final_attrs), 
+    return string_format('<select%s>%s</select>', utils.to_html_attrs(final_attrs), 
         self:render_options(choices, {value}))
 end
 function Select.render_options(self, choices, selected_choices)
     local output = {}
     local choices_from_field = self.field and self.field.choices or {}
-    for i,v in ipairs(list(choices_from_field, self.choices, choices)) do
+    for i,v in ipairs(utils.list(choices_from_field, self.choices, choices)) do
         local option_value, option_label = v[1], v[2]
         if type(option_label) == 'table' then
             table_insert(output, string_format('<optgroup label="%s">', option_value))
@@ -196,7 +192,7 @@ function SelectMultiple.render(self, name, value, attrs, choices)
         value = {value}
     end
     local final_attrs = self:build_attrs(attrs, {name=name})
-    return string_format('<select multiple="multiple"%s>%s</select>', to_html_attrs(final_attrs), 
+    return string_format('<select multiple="multiple"%s>%s</select>', utils.to_html_attrs(final_attrs), 
         self:render_options(choices, value))
 end
 -- function SelectMultiple.value_from_datadict(self, data, files, name)
@@ -232,7 +228,7 @@ function ChoiceInput.render(self, name, value, attrs, choices)
         label_for = string_format(' for="%s"', self.attrs.id)
     end
     if attrs then
-        attrs = dict(self.attrs, attrs)
+        attrs = utils.dict(self.attrs, attrs)
     else
         attrs = self.attrs
     end
@@ -244,7 +240,7 @@ function ChoiceInput.tag(self, attrs)
     if self:is_checked() then
         final_attrs.checked = 'checked'
     end
-    return string_format('<input%s />', to_html_attrs(final_attrs))
+    return string_format('<input%s />', utils.to_html_attrs(final_attrs))
 end
 function ChoiceInput.is_checked(self)
     return self.value == self.choice_value
@@ -314,7 +310,7 @@ function RendererMixin.get_renderer(self, name, value, attrs, choices)
     -- Returns an instance of the renderer.
     -- big different from Django: use `self.field.choices` instead of `self.choices`
     local choices_from_field = self.field and self.field.choices or {}
-    choices = list(choices_from_field, self.choices, choices)
+    choices = utils.list(choices_from_field, self.choices, choices)
     if value == nil then
         value = self._empty_value
     end

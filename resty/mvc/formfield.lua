@@ -2,13 +2,6 @@ local Validator = require"resty.mvc.validator"
 local Widget = require"resty.mvc.widget"
 local BoundField = require"resty.mvc.boundfield"
 local utils = require"resty.mvc.utils"
-local string_strip = utils.string_strip
-local is_empty_value = utils.is_empty_value
-local to_html_attrs = utils.to_html_attrs
-local list = utils.list
-local dict = utils.dict
-local dict_update = utils.dict_update
-local reversed_metatables = utils.reversed_metatables
 local rawget = rawget
 local setmetatable = setmetatable
 local getmetatable = getmetatable
@@ -61,15 +54,15 @@ function Field.instance(cls, attrs)
     -- Let the widget know whether it should display as required.
     widget.is_required = self.required
     -- Hook into self.widget_attrs() for any Field-specific HTML attributes.
-    dict_update(widget.attrs, self:widget_attrs(widget))
+    utils.dict_update(widget.attrs, self:widget_attrs(widget))
     self.widget = widget
     -- walk parents
     local messages = {}
-    for parent in reversed_metatables(self) do
-        dict_update(messages, parent.default_error_messages)
+    for parent in utils.reversed_metatables(self) do
+        utils.dict_update(messages, parent.default_error_messages)
     end
-    self.error_messages = dict(messages, self.error_messages) 
-    self.validators = list(self.default_validators, self.validators)
+    self.error_messages = utils.dict(messages, self.error_messages) 
+    self.validators = utils.list(self.default_validators, self.validators)
     return self
 end
 function Field.widget_attrs(self, widget)
@@ -79,12 +72,12 @@ function Field.to_lua(self, value)
     return value
 end
 function Field.validate(self, value)
-    if is_empty_value(value) and self.required then
+    if utils.is_empty_value(value) and self.required then
         return self.error_messages.required
     end
 end
 function Field.run_validators(self, value)
-    if is_empty_value(value) then
+    if utils.is_empty_value(value) then
         return 
     end
     local errors = {}
@@ -141,11 +134,11 @@ function CharField.instance(cls, attrs)
     return self
 end
 function CharField.to_lua(self, value)
-    if is_empty_value(value) then
+    if utils.is_empty_value(value) then
         return ''
     end
     if self.strip then
-        value = string_strip(value)
+        value = utils.string_strip(value)
     end
     return value
 end
@@ -174,7 +167,7 @@ function IntegerField.instance(cls, attrs)
     return self
 end
 function IntegerField.to_lua(self, value)
-    if is_empty_value(value) then
+    if utils.is_empty_value(value) then
         return
     end
     value = tonumber(value)
@@ -199,7 +192,7 @@ local FloatField = IntegerField:new{
     default_error_messages={invalid='Enter a float.'}, 
 }
 function FloatField.to_lua(self, value)
-    if is_empty_value(value) then
+    if utils.is_empty_value(value) then
         return
     end
     value = tonumber(value)
@@ -219,10 +212,10 @@ end
 
 local BaseTemporalField = Field:new{format_re=nil}
 function BaseTemporalField.to_lua(self, value)
-    if is_empty_value(value) then
+    if utils.is_empty_value(value) then
         return
     end
-    value = string_strip(value)
+    value = utils.string_strip(value)
     local res, err = ngx_re_match(value, self.format_re, 'jo')
     if not res then
         return nil, self.error_messages.invalid
@@ -298,7 +291,7 @@ function ChoiceField.instance(cls, attrs)
     return Field.instance(cls, attrs)
 end
 function ChoiceField.to_lua(self, value)
-    if is_empty_value(value) then
+    if utils.is_empty_value(value) then
         return 
     end
     return tostring(value)

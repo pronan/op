@@ -1,7 +1,7 @@
 local query = require"resty.mvc.query".single
 local Row = require"resty.mvc.row"
 local Manager = require"resty.mvc.manager" 
-local serialize_andkwargs = require"resty.mvc.utils".serialize_andkwargs
+local utils = require"resty.mvc.utils"
 local rawget = rawget
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -77,7 +77,7 @@ end
 function Model.get(self, params)
     -- params cannot be empty table
     if type(params) == 'table' then
-        params = serialize_andkwargs(params)
+        params = utils.serialize_andkwargs(params)
     end
     local res, err = query(string_format('SELECT * FROM `%s` WHERE %s;', self.table_name, params))
     if not res then
