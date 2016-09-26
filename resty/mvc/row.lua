@@ -3,6 +3,7 @@ local serialize_basetype = require"resty.mvc.utils".serialize_basetype
 local serialize_attrs = require"resty.mvc.utils".serialize_attrs
 local rawget = rawget
 local setmetatable = setmetatable
+local pairs = pairs
 local ipairs = ipairs
 local next = next
 local tostring = tostring
@@ -11,6 +12,13 @@ local string_format = string.format
 local table_concat = table.concat
 local ngx_localtime = ngx.localtime
 
+-- `Row` is the main api for create, update and delete a database record
+-- the instance of `Row` should be a plain table, i.e. key should be a valid lua variable name, 
+-- value should be either a string or a number. if value is a boolean or table and you
+-- want to save it to database, you should provide a `to_db` method for that field to convert 
+-- the value to string or number. Currently no hook to convert the value read from database to
+-- non-string or non-number. For exmaple, a BooleanField value read from database will be number
+-- 0 or 1. a DateTimeField value will be a plain string.
 local Row = {}
 function Row.new(cls, attrs)
     attrs = attrs or {}
@@ -35,12 +43,14 @@ function Row.create(self)
     for name, field in pairs(self.fields) do
         local value = self[name]
         if value == nil then
+            -- no value, try to get from default or auto_now/auto_now_add
             if field.default then
                 valid_attrs[name] = field:get_default()
             elseif field.auto_now or field.auto_now_add then
                 valid_attrs[name] = ngx_localtime()
             end
         else
+            -- if value is given, auto_now/auto_now_add will be ignored
             local value, errors = field:clean(value)
             if errors then
                 for i, v in ipairs(errors) do
@@ -57,8 +67,8 @@ function Row.create(self)
     if next(all_errors) then
         return nil, all_errors
     end
-    local res, err = query(string_format(
-        'INSERT INTO `%s` SET %s;', self.table_name, serialize_attrs(valid_attrs)))
+    local res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
+        self.table_name, serialize_attrs(valid_attrs)))
     if res then
         self.id = res.insert_id
         return res
@@ -71,6 +81,7 @@ function Row.update(self)
     local all_errors = {}
     for name, field in pairs(self.fields) do
         if field.auto_now then
+            -- note we check the existence of `auto_now` 
             -- when update, always update the time if this should be done
             -- according to the field defination
             valid_attrs[name] = ngx_localtime()
