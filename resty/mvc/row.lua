@@ -14,7 +14,7 @@ local ngx_localtime = ngx.localtime
 -- `Row` is the main api for create, update and delete a database record
 -- the instance of `Row` should be a plain table, i.e. key should be a valid lua variable name, 
 -- value should be either a string or a number. if value is a boolean or table and you
--- want to save it to database, you should provide a `to_db` method for that field to convert 
+-- want to save it to database, you should provide a `lua_to_db` method for that field to convert 
 -- the value to string or number. Currently no hook to convert the value read from database to
 -- non-string or non-number. For exmaple, a BooleanField value read from database will be number
 -- 0 or 1. a DateTimeField value will be a plain string.
@@ -56,8 +56,8 @@ function Row.create(self)
                     all_errors[#all_errors+1] = v
                 end
             else
-                if field.to_db then
-                    value = field:to_db(value)
+                if field.lua_to_db then
+                    value = field:lua_to_db(value)
                 end
                 valid_attrs[name] = value
             end
@@ -95,8 +95,8 @@ function Row.update(self)
                         all_errors[#all_errors+1] = v
                     end
                 else
-                    if field.to_db then
-                        value = field:to_db(value)
+                    if field.lua_to_db then
+                        value = field:lua_to_db(value)
                     end
                     valid_attrs[name] = value
                 end
@@ -116,7 +116,7 @@ function Row.update(self)
 end
 -- *_without_clean is used when you're sure no need to perform validations, 
 -- e.g. when the a string comes from `resty.mvc.form` cleaned_data. 
--- note, `to_db` is still used to ensure correct type saved to database.
+-- note, `lua_to_db` is still used to ensure correct type saved to database.
 function Row.create_without_clean(self)
     local valid_attrs = {}
     for name, field in pairs(self.fields) do
@@ -128,8 +128,8 @@ function Row.create_without_clean(self)
                 valid_attrs[name] = ngx_localtime()
             end
         else
-            if field.to_db then
-                value = field:to_db(value)
+            if field.lua_to_db then
+                value = field:lua_to_db(value)
             end
             valid_attrs[name] = value
         end
@@ -153,8 +153,8 @@ function Row.update_without_clean(self)
             if value == nil then
                 -- do nothing 
             else
-                if field.to_db then
-                    value = field:to_db(value)
+                if field.lua_to_db then
+                    value = field:lua_to_db(value)
                 end
                 valid_attrs[name] = value
             end

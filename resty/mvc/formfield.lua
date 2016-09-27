@@ -68,7 +68,7 @@ end
 function Field.widget_attrs(self, widget)
     return {}
 end
-function Field.to_lua(self, value)
+function Field.client_to_lua(self, value)
     return value
 end
 function Field.validate(self, value)
@@ -92,7 +92,7 @@ function Field.run_validators(self, value)
     end
 end
 function Field.clean(self, value)
-    local value, err = self:to_lua(value)
+    local value, err = self:client_to_lua(value)
     if value == nil and err ~= nil then
         return nil, {err}
     end
@@ -133,7 +133,7 @@ function CharField.instance(cls, attrs)
     end
     return self
 end
-function CharField.to_lua(self, value)
+function CharField.client_to_lua(self, value)
     if utils.is_empty_value(value) then
         return ''
     end
@@ -166,7 +166,7 @@ function IntegerField.instance(cls, attrs)
     end
     return self
 end
-function IntegerField.to_lua(self, value)
+function IntegerField.client_to_lua(self, value)
     if utils.is_empty_value(value) then
         return
     end
@@ -191,7 +191,7 @@ end
 local FloatField = IntegerField:new{
     default_error_messages={invalid='Enter a float.'}, 
 }
-function FloatField.to_lua(self, value)
+function FloatField.client_to_lua(self, value)
     if utils.is_empty_value(value) then
         return
     end
@@ -211,7 +211,7 @@ end
 
 
 local BaseTemporalField = Field:new{format_re=nil}
-function BaseTemporalField.to_lua(self, value)
+function BaseTemporalField.client_to_lua(self, value)
     if utils.is_empty_value(value) then
         return
     end
@@ -258,13 +258,13 @@ local URLField = CharField:new{widget=Widget.URLInput}
 local TextareaField = CharField:new{widget=Widget.Textarea}
 
 local BooleanField = Field:new{widget=Widget.CheckboxInput}
-function BooleanField.to_lua(self, value)
-    if value == true or value == false then
-        return value
-    elseif value == 'on' then
+function BooleanField.client_to_lua(self, value)
+    if value == 'on' then
         return true
     elseif value == nil or value =='0' or value == 0 or value == '' or value=='false' then
         return false
+    elseif value == true or value == false then
+        return value
     end
     return true
 end
@@ -289,11 +289,11 @@ function ChoiceField.instance(cls, attrs)
     end
     return Field.instance(cls, attrs)
 end
-function ChoiceField.to_lua(self, value)
+function ChoiceField.client_to_lua(self, value)
     if utils.is_empty_value(value) then
         return 
     end
-    return tostring(value)
+    return value
 end
 function ChoiceField.validate(self, value)
     local err = Field.validate(self, value)
@@ -311,12 +311,12 @@ function ChoiceField.valid_value(self, value)
             -- This is an optgroup, so look inside the group for options
             for i, e in ipairs(v) do
                 local k2, v2 = e[1], e[2]
-                if value == k2 then
+                if value == k2 or  value == tostring(k2) then
                     return true
                 end
             end
         else
-            if value == k then
+            if value == k or value == tostring(k) then
                 return true
             end
         end
@@ -374,7 +374,7 @@ local MultipleChoiceField = ChoiceField:new{
         invalid_list='Enter a list of values.', 
     }, 
 }
-function MultipleChoiceField.to_lua(self, value)
+function MultipleChoiceField.client_to_lua(self, value)
     -- 待定, reqargs将多选下拉框解析成的值是, 没选时直接忽略, 选1个的时候是字符串, 大于1个是table
     if not value then
         return {}
@@ -411,10 +411,9 @@ return{
     
     ChoiceField = ChoiceField, 
     BooleanField = BooleanField, 
-
     HiddenField = HiddenField, 
-    
     FileField = FileField, 
-    MultipleChoiceField = MultipleChoiceField, -- todo
-    ForeignKey = ForeignKey, -- to do
+    
+    -- MultipleChoiceField = MultipleChoiceField, -- todo
+    -- ForeignKey = ForeignKey, -- to do
 }

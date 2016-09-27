@@ -6,7 +6,7 @@ local Field = require"resty.mvc.modelfield"
 local User = Model:class{table_name = "user", 
     fields = {
         name = Field.CharField{maxlen=10},
-        class = Field.CharField{maxlen=5, choices={{'1', '三年一班'}, {'2', '三年二班'}}},
+        class = Field.IntegerField{choices={{1, '三年一班'}, {2, '三年二班'}}},
         age = Field.IntegerField{min=6, max=100},
         score = Field.FloatField{min=0, max=150},
         passed = Field.BooleanField{},

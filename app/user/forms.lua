@@ -11,7 +11,7 @@ local User = models.User
 local UserCreateForm = Form:class{model = User, 
     fields = {
         name = Field.CharField{maxlen=10},
-        class = Field.ChoiceField{maxlen=5, choices={{'1', '三年一班'}, {'2', '三年二班'}}},
+        class = Field.ChoiceField{maxlen=5, choices={{1, '三年一班'}, {2, '三年二班'}}},
         age = Field.IntegerField{min=6, max=100},
         score = Field.FloatField{min=0, max=150},
         passed = Field.BooleanField{},

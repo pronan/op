@@ -56,15 +56,16 @@ local function auto_models( ... )
                 table_options[#table_options+1] = 'DEFAULT CHARSET='..meta.charset
                 for name, field in pairs(model.fields) do
                     local db_type = field.db_type
+                    local field_type = field:get_internal_type()
                     local field_string
-                    if db_type =='FOREIGNKEY' then
+                    if field_type =='ForeignKey' then
                         if not field_options.foreign_key then
                             field_options.foreign_key = {}
                         end
                         table.insert(field_options.foreign_key, string.format(
                             'FOREIGN KEY (%s) REFERENCES %s(id)', field.name, field.reference.table_name))
                         field_string = string.format('%s INT UNSIGNED NOT NULL', field.name)
-                    elseif db_type == 'PRIMARYKEY' then
+                    elseif field_type == 'AutoField' then
                         assert(pk_not_done, 'you could set only one primary key')
                         field_string = string.format('%s INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY', field.name)
                         pk_not_done = false
