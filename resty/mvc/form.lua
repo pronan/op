@@ -118,6 +118,9 @@ function Form.is_valid(self)
 end
 function Form._clean_fields(self)
     for i, name in ipairs(self.field_order) do
+        -- Note here we iterate `field_order` instead of `fields` 
+        -- because the order matters. In some situations we
+        -- need to ensure A field performs cleaning before B.
         local field = self.fields[name]
         local value;
         if field.disabled then

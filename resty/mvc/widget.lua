@@ -105,8 +105,14 @@ local TimeInput = TextInput:new{format_key=''}
 
 local CheckboxInput = Widget:new{}
 function CheckboxInput.value_from_datadict(self, data, files, name)
+    -- lua-resty-reqargs will parse selected input value to string 'on',
+    -- and simply doesn't send the value if unselected. so we check 'on' or nil first
     local value = data[name]
-    if not value or value == '' or value =='0' or value=='false' then
+    if value == nil then
+        return false
+    elseif value == 'on' then 
+        return true
+    elseif value == '' or value =='0' or value=='false' then
         return false
     end
     return true

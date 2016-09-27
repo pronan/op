@@ -259,12 +259,11 @@ local TextareaField = CharField:new{widget=Widget.Textarea}
 
 local BooleanField = Field:new{widget=Widget.CheckboxInput}
 function BooleanField.to_lua(self, value)
-    -- lua-resty-reqargs will parse selected input value to string 'on',
-    -- and simply doesn't send the value if unselected. so we check 'on' or nil first
-    if value == 'on' then
+    if value == true or value == false then
+        return value
+    elseif value == 'on' then
         return true
-    end 
-    if not value or value =='0' or value == 0 or value == '' or value=='false' then
+    elseif value == nil or value =='0' or value == 0 or value == '' or value=='false' then
         return false
     end
     return true

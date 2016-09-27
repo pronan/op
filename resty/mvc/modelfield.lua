@@ -522,6 +522,7 @@ function TimeField.to_lua(self, value)
     return value
 end
 function TimeField.to_db(self, value)
+    -- todo
     return self:to_lua(value)
 end
 function TimeField.formfield(self, kwargs)
