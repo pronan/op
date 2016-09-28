@@ -64,16 +64,28 @@ end
 
 
 local function lookup(t, k)
-    if k=='string' then
+    --if k=='string' then 
+
         
         
 end
-local  dt  = {__index=lookup}
-function  dt.new(cls, a)
-    local tp = type(a)
-    if tp ~= 'number' then
-        
-    local self = {=a}
+local function sub(t, o)
+
+end
+local delta = {
+  sec  = 1, 
+  min  = 60, 
+  hour = 60*60, 
+  day  = 60*60*24, 
+  month= 60*60*24*30, 
+  year = 60*60*24*30*12, 
+}
+
+local  dt = {
+  __index = lookup, 
+}
+function  dt.new(cls, arg)        
+    local self = {[type(arg)]=arg}
     return setmetatable(self, cls)
 end
 
