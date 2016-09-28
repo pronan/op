@@ -91,14 +91,19 @@ end
 
 
 local t = 1417472847
+local t2= delta.day*366+t
 
 print(t)
-print(strfmt(gmtime(t)))
+--print(strfmt(gmtime(t)))
+print(strfmt(gmtime(t2)))
 d = localtime(t)
-print(type(tm_constructor()))
+
 print(strfmt(d))
 print(mktime(d))
 print(asctime(d))
+
+--local d=tm_constructor(50)
+print(mktime(d))
 local function test(...)
     local times=300000
     t1=os.time()
