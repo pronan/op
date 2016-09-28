@@ -26,65 +26,22 @@ local p_time_t_constructor = ffi.typeof("time_t[1]")
 local p_uint8_t_constructor = ffi.typeof("uint8_t[?]")
 
 local function gmtime(timestamp)
-    local timestamp_ptr = p_time_t_constructor(timestamp)
-    local r = tm_constructor()
-    ffi.C.gmtime_r(timestamp_ptr, r)
-    return {
-        year  = r.year+1900, 
-        month = r.month+1,
-        day   = r.day,
-        hour  = r.hour,
-        min   = r.min,
-        sec   = r.sec,
-    }
+    return ffi.C.gmtime_r(
+        p_time_t_constructor(timestamp), 
+        tm_constructor())
 end
 local function localtime(timestamp)
-    local timestamp_ptr = p_time_t_constructor(timestamp)
-    local r = tm_constructor()
-    ffi.C.localtime_r(timestamp_ptr, r)
-    return {
-        year  = r.year+1900, 
-        month = r.month+1,
-        day   = r.day,
-        hour  = r.hour,
-        min   = r.min,
-        sec   = r.sec,
-    }
+    return ffi.C.localtime_r(
+        p_time_t_constructor(timestamp), 
+        tm_constructor())
+end
+local function mktime(r)
+    return ffi.C.mktime(r)
 end
 
--- local function mktime(r)
---     local tm = tm_constructor{
---         year  = r.year-1900, 
---         month = r.month-1,
---         day   = r.day,
---         hour  = r.hour,
---         min   = r.min,
---         sec   = r.sec,
---     }
---     local tm_ptr = ffi.new("struct tm[1]",tm)
---     return ffi.C.mktime(tm_ptr)
--- end
--- local function asctime(tm)
---     -- 25 seems to be the min number that doesn't cause segmentation fault,
---     -- here use 26 for safety.
---     local buf = ffi.new("uint8_t[?]", 26)
---     local tm_ptr = ffi.new("struct tm[1]")
---     ffi.C.asctime_r(tm_ptr, buf)
---     return ffi.string(buf)
--- end
-local function mktime(r)
-    local tm = tm_constructor{
-        year  = r.year-1900, 
-        month = r.month-1,
-        day   = r.day,
-        hour  = r.hour,
-        min   = r.min,
-        sec   = r.sec,
-    }
-    return ffi.C.mktime(tm)
-end
+
 local function asctime(tm)
-    local buf = ffi.new("uint8_t[?]", 26)
+    local buf = p_uint8_t_constructor(26)
     ffi.C.asctime_r(tm, buf)
     return ffi.string(buf)
 end
@@ -105,14 +62,14 @@ local function strfmt(tm)
       zerofill(tm.sec))
 end
 
-local t = 147472847
+local t = 1417472847
 
 print(t)
 print(strfmt(gmtime(t)))
 d = localtime(t)
 print(strfmt(d))
 print(mktime(d))
-
+print(asctime(d))
 local function test(...)
     local times=300000
     t1=os.time()
