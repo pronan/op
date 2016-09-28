@@ -62,14 +62,19 @@ local function strfmt(tm)
       zerofill(tm.sec))
 end
 
-local  dt  = {}
+
 local function lookup(t, k)
-    -- body
+    if k=='string' then
+        
+        
 end
-function  dt.new(self, opts)
-    opts = opts or {}
-    self.__index = self
-    return setmetatable(opts, self)
+local  dt  = {__index=lookup}
+function  dt.new(cls, a)
+    local tp = type(a)
+    if tp ~= 'number' then
+        
+    local self = {=a}
+    return setmetatable(self, cls)
 end
 
 
@@ -78,7 +83,7 @@ local t = 1417472847
 print(t)
 print(strfmt(gmtime(t)))
 d = localtime(t)
-print(type(d))
+print(type(tm_constructor()))
 print(strfmt(d))
 print(mktime(d))
 print(asctime(d))
