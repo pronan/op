@@ -1,6 +1,6 @@
 local ffi = require("ffi")
 ffi.cdef[[
-typedef int64_t  time_t;
+typedef long  time_t;
 typedef struct tm {
   int sec;        /* secs. [0-60] (1 leap sec) */
   int min;        /* mins. [0-59] */
