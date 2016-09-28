@@ -1,4 +1,5 @@
 local ffi = require("ffi")
+
 ffi.cdef[[
 typedef long  time_t;
 typedef struct tm {
@@ -20,104 +21,219 @@ char*      asctime_r  (const struct tm*, char*);
 time_t     mktime     (struct tm*);
 ]]
 
-local p_tm_constructor = ffi.typeof("struct tm[1]")
-local tm_constructor = ffi.typeof("struct tm")
-local p_time_t_constructor = ffi.typeof("time_t[1]")
-local p_uint8_t_constructor = ffi.typeof("uint8_t[?]")
+local TimeStructP = ffi.typeof("struct tm[1]")
+local TimeStruct = ffi.typeof("struct tm")
+local TimeP = ffi.typeof("time_t[1]")
+local Buf = ffi.typeof("uint8_t[?]")
 
-local function gmtime(timestamp)
-    return ffi.C.gmtime_r(
-        p_time_t_constructor(timestamp), 
-        tm_constructor())
+local function gmtime(sec)
+    local c = ffi.C.gmtime_r(TimeP(sec), TimeStruct())
+    return {
+        year  = c.year+1900, 
+        month = c.month+1, 
+        day   = c.day, 
+        hour  = c.hour,
+        min   = c.min,
+        sec   = c.sec}
 end
-local function localtime(timestamp)
-    return ffi.C.localtime_r(
-        p_time_t_constructor(timestamp), 
-        tm_constructor())
+local function localtime(sec)
+    local c = ffi.C.localtime_r(TimeP(sec), TimeStruct())
+    return {
+        year  = c.year+1900, 
+        month = c.month+1, 
+        day   = c.day, 
+        hour  = c.hour,
+        min   = c.min,
+        sec   = c.sec}
 end
-local function mktime(r)
-    return ffi.C.mktime(r)
+local function mktime(t)
+    local r = ffi.C.mktime(TimeStruct(
+        t.sec, 
+        t.min, 
+        t.hour,
+        t.day, 
+        t.month - 1, 
+        t.year - 1900))
+    -- r is cdata, need to convert to lua number
+    return tonumber(r)
 end
-
-
-local function asctime(tm)
-    local buf = p_uint8_t_constructor(26)
-    ffi.C.asctime_r(tm, buf)
+local function asctime(t)
+    local buf = Buf(26)
+    ffi.C.asctime_r(TimeStruct(
+        t.sec, 
+        t.min, 
+        t.hour,
+        t.day, 
+        t.month - 1, 
+        t.year - 1900), buf)
     return ffi.string(buf)
 end
+local function strfmt(t)
+  return string.format('%04d-%02d-%02d %02d:%02d:%02d', 
+      t.year,  t.month,  t.day, 
+      t.hour or 0,  t.min or 0,  t.sec or 0)
+end
 
-local function zerofill(num)
-    if num < 10 then
-        return string.format('0%d',num)
+local datetimematch
+if ngx~=nil then
+    function datetimematch(value)
+        return ngx.re.match(value,[[^(\d\d\d\d)-(\d\d?)-(\d\d?) (\d\d?):(\d\d?):(\d\d?)$]],'jo')
     end
-    return tostring(num)
-end
-local function strfmt(tm)
-  return string.format('%d-%s-%s %s:%s:%s', 
-      tm.year, 
-      zerofill(tm.month), 
-      zerofill(tm.day), 
-      zerofill(tm.hour), 
-      zerofill(tm.min), 
-      zerofill(tm.sec))
+else
+    function datetimematch(value)
+        return {value:match("^(%d%d%d%d)%-(%d%d?)%-(%d%d?) (%d%d?):(%d%d?):(%d%d?)$")}
+    end
 end
 
-
-local function lookup(t, k)
-    --if k=='string' then 
-
-        
-        
-end
-local function sub(t, o)
-
-end
-local delta = {
+local delta_to_sec = {
   sec  = 1, 
   min  = 60, 
   hour = 60*60, 
   day  = 60*60*24, 
-  month= 60*60*24*30, 
-  year = 60*60*24*30*12, 
+  week = 60*60*24*7, 
 }
-
-local  dt = {
-  __index = lookup, 
-}
-function  dt.new(cls, arg)        
-    local self = {[type(arg)]=arg}
+local timedelta = {is_timedelta=true}
+timedelta.__index = timedelta
+function  timedelta.new(cls, attrs)        
+    local self = {}
+    local t = 0
+    for k, v in pairs(attrs) do
+        t = t + (delta_to_sec[k] or 0) * v
+    end
+    self.total_seconds = t
     return setmetatable(self, cls)
 end
-
-
-local t = 1417472847
-local t2= delta.day*366+t
-
-print(t)
---print(strfmt(gmtime(t)))
-print(strfmt(gmtime(t2)))
-d = localtime(t)
-
-print(strfmt(d))
-print(mktime(d))
-print(asctime(d))
-
---local d=tm_constructor(50)
-print(mktime(d))
-local function test(...)
-    local times=300000
-    t1=os.time()
-    for i=1,times do
-        local a=os.time(d)
-    end
-    t2=os.time()
-    for i=1,times do
-        local a=mktime(d)
-    end
-    t3=os.time()
-    print(mktime(d)==os.time(d))
-    print(t2-t1)
-    print(t3-t2)
+function  timedelta.weeks(self)        
+    return (math.modf(self.total_seconds/604800))
 end
+function  timedelta.days(self)        
+    return (math.modf(self.total_seconds/86400))
+end
+function  timedelta.hours(self)        
+    return (math.modf(self.total_seconds/3600))
+end
+function  timedelta.mins(self)        
+    return (math.modf(self.total_seconds/60))
+end
+
+
+local  datetime = {}
+local function index(t, k)
+    if k=='string' then 
+        if rawget(t,'table') then
+            t.string = strfmt(t.table)
+            return t.string
+        elseif rawget(t,'number') then
+            t.table = localtime(t.number)
+            t.string = strfmt(t.table)
+            return t.string
+        end
+    elseif k=='table' then
+        if rawget(t,'string') then
+            local m, e = datetimematch(t.string)
+            if not m then
+                return nil
+            end
+            t.table = { 
+                year = tonumber(m[1]),
+                month= tonumber(m[2]),
+                day  = tonumber(m[3]),
+                hour = tonumber(m[4]),
+                min  = tonumber(m[5]),
+                sec  = tonumber(m[6]),
+            }
+            return t.table
+        elseif rawget(t,'number') then
+            t.table = localtime(t.number)
+            t.string = strfmt(t.table)
+            return t.table
+        end
+    elseif k=='number' then
+        if rawget(t,'string') then
+            local m, e = datetimematch(t.string)
+            if not m then
+                return nil
+            end
+            t.table = { 
+                year = tonumber(m[1]),
+                month= tonumber(m[2]),
+                day  = tonumber(m[3]),
+                hour = tonumber(m[4]),
+                min  = tonumber(m[5]),
+                sec  = tonumber(m[6]),
+            }
+            t.number = mktime(t.table)
+            return t.number
+        elseif rawget(t,'table') then
+            t.number= mktime(t.table)
+            t.string = strfmt(t.table)
+            return t.number
+        end
+    else
+        return nil
+    end
+end
+local function lt(a, b)
+    return a.number < b.number
+end
+local function le(a, b)
+    return a<b or a==b
+end
+local function eq(a, b)
+    return a.number == b.number
+end
+local function sub(a, b)
+    -- two datetime or one datetime and one timedelta
+    if b.is_timedelta then
+        return datetime.new(a.number - b.total_seconds)
+    else
+        return timedelta:new{sec = a.number - b.number}
+    end
+end
+local function add(a, b)
+    -- one datetime and one timedelta
+    return datetime.new(a.number + b.total_seconds)
+end
+datetime.__index=index
+datetime.__lt=lt
+datetime.__le=le
+datetime.__eq=eq
+datetime.__sub=sub 
+datetime.__add=add
+datetime.__tostring=function(t) return t.string end
+function  datetime.new(arg)        
+    return setmetatable({[type(arg)]=arg}, datetime)
+end
+
+
+local function test(...)
+    local x=datetime.new('2016-01-01 00:01:00')
+    local y=datetime.new(os.time())
+    local b=os.date('*t')
+    local a=datetime.new(b) + timedelta:new{day=2}
+    print(strfmt(b))
+    print(a)
+    
+    local n=3600
+    local s='1970-01-01 01:00:00'
+    local t={year=1970,month=1,day=1,hour=1}
+    for i,v in ipairs({n,s,t}) do
+       local r = datetime.new(v)
+       print(r)
+       print(r.number)
+       print(r + timedelta:new{day=3})
+       print(r - timedelta:new{day=3})
+    end
+    print(datetime.new('1970-1-01 0:02:00')>datetime.new(s))
+    print(datetime.new('1970-1-1 3:2:0')>datetime.new(s))
+end
+--test()
+return {
+    datetime=datetime,
+    timedelta=timedelta,
+    gmtime=gmtime,
+    localtime=localtime,
+    mktime=mktime,
+}
 
 
