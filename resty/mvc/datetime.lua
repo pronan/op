@@ -62,11 +62,23 @@ local function strfmt(tm)
       zerofill(tm.sec))
 end
 
+local  dt  = {}
+local function lookup(t, k)
+    -- body
+end
+function  dt.new(self, opts)
+    opts = opts or {}
+    self.__index = self
+    return setmetatable(opts, self)
+end
+
+
 local t = 1417472847
 
 print(t)
 print(strfmt(gmtime(t)))
 d = localtime(t)
+print(type(d))
 print(strfmt(d))
 print(mktime(d))
 print(asctime(d))
