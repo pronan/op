@@ -240,7 +240,7 @@ end
 print(datetime.new('1970-1-01 0:02:00')>datetime.new(s))
 print(datetime.new('1970-1-1 3:2:0')>datetime.new(s))
 end
-
+test()
 return {
     datetime=datetime,
     timedelta=timedelta,
