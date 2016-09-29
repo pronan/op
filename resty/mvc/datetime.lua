@@ -48,9 +48,9 @@ local function localtime(sec)
 end
 local function mktime(t)
     local r = ffi.C.mktime(TimeStruct(
-        t.sec, 
-        t.min, 
-        t.hour,
+        t.sec or 0, 
+        t.min or 0, 
+        t.hour or 0,
         t.day, 
         t.month - 1, 
         t.year - 1900))
@@ -60,9 +60,9 @@ end
 local function asctime(t)
     local buf = Buf(26)
     ffi.C.asctime_r(TimeStruct(
-        t.sec, 
-        t.min, 
-        t.hour,
+        t.sec or 0, 
+        t.min or 0, 
+        t.hour or 0,
         t.day, 
         t.month - 1, 
         t.year - 1900), buf)
