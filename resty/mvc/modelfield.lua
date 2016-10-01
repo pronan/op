@@ -1,6 +1,8 @@
+local query = require"resty.mvc.query".single
 local Validator = require"resty.mvc.validator"
 local FormField = require"resty.mvc.formfield"
 local Widget = require"resty.mvc.widget"
+local datetime = require"resty.mvc.datetime"
 local utils = require"resty.mvc.utils"
 local rawget = rawget
 local setmetatable = setmetatable
@@ -475,6 +477,15 @@ local DateTimeField = DateField:new{
     description = "Date (with time)", 
 }
 utils.dict_update(DateTimeField, DateTimeCheckMixin)
+function DateTimeField.db_to_lua(self, value)
+    return datetime.new(value)
+end
+function DateTimeField.lua_to_db(self, value)
+    if type(value)~='string' then
+        value = value.string
+    end
+    return value
+end
 function DateTimeField._check_fix_default_value(self)
 
 end
@@ -760,18 +771,37 @@ function BooleanField.formfield(self, kwargs)
     return Field.formfield(self, defaults)
 end
 
-
+local function __index(t, key)
+    local res, err = query(string_format('select * from `%s` where id=%s;', t.__ref.table_name, t.id))
+    if not res or res[1] == nil then
+        return nil
+    end
+    for k, v in pairs(res[1]) do
+        if rawget(t, k) == nil then
+            t[k] = v
+        end
+    end
+    t.__ref.row_class:instance(t)
+    return t[key]
+end
+local FK_meta = {__index = __index}
 local ForeignKey = Field:new{
     db_type = 'INT', 
     on_delete=false, on_update=false}
 function ForeignKey.get_internal_type(self)
     return "ForeignKey"
 end
+function ForeignKey.db_to_lua(self, value)
+    return setmetatable({id=value, __ref=self.reference}, FK_meta)
+end
+function ForeignKey.lua_to_db(self, value)
+    return value.id
+end
 function ForeignKey.instance(cls, attrs)
     local self = cls:new(attrs)
     self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
     local e = self.reference
-    assert(e.table_name and e.fields, 'It seems that you didnot provide a model')
+    assert(e.table_name and e.fields, 'It seems that you did not provide a model')
     self.validators = self.validators or {}
     return self
 end
@@ -789,7 +819,7 @@ return {
 
     BooleanField = BooleanField, 
     
-    -- AutoField = AutoField, 
-    -- ForeignKey = ForeignKey,
+    AutoField = AutoField, 
+    ForeignKey = ForeignKey,
     -- FileField = FileField,
 }

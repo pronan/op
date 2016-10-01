@@ -24,18 +24,18 @@ function Row.new(cls, attrs)
     cls.__index = cls
     return setmetatable(attrs, cls)
 end
--- function Row.instance(cls, attrs)
---     -- attrs may be from db driver, try to use `db_to_lua` if the field specified
---     local self = cls:new(attrs)
---     local fields = self.fields
---     for k, v in pairs(self) do
---         local f = fields[k]
---         if f and f.db_to_lua then
---             self[k] = f:db_to_lua(v)
---         end
---     end
---     return self
--- end
+function Row.instance(cls, attrs)
+    -- attrs may be from db driver, try to use `db_to_lua` if the field specified
+    local self = cls:new(attrs)
+    local fields = self.fields
+    for k, v in pairs(self) do
+        local f = fields[k]
+        if f and f.db_to_lua then
+            self[k] = f:db_to_lua(v)
+        end
+    end
+    return self
+end
 function Row.create(self)
     local valid_attrs = {}
     local all_errors = {}
@@ -67,7 +67,7 @@ function Row.create(self)
         return nil, all_errors
     end
     local res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
-        self.table_name, utils.serialize_attrs(valid_attrs)))
+        self.table_name, utils.serialize_attrs(valid_attrs, self.table_name)))
     if res then
         self.id = res.insert_id
         return res
@@ -107,7 +107,7 @@ function Row.update(self)
         return nil, all_errors
     end
     local res, err = query(string_format( 'UPDATE `%s` SET %s WHERE id=%s;', 
-        self.table_name, utils.serialize_attrs(valid_attrs), self.id))
+        self.table_name, utils.serialize_attrs(valid_attrs, self.table_name), self.id))
     if res then
         return res
     else
@@ -135,7 +135,7 @@ function Row.create_without_clean(self)
         end
     end
     local res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
-        self.table_name, utils.serialize_attrs(valid_attrs)))
+        self.table_name, utils.serialize_attrs(valid_attrs, self.table_name)))
     if res then
         self.id = res.insert_id
         return res
@@ -161,7 +161,7 @@ function Row.update_without_clean(self)
         end
     end
     local res, err = query(string_format('UPDATE `%s` SET %s WHERE id=%s;', 
-        self.table_name, utils.serialize_attrs(valid_attrs), self.id))
+        self.table_name, utils.serialize_attrs(valid_attrs, self.table_name), self.id))
     if res then
         return res
     else
@@ -174,17 +174,23 @@ function Row.direct_save(self, add)
     local res, err
     if add then
         res, err = query(string_format( 'INSERT INTO `%s` SET %s;', 
-            self.table_name, utils.serialize_attrs(self)))
+            self.table_name, utils.serialize_attrs(self, self.table_name)))
         self.id = res.insert_id
     else
         res, err = query(string_format('UPDATE `%s` SET %s WHERE id=%s;', 
-            self.table_name, utils.serialize_attrs(self), self.id))    
+            self.table_name, utils.serialize_attrs(self, self.table_name), self.id))    
     end
     if res then
         return res
     else
         return nil, {err}
     end
+end
+function Row.save(self, add)
+    if add then
+        return self:create()
+    end
+    return self:update()
 end
 function Row.delete(self)
     if not self.id then

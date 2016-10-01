@@ -3,14 +3,36 @@ local query = require"resty.mvc.query".single
 local response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
 local User = require"app.user.models".User
+local Pet = require"app.pet.models".Pet
 local forms = require"app.forms"
 
 
+local function eval(s)
+    f = loadstring('return '..s)
+    setfenv(f, _G)
+    return f()
+end
 local m={}
 function m.q(kwargs)
-    -- local ret, err = query("select `user`.`name` as `u-name`, `pet`.`name` from user INNER JOIN pet ON (`user`.`id`=`pet`.`user`);")
-    local ret, err = User:where{name__contains="\\"}:exec()
-    return response.Plain(repr(ret))
+    -- local res = {
+    --     Pet:join{'mom', 'dad'}, 
+    --     Pet:where{mom__name='mike'}, 
+    --     Pet:select{'id', 'name'}:where{dad__name='tom'}, 
+    --     Pet:where{mom__name='mike'}:join{'mom', 'dad'}, 
+    --     Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}, 
+    --     Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}:order{'-mom__id'}, 
+    -- }
+    -- local stm = ''
+    -- for i, v in ipairs(res) do
+    --     stm  =  stm..'\n'..v:to_sql()..'\n'
+    -- end
+    local e, err = -Pet:join{'mom'}:where{id=1}
+    local a = e[1]
+    local dad = a.mom
+    dad.name = 'yyyy'
+    dad:save()
+    local u = User:get{name='xxxx'}
+    return response.Plain(u.id..dad.id)
 end
 function m.register(request)
     if request.user then

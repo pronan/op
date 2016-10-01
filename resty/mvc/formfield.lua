@@ -1,6 +1,7 @@
 local Validator = require"resty.mvc.validator"
 local Widget = require"resty.mvc.widget"
 local BoundField = require"resty.mvc.boundfield"
+local datetime = require"resty.mvc.datetime"
 local utils = require"resty.mvc.utils"
 local rawget = rawget
 local setmetatable = setmetatable
@@ -230,6 +231,13 @@ local DateTimeField = BaseTemporalField:new{
     }, 
     format_re = [[^(19|20)\d\d-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01]) [012]\d:[0-5]\d:[0-5]\d$]], 
 }
+function DateTimeField.client_to_lua(self, value)
+    local res, err = BaseTemporalField.client_to_lua(self, value)
+    if not res then
+        return nil, err
+    end
+    return datetime.new(value) 
+end
 
 local DateField = BaseTemporalField:new{
     widget=Widget.DateInput, 

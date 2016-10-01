@@ -1,6 +1,9 @@
 -- lua manage.lua user -fields name class age:int score:float passed:bool create_time:datetime update_time:datetime
 -- lua manage.lua thread -fields user::User title content:text 
 
+-- lua manage.lua user -fields name age:int
+-- lua manage.lua pet -fields mom::User dad::User name age:int
+
 local field_map = {
   string = "CharField", 
   int = "IntegerField", 
@@ -74,7 +77,7 @@ local forms = require"app.<*name*>.forms"
 local <*model_name*> = models.<*model_name*>
 local views = {}
 
--- function views.foobar(request)
+-- function views.method(request)
 --     return Response.Template("/")
 -- end
 
@@ -89,7 +92,7 @@ local <*model_name*> = Model:class{table_name = "<*name*>",
         <*fields*>
     }
 }
--- function <*model_name*>.foobar(self)
+-- function <*model_name*>.method(self)
 --   -- define your model methods here like this
 -- end
 
@@ -110,7 +113,7 @@ local <*model_name*>CreateForm = Form:class{model = <*model_name*>,
         <*fields*>
     }, 
 }
--- function <*model_name*>CreateForm.clean_foobar(self, value)
+-- function <*model_name*>CreateForm.clean_fieldname(self, value)
 --     -- define your form method here like this
 --     return value
 -- end
@@ -121,7 +124,7 @@ local <*model_name*>UpdateForm = Form:class{model = <*model_name*>,
         <*fields*>
     }, 
 }
--- function <*model_name*>UpdateForm.clean_foobar(self, value)
+-- function <*model_name*>UpdateForm.clean_fieldname(self, value)
 --     -- define your form method here like this
 --     return value
 -- end
@@ -178,11 +181,13 @@ local html_map = {
   {% end%}
 </table>]], 
 }
-
+local function capitalize(name)
+  return name:sub(1, 1):upper()..name:sub(2)
+end
 
 local config = {}
 local name = arg[1]
-local model_name = name:sub(1, 1):upper()..name:sub(2)
+local model_name = capitalize(name)
 
 local i = 2
 if arg[2] == '-fields' then
@@ -245,6 +250,7 @@ end
 local fields = {}
 local indent = '        ' --8 spaces
 local require_hooks = {}
+local foreignkeys = {} -- register foreignkey already defined
 while true do
   local s = arg[i]
   if not s then
@@ -266,8 +272,12 @@ while true do
   local field_string = ''
   if foreignkey then
     local model = column_type
+    local model_module = column_type:lower()
     field_string = string.format('%s = Field.ForeignKey{%s}', column_name, model)
-    require_hooks[#require_hooks+1] = string.format('local %s = require"app.%s.models".%s', model, column_name, model)
+    if not foreignkeys[model_module] then
+      foreignkeys[model_module] = true
+      require_hooks[#require_hooks+1] = string.format('local %s = require"app.%s.models".%s', model, model_module, model)
+    end
   else
     local field_template;
     if column_type == 'string' or column_type == 'text' then

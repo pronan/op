@@ -20,7 +20,7 @@ local function make_file(fn, content)
   return true
 end
 
-local do_not_create = false
+local do_not_create = true
 local drop_existed_table = true
 local function simple_repr(s)
     if type(s)=='string' then
@@ -49,12 +49,9 @@ local function auto_models( ... )
                 local fields = {}
                 local meta = model.meta
                 local pk_not_done = true
-                if meta.auto_id then
-                    fields[#fields+1] = 'id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY'
-                    pk_not_done = false
-                end
                 table_options[#table_options+1] = 'DEFAULT CHARSET='..meta.charset
                 for name, field in pairs(model.fields) do
+                    -- name  == field.name
                     local db_type = field.db_type
                     local field_type = field:get_internal_type()
                     local field_string
@@ -63,11 +60,12 @@ local function auto_models( ... )
                             field_options.foreign_key = {}
                         end
                         table.insert(field_options.foreign_key, string.format(
-                            'FOREIGN KEY (%s) REFERENCES %s(id)', field.name, field.reference.table_name))
-                        field_string = string.format('%s INT UNSIGNED NOT NULL', field.name)
+                            'FOREIGN KEY (%s) REFERENCES %s(id)', name, field.reference.table_name))
+                        field_string = string.format('%s INT UNSIGNED NOT NULL', name)
                     elseif field_type == 'AutoField' then
                         assert(pk_not_done, 'you could set only one primary key')
-                        field_string = string.format('%s INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY', field.name)
+                        assert(name=='id', 'primary key name must be `id`')
+                        field_string = 'id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY'
                         pk_not_done = false
                     else
                         if db_type =='VARCHAR' then
@@ -77,7 +75,7 @@ local function auto_models( ... )
                             if not field_options.index then
                                 field_options.index = {}
                             end        
-                            table.insert(field_options.index, string.format('INDEX (%s)', field.name))
+                            table.insert(field_options.index, string.format('INDEX (%s)', name))
                         end                
                         if field.default ~= nil then
                             db_type = db_type..' DEFAULT '..simple_repr(field.default)
@@ -93,9 +91,9 @@ local function auto_models( ... )
                         if field.primary_key then
                             assert(pk_not_done, 'you could set only one primary key')
                             pk_not_done = false
-                            field_options.primary_key = string.format('PRIMARY KEY (%s)', field.name)
+                            field_options.primary_key = string.format('PRIMARY KEY (%s)', name)
                         end
-                        field_string = string.format('%s %s', field.name, db_type)
+                        field_string = string.format('%s %s', name, db_type)
                     end
                     fields[#fields+1] = field_string
                 end

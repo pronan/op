@@ -1,12 +1,7 @@
 CREATE TABLE `user` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `update_time` datetime NOT NULL,
-  `create_time` datetime NOT NULL,
-  `passed` tinyint(4) NOT NULL,
-  `class` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `age` int(11) NOT NULL,
-  `name` varchar(10) NOT NULL,
-  `score` float NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8

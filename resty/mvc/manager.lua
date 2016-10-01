@@ -12,6 +12,15 @@ local table_concat = table.concat
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
 
+-- mysql> select pet.name, pet.age, `dad`.`name` as dad_name, `mom`.`name` as mom_name from (pet inner join user as dad on dad.id=pet.dad )inner join user as mom on mom.id=pet.mom;
+-- +------+-----+----------+----------+
+-- | name | age | dad_name | mom_name |
+-- +------+-----+----------+----------+
+-- | zfe  |   2 | tom      | kate     |
+-- | xp   |   1 | tom      | mike     |
+-- +------+-----+----------+----------+
+-- 2 rows in set (0.00 sec)
+
 -- Although `Manager` can be used alone with `table_name`, `fields` and `row_class` specified, 
 -- it is mainly used as a proxy for the `Model` api. Besides, `Manager` performs little checks 
 -- such as whether a field is valid or a value is valid for a field.
@@ -43,7 +52,7 @@ function Manager.new(cls, attrs)
     return setmetatable(attrs, cls)
 end
 local chain_methods = {
-    "select", "where", "group", "having", "order", "page", 
+    "select", "where", "group", "having", "order", "page", 'join', 
     "create", "update", "delete", 
 }
 function Manager.flush(self)
@@ -57,97 +66,262 @@ end
 function Manager.exec_raw(self)
     return query(self:to_sql())
 end
+local function _get_fk_table(attrs, fk)
+    local res = {}
+    local prefix = fk..'__'
+    for k,v in pairs(attrs) do
+        if k:sub(1, #fk+2) == prefix then
+            res[k:sub(#fk+3)] = v
+            attrs[k] = nil
+        end
+    end
+    return res
+end
 function Manager.exec(self)
-    local statement = self:to_sql()
-    local res, err = query(statement)
+    local res, err = query(self:to_sql())
     if not res then
         return nil, err
     end
     if self.is_select and not(
         self._group or self._group_string or self._having or self._having_string) then
         -- none-group SELECT clause, wrap the results
-        for i, attrs in ipairs(res) do
-            res[i] = self.row_class:new(attrs)
+        if self._select_join then
+            for i, attrs in ipairs(res) do
+                res[i] = self.row_class:instance(attrs)
+                for fk, fk_model in pairs(self._select_join) do 
+                    attrs[fk] = fk_model.row_class:instance(_get_fk_table(attrs, fk))
+                end
+            end
+        else
+            for i, attrs in ipairs(res) do
+                res[i] = self.row_class:instance(attrs)
+            end
+        end            
+    end
+    return res
+end
+local RELATIONS = {
+    lt='%s < %s', lte='%s <= %s', gt='%s > %s', gte='%s >= %s', 
+    ne='%s <> %s', eq='%s = %s', ['in']='%s IN %s', 
+    exact = '%s = %s', iexact = '%s COLLATE UTF8_GENERAL_CI = %s',}
+local STRING_LIKE_RELATIONS = {
+    contains = '%s LIKE "%%%s%%"',
+    icontains = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s%%"',
+    startswith = '%s LIKE "%s%%"',
+    istartswith = '%s COLLATE UTF8_GENERAL_CI LIKE "%s%%"',
+    endswith = '%s LIKE "%%%s"',
+    iendswith = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s"',
+}
+function Manager.parse_where(self)
+    -- complidated part is foreign key stuff
+    if self._where_string then
+        return ' WHERE '..self._where_string
+    elseif self._where then
+        local results = {}
+        for key, value in pairs(self._where) do
+            -- try pattern `foo__bar` to split key
+            local field, operator, template, add_foreignkey_prefix
+            local pos = key:find('__', 1, true)
+            if pos then
+                field = key:sub(1, pos-1)
+                operator = key:sub(pos+2)
+                local ref = self.foreignkeys[field]
+                if ref then
+                    --                 field, operator
+                    -- fk__name__eq ->    fk, name__eq -> fk__name, eq
+                    -- fk__name     ->    fk, name     -> fk__name
+                    -- fk__eq       ->    fk, eq       -> fk,       eq
+                    if not self._join then
+                        self._join = {}
+                    end
+                    self._join[field] = ref
+                    local pos = operator:find('__', 1, true)
+                    if pos then
+                        -- fk, name__eq -> `fk`.`name`, eq
+                        add_foreignkey_prefix = true
+                        field = string_format('`%s`.`%s`', field, operator:sub(1, pos-1)) 
+                        operator = operator:sub(pos+2)
+                    else
+                        -- fk, name     -> `fk`.`name`
+                        -- fk, eq       -> fk, eq
+                        if not RELATIONS[operator] then
+                            -- fk, name     -> `fk`.`name`
+                            add_foreignkey_prefix = true
+                            field = string_format('`%s`.`%s`', field, operator) 
+                            operator = 'exact'
+                        end
+                    end
+                end
+            else
+                field = key
+                operator = 'exact'
+            end
+            template = RELATIONS[operator] or STRING_LIKE_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
+            if type(value) == 'string' then
+                value = string_format("%q", value)
+                if STRING_LIKE_RELATIONS[operator] then
+                    value = value:sub(2, -2)
+                    -- value = value:sub(2, -2):gsub([[\\]], [[\\\]]) --search for backslash, seems rare
+                end
+            elseif type(value) == 'table' then 
+                -- turn table like {'a', 'b', 1} to string ('a', 'b', 1)
+                value = '('..table_concat(utils.map(value, utils.serialize_basetype), ", ")..')'
+            else -- number
+                value = tostring(value)
+            end
+            if not add_foreignkey_prefix then
+                field = string_format('`%s`.`%s`', self.table_name, field)
+            end
+            results[#results+1] = string_format(template, field, value)
+        end
+        return ' WHERE '..table_concat(results, " AND ")
+    else
+        return ''
+    end
+end
+function Manager.parse_from(self)
+    local res = string_format('`%s`', self.table_name)
+    if self._join then
+        -- k : mom, v: User, v.table_name: user
+        for k, v in pairs(self._join) do
+            res = string_format('(%s) INNER JOIN `%s` AS `%s` ON `%s`.`id` = `%s`.`%s`', 
+                res, v.table_name, k, k, self.table_name, k)
         end
     end
     return res
 end
+function Manager.parse_select(self)
+    local res = {}
+    if self._select_string then
+        res[#res+1] = self._select_string
+    elseif self._select then
+        for i, v in ipairs(self._select) do
+            if v:find('\\(') or v:find(' ') then
+                -- v is passed as an expression or alias set.
+                -- e.g. Manager:select{'(field_a + field_b) as a_add_b', 'name as alias_name'}
+                -- don't use this with out a space or '(' or alias, e.g. Manager:select{'field_a+field_b'}
+                res[#res+1] = v
+            else
+                res[#res+1] = string_format('`%s`.`%s`', self.table_name, v)
+            end
+        end
+    else
+        res[#res+1] = self.fields_string -- this is what '*' means
+    end
+    -- extra fields needed if Manager:join is used
+    if self._select_join then
+        for fk, fk_model in pairs(self._select_join) do
+            for k, v in pairs(fk_model.fields) do
+                -- `dad`.`name` as dad__name
+                res[#res+1] = string_format('`%s`.`%s` AS %s__%s', fk, k, fk, k)
+            end
+        end
+    end
+    return table_concat(res, ', ')
+end
+function Manager.parse_group(self)
+    if self._group_string then
+        return ' GROUP BY '..self._group_string
+    elseif self._group then
+        -- you should take care of column prefix stuff
+        return ' GROUP BY '..table_concat(self._group, ', ')
+    else
+        return ''
+    end
+end
+function Manager.parse_order(self)
+    if self._order_string then
+        return ' ORDER BY '..self._order_string
+    elseif self._order then
+        -- you should take care of column prefix stuff
+        return ' ORDER BY '..table_concat(self._order, ', ')
+    else
+        return ''
+    end
+end
+function Manager.parse_having(self)
+    -- this is simpler than `parse_where` because no foreign key stuff involved
+    if self._having_string then
+        return ' HAVING '..self._having_string
+    elseif self._having then
+        local results = {}
+        for key, value in pairs(self._having) do
+            -- try foo__bar -> foo, bar
+            local field, operator, template
+            local pos = key:find('__', 1, true)
+            if pos then
+                field = key:sub(1, pos-1)
+                operator = key:sub(pos+2)
+            else
+                field = key
+                operator = 'exact'
+            end
+            template = RELATIONS[operator] or STRING_LIKE_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
+            if type(value) == 'string' then
+                value = string_format("%q", value)
+                if STRING_LIKE_RELATIONS[operator] then
+                    value = value:sub(2, -2)
+                end
+            elseif type(value) == 'table' then 
+                -- turn table like {'a', 'b', 1} to string: ("a", "b", 1)
+                value = '('..table_concat(utils.map(value, utils.serialize_basetype), ", ")..')'
+            else -- number
+                value = tostring(value)
+            end
+            results[#results+1] = string_format(template, field, value)
+        end
+        return ' HAVING '..table_concat(results, " AND ")
+    else
+        return ''
+    end
+end
 function Manager.to_sql(self)
-    if self._update_string then
-        return string_format('UPDATE `%s` SET %s%s;', self.table_name, self._update_string,
-            self._where_string and ' WHERE '..self._where_string or 
-            self._where and ' WHERE '..utils.serialize_andkwargs(self._where, self.table_name) or '')
-    elseif self._update then
-        return string_format('UPDATE `%s` SET %s%s;', self.table_name, utils.serialize_attrs(self._update, self.table_name),
-            self._where_string and ' WHERE '..self._where_string or 
-            self._where and ' WHERE '..utils.serialize_andkwargs(self._where, self.table_name) or '')
-    elseif self._create_string then
-        return string_format('INSERT INTO `%s` SET %s;', self.table_name, self._create_string)
+    -- note `parse_where` must be called before `parse_from` because foreignkeys stuff
+    if self._update then
+        local where_clause = self:parse_where()
+        local from_clause = self:parse_from()
+        return string_format('UPDATE %s SET %s%s;', from_clause, 
+            utils.serialize_attrs(self._update, self.table_name), where_clause)
     elseif self._create then
-        return string_format('INSERT INTO `%s` SET %s;', self.table_name, utils.serialize_attrs(self._create, self.table_name))
-    -- delete always need WHERE clause in case truncate table    
-    elseif self._delete_string then 
-        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, self._delete_string)
+        -- this is always a single table operation
+        return string_format('INSERT INTO `%s` SET %s;', self.table_name, utils.serialize_attrs(self._create))
     elseif self._delete then 
-        return string_format('DELETE FROM `%s` WHERE %s;', self.table_name, utils.serialize_andkwargs(self._delete, self.table_name))
+        -- this is always a single table operation
+        return string_format('DELETE FROM `%s`%s;', self.table_name, self:parse_where())
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     else 
         self.is_select = true --for the `exec` method
-        local stm = string_format('SELECT %s FROM `%s`%s%s%s%s%s;', 
-            self._select_string or self._select and utils.serialize_columns(self._select, self.table_name) or '*',  
-            self.table_name, 
-            self._where_string  and    ' WHERE '..self._where_string  or self._where  and ' WHERE '..utils.serialize_andkwargs(self._where, self.table_name)   or '', 
-            self._group_string  and ' GROUP BY '..self._group_string  or self._group  and ' GROUP BY '..utils.serialize_columns(self._group, self.table_name)      or '', 
-            self._having_string and   ' HAVING '..self._having_string or self._having and ' HAVING '..utils.serialize_andkwargs(self._having) or '', 
-            self._order_string  and ' ORDER BY '..self._order_string  or self._order  and ' ORDER BY '..utils.serialize_columns(self._order, self.table_name)      or '', 
-            self._page_string   and ' LIMIT '..self._page_string      or '')
-        return stm
+        --local limit_clause = self:parse_page()
+        -- note `parse_where` must be called before `parse_from` because foreignkeys stuff
+        local where_clause = self:parse_where()
+        return string_format('SELECT %s FROM %s %s%s%s%s%s;', 
+            self:parse_select(), self:parse_from(), 
+            where_clause, 
+            self:parse_group(), self:parse_having(), 
+            self:parse_order(), 
+            self._page_string  and ' LIMIT '..self._page_string or '')
     end
 end
-
--- chain methods. They look the same, but to be friendly for debugging and
--- to be easy for further custom logic writing, we decide not to define these
--- methods by a loop.
 function Manager.create(self, params)
-    if type(params) == 'table' then
-        if self._create == nil then
-            self._create = {}
-        end
-        local res = self._create
-        for k, v in pairs(params) do
-            res[k] = v
-        end
-    else
-        self._create_string = params
+    if self._create == nil then
+        self._create = {}
+    end
+    for k, v in pairs(params) do
+        self._create[k] = v
     end
     return self
 end
 function Manager.update(self, params)
-    if type(params) == 'table' then
-        if self._update == nil then
-            self._update = {}
-        end
-        local res = self._update
-        for k, v in pairs(params) do
-            res[k] = v
-        end
-    else
-        self._update_string = params
+    if self._update == nil then
+        self._update = {}
+    end
+    for k, v in pairs(params) do
+        self._update[k] = v
     end
     return self
 end
-function Manager.delete(self, params)
-    if type(params) == 'table' then
-        if self._delete == nil then
-            self._delete = {}
-        end
-        local res = self._delete
-        for k, v in pairs(params) do
-            res[k] = v
-        end
-    else
-        self._delete_string = params
-    end
+function Manager.delete(self)
+    self._delete = true
     return self
 end
 function Manager.where(self, params)
@@ -155,9 +329,8 @@ function Manager.where(self, params)
         if self._where == nil then
             self._where = {}
         end
-        local res = self._where
         for k, v in pairs(params) do
-            res[k] = v
+            self._where[k] = v
         end
     else
         self._where_string = params
@@ -169,9 +342,8 @@ function Manager.having(self, params)
         if self._having == nil then
             self._having = {}
         end
-        local res = self._having
         for k, v in pairs(params) do
-            res[k] = v
+            self._having[k] = v
         end
     else
         self._having_string = params
@@ -189,7 +361,7 @@ function Manager.group(self, params)
         end
     else
         self._group_string = params
-    end
+    end    
     return self
 end
 function Manager.select(self, params)
@@ -215,12 +387,25 @@ function Manager.order(self, params)
         for i, v in ipairs(params) do
             if v:sub(1, 1) == '-' then
                 -- convert '-key' to 'key desc'
-                v = v:sub(2)..' desc'
+                v = v:sub(2)..' DESC'
             end
             res[#res+1] = v
         end
     else
         self._order_string = params
+    end
+    return self
+end
+function Manager.join(self, params)
+    if self._join == nil then
+        self._join = {}
+    end
+    if self._select_join == nil then
+        self._select_join = {}
+    end
+    for i, v in ipairs(params) do
+        self._join[v] = self.foreignkeys[v]
+        self._select_join[v] = self.foreignkeys[v]
     end
     return self
 end
