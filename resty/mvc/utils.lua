@@ -216,6 +216,7 @@ local function serialize_andkwargs(andkwargs, table_name)
     end
     return table_concat(results, " AND ")
 end
+
 return {
     dict = dict, 
     list = list, 
@@ -233,7 +234,7 @@ return {
     serialize_andkwargs = serialize_andkwargs, 
     serialize_attrs = serialize_attrs, 
     serialize_columns = serialize_columns, 
-
+    map = map, 
 }
 
 -- mysql> select * from user;

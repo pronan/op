@@ -11,6 +11,11 @@ local string_format = string.format
 local table_concat = table.concat
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
+--todo add `:count()` method
+
+-- >>> x=u.objects.filter(sfzh__startswith='5').filter(Q(id__gt=5)).filter(Q(id__lt=30))
+-- >>> print(x.query)
+-- SELECT "accounts_user"."id" FROM "accounts_user" WHERE ("accounts_user"."sfzh" LIKE 5% AND "accounts_user"."id" > 5 AND "accounts_user"."id" < 30)
 
 -- mysql> select pet.name, pet.age, `dad`.`name` as dad_name, `mom`.`name` as mom_name from (pet inner join user as dad on dad.id=pet.dad )inner join user as mom on mom.id=pet.mom;
 -- +------+-----+----------+----------+
@@ -112,69 +117,80 @@ local STRING_LIKE_RELATIONS = {
     endswith = '%s LIKE "%%%s"',
     iendswith = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s"',
 }
+function Manager._parse_kv(self, key, value)
+    local field, operator, template, add_foreignkey_prefix
+    local pos = key:find('__', 1, true)
+    if pos then
+        field = key:sub(1, pos-1)
+        operator = key:sub(pos+2)
+        local ref = self.foreignkeys[field]
+        if ref then
+            --                 field, operator
+            -- fk__name__eq ->    fk, name__eq -> fk__name, eq
+            -- fk__name     ->    fk, name     -> fk__name
+            -- fk__eq       ->    fk, eq       -> fk,       eq
+            if not self._join then
+                self._join = {}
+            end
+            self._join[field] = ref
+            local pos = operator:find('__', 1, true)
+            if pos then
+                -- fk, name__eq -> `fk`.`name`, eq
+                add_foreignkey_prefix = true
+                field = string_format('`%s`.`%s`', field, operator:sub(1, pos-1)) 
+                operator = operator:sub(pos+2)
+            else
+                -- fk, name     -> `fk`.`name`
+                -- fk, eq       -> fk, eq
+                if not RELATIONS[operator] then
+                    -- fk, name     -> `fk`.`name`
+                    add_foreignkey_prefix = true
+                    field = string_format('`%s`.`%s`', field, operator) 
+                    operator = 'exact'
+                end
+            end
+        end
+    else
+        field = key
+        operator = 'exact'
+    end
+    template = RELATIONS[operator] or STRING_LIKE_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
+    if type(value) == 'string' then
+        value = string_format("%q", value)
+        if STRING_LIKE_RELATIONS[operator] then
+            value = value:sub(2, -2)
+            -- value = value:sub(2, -2):gsub([[\\]], [[\\\]]) --search for backslash, seems rare
+        end
+    elseif type(value) == 'table' then 
+        -- turn table like {'a', 'b', 1} to string ('a', 'b', 1)
+        value = '('..table_concat(utils.map(value, utils.serialize_basetype), ", ")..')'
+    else -- number
+        value = tostring(value)
+    end
+    if not add_foreignkey_prefix then
+        field = string_format('`%s`.`%s`', self.table_name, field)
+    end
+    return string_format(template, field, value)
+end 
+function Manager._parse_Q(self, qobj)
+    return qobj:serialize(self)
+end
+function Manager._parse_params(self, args, kwargs)
+    local results = {}
+    for i, qobj in ipairs(args or {}) do
+        results[#results+1] = self:_parse_Q(qobj)
+    end
+    for key, value in pairs(kwargs or {}) do
+        results[#results+1] = self:_parse_kv(key, value)
+    end
+    return table_concat(results, " AND ")
+end
 function Manager.parse_where(self)
     -- complidated part is foreign key stuff
     if self._where_string then
         return ' WHERE '..self._where_string
-    elseif self._where then
-        local results = {}
-        for key, value in pairs(self._where) do
-            -- try pattern `foo__bar` to split key
-            local field, operator, template, add_foreignkey_prefix
-            local pos = key:find('__', 1, true)
-            if pos then
-                field = key:sub(1, pos-1)
-                operator = key:sub(pos+2)
-                local ref = self.foreignkeys[field]
-                if ref then
-                    --                 field, operator
-                    -- fk__name__eq ->    fk, name__eq -> fk__name, eq
-                    -- fk__name     ->    fk, name     -> fk__name
-                    -- fk__eq       ->    fk, eq       -> fk,       eq
-                    if not self._join then
-                        self._join = {}
-                    end
-                    self._join[field] = ref
-                    local pos = operator:find('__', 1, true)
-                    if pos then
-                        -- fk, name__eq -> `fk`.`name`, eq
-                        add_foreignkey_prefix = true
-                        field = string_format('`%s`.`%s`', field, operator:sub(1, pos-1)) 
-                        operator = operator:sub(pos+2)
-                    else
-                        -- fk, name     -> `fk`.`name`
-                        -- fk, eq       -> fk, eq
-                        if not RELATIONS[operator] then
-                            -- fk, name     -> `fk`.`name`
-                            add_foreignkey_prefix = true
-                            field = string_format('`%s`.`%s`', field, operator) 
-                            operator = 'exact'
-                        end
-                    end
-                end
-            else
-                field = key
-                operator = 'exact'
-            end
-            template = RELATIONS[operator] or STRING_LIKE_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
-            if type(value) == 'string' then
-                value = string_format("%q", value)
-                if STRING_LIKE_RELATIONS[operator] then
-                    value = value:sub(2, -2)
-                    -- value = value:sub(2, -2):gsub([[\\]], [[\\\]]) --search for backslash, seems rare
-                end
-            elseif type(value) == 'table' then 
-                -- turn table like {'a', 'b', 1} to string ('a', 'b', 1)
-                value = '('..table_concat(utils.map(value, utils.serialize_basetype), ", ")..')'
-            else -- number
-                value = tostring(value)
-            end
-            if not add_foreignkey_prefix then
-                field = string_format('`%s`.`%s`', self.table_name, field)
-            end
-            results[#results+1] = string_format(template, field, value)
-        end
-        return ' WHERE '..table_concat(results, " AND ")
+    elseif self._where_args or self._where_kwargs then
+        return ' WHERE '..self:_parse_params(self._where_args, self._where_kwargs)
     else
         return ''
     end
@@ -212,7 +228,7 @@ function Manager.parse_select(self)
     if self._select_join then
         for fk, fk_model in pairs(self._select_join) do
             for k, v in pairs(fk_model.fields) do
-                -- `dad`.`name` as dad__name
+                -- `dad`.`name` AS dad__name
                 res[#res+1] = string_format('`%s`.`%s` AS %s__%s', fk, k, fk, k)
             end
         end
@@ -284,7 +300,7 @@ function Manager.to_sql(self)
             utils.serialize_attrs(self._update, self.table_name), where_clause)
     elseif self._create then
         -- this is always a single table operation
-        return string_format('INSERT INTO `%s` SET %s;', self.table_name, utils.serialize_attrs(self._create))
+        return string_format('INSERT INTO `%s` SET %s;', self.table_name, utils.serialize_attrs(self._create, self.table_name))
     elseif self._delete then 
         -- this is always a single table operation
         return string_format('DELETE FROM `%s`%s;', self.table_name, self:parse_where())
@@ -325,12 +341,21 @@ function Manager.delete(self)
     return self
 end
 function Manager.where(self, params)
+    -- in case of :where{Q{foo=1}}:where{Q{bar=2}}
+    -- args must be processed seperately
     if type(params) == 'table' then
-        if self._where == nil then
-            self._where = {}
+        if self._where_args == nil then
+            self._where_args = {}
+        end
+        if self._where_kwargs == nil then
+            self._where_kwargs = {}
         end
         for k, v in pairs(params) do
-            self._where[k] = v
+            if type(k) == 'number' then
+                table.insert(self._where_args, v)
+            else
+                self._where_kwargs[k] = v
+            end
         end
     else
         self._where_string = params

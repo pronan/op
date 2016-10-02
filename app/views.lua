@@ -2,37 +2,34 @@ local json = require "cjson.safe"
 local query = require"resty.mvc.query".single
 local response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
+local utils = require"resty.mvc.utils"
 local User = require"app.user.models".User
 local Pet = require"app.pet.models".Pet
 local forms = require"app.forms"
 
-
-local function eval(s)
-    f = loadstring('return '..s)
-    setfenv(f, _G)
+local function eval(s, context)
+    local f = loadstring('return '..s)
+    setfenv(f, context)
     return f()
 end
+
 local m={}
 function m.q(kwargs)
-    -- local res = {
-    --     Pet:join{'mom', 'dad'}, 
-    --     Pet:where{mom__name='mike'}, 
-    --     Pet:select{'id', 'name'}:where{dad__name='tom'}, 
-    --     Pet:where{mom__name='mike'}:join{'mom', 'dad'}, 
-    --     Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}, 
-    --     Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}:order{'-mom__id'}, 
-    -- }
-    -- local stm = ''
-    -- for i, v in ipairs(res) do
-    --     stm  =  stm..'\n'..v:to_sql()..'\n'
-    -- end
-    local e, err = -Pet:join{'mom'}:where{id=1}
-    local a = e[1]
-    local dad = a.mom
-    dad.name = 'yyyy'
-    dad:save()
-    local u = User:get{name='xxxx'}
-    return response.Plain(u.id..dad.id)
+    local stms = {
+        Pet:join{'mom', 'dad'}, 
+        Pet:where{mom__name='mike'}, 
+        Pet:select{'id', 'name'}:where{dad__name='tom'}, 
+        Pet:where{mom__name='mike'}:join{'mom', 'dad'}, 
+        Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}, 
+        Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}:order{'-mom__id'}, 
+    }
+    local res = {}
+    for i, str in ipairs(stms) do
+        res[#res+1] = str
+        res[#res+1] = eval(str):to_sql()
+        res[#res+1] = '\n'
+    end
+    return response.Plain(table.concat(res, '\n'))
 end
 function m.register(request)
     if request.user then

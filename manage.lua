@@ -1,8 +1,6 @@
--- lua manage.lua user -fields name class age:int score:float passed:bool create_time:datetime update_time:datetime
--- lua manage.lua thread -fields user::User title content:text 
-
--- lua manage.lua user -fields name age:int
--- lua manage.lua pet -fields mom::User dad::User name age:int
+-- luajit manage.lua user -fields name age:int money:float
+-- luajit manage.lua product -fields name price:float
+-- luajit manage.lua record -fields buyer::User seller::User product::Product count:int time:datetime
 
 local field_map = {
   string = "CharField", 

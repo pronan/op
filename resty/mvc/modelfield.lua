@@ -49,7 +49,7 @@ function Field.instance(cls, attrs)
     self.help_text = self.help_text or ''
     self.choices = self.choices -- or {}
     self.validators = utils.list(self.default_validators, self.validators)
-    self.primary_key = self.primary_key or false
+    -- self.primary_key = self.primary_key or false
     self.blank = self.blank or false
     self.null = self.null or false
     self.db_index = self.db_index or false
@@ -75,7 +75,7 @@ function Field.check(self, kwargs)
     errors[#errors+1] = self:_check_field_name()
     errors[#errors+1] = self:_check_choices()
     errors[#errors+1] = self:_check_db_index()
-    errors[#errors+1] = self:_check_null_allowed_for_primary_keys()
+    --errors[#errors+1] = self:_check_null_allowed_for_primary_keys()
     return errors
 end
 function Field._check_field_name(self)
@@ -110,11 +110,11 @@ function Field._check_db_index(self)
         return "`db_index` must be nil, true or false"
     end
 end
-function Field._check_null_allowed_for_primary_keys(self)
-    if self.primary_key and self.null then
-        return 'Primary keys must not have null=true.'
-    end
-end
+-- function Field._check_null_allowed_for_primary_keys(self)
+--     if self.primary_key and self.null then
+--         return 'Primary keys must not have null=true.'
+--     end
+-- end
 -- function Field.client_to_lua(self, value)
 --     -- Converts the input value or value returned by lua-resty-mysql 
 --     -- into the expected lua data type.

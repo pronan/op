@@ -2,7 +2,8 @@ local M = {}
 M.DEBUG = true
 M.APP = {
     'user',
-    'pet', 
+    'product',
+    'record',  
 }
 
 M.DATABASES ={
