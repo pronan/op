@@ -58,7 +58,8 @@ local function make_table_defination(model)
                 field_options.foreign_key = {}
             end
             table.insert(field_options.foreign_key, string.format(
-                'FOREIGN KEY (%s) REFERENCES %s(id)', name, field.reference.table_name))
+                'FOREIGN KEY (%s) REFERENCES %s(id) ON DELETE %s ON UPDATE %s', 
+                name, field.reference.table_name, field.on_delete or 'CASCADE', field.on_update or 'CASCADE'))
             -- todo allow null
             field_string = string.format('%s INT UNSIGNED NOT NULL', name)
         elseif field_type == 'AutoField' then
@@ -144,16 +145,60 @@ local function write_model_to_db(model, drop_existed_table)
     end
     return get_table_defination(model.table_name)
 end
-
-local function auto_models()
-    local defs = {}
-    for i, name in ipairs(settings.APP) do
-        local models = require("app."..name..".models")
-        for name, model in pairs(models) do
-            defs[#defs+1] = write_model_to_db(model, drop_existed_table)
+local function has_values(t, e)
+    for k, v in pairs(t) do
+        if v == e then
+            return true
         end
+    end
+    return false
+end
+local function migrate_models(models)
+    local res = {}
+    -- name: User, model: User
+    for i, model in ipairs(models) do
+        local insert_index = nil
+        for i, e in ipairs(res) do
+            if has_values(e.foreignkeys, model) then
+                insert_index = i
+                break
+            end
+        end
+        table.insert(res, insert_index or #res+1, model)
+    end
+
+    if drop_existed_table then    
+        for i = #res, 1, -1 do
+            local r, err = query('DROP TABLE IF EXISTS '..res[i].table_name)
+            if not r then
+                assert(nil, err)
+            end
+        end
+    end
+
+    loger('end.....')
+    local defs = {}
+    for i, model in ipairs(res) do
+        defs[#defs+1] = write_model_to_db(model, drop_existed_table)
     end
     return defs
 end
 
-ngx.timer.at(0, auto_models)
+
+local function get_models()
+    local res = {}
+    for i, name in ipairs(settings.APP) do
+        local models = require("app."..name..".models")
+        for name, model in pairs(models) do
+            res[#res+1] = model
+        end
+    end
+    return res
+end
+
+local function main()
+    return migrate_models(get_models())
+end
+
+
+ngx.timer.at(0, main)

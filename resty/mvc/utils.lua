@@ -216,6 +216,26 @@ local function serialize_andkwargs(andkwargs, table_name)
     end
     return table_concat(results, " AND ")
 end
+local function split(s, sep)
+    local i = 1
+    local over = false
+    local function _get()
+        if over then
+            return
+        end
+        local a, b = s:find(sep, i, true)
+        if a then
+            local e = s:sub(i, a-1)
+            i = b + 1
+            return e
+        else
+            e = s:sub(i)
+            over = true
+            return e
+        end
+    end
+    return _get
+end
 
 return {
     dict = dict, 
@@ -235,6 +255,7 @@ return {
     serialize_attrs = serialize_attrs, 
     serialize_columns = serialize_columns, 
     map = map, 
+    split = split, 
 }
 
 -- mysql> select * from user;

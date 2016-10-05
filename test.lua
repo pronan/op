@@ -3,12 +3,19 @@ local Model = require"resty.mvc.model"
 local Field = require"resty.mvc.modelfield"
 local Q = require"resty.mvc.q"
 
+local Detail = Model:class{table_name = "detail", 
+    fields = {
+        sex = Field.CharField{maxlen=1},
+        age = Field.IntegerField{},
+        money = Field.FloatField{}, 
+    }
+}
+
 local User = Model:class{
     table_name = "user", 
     fields = {
         name = Field.CharField{maxlen=50},
-        age = Field.IntegerField{min=1}, 
-        money = Field.FloatField{}, 
+        detail = Field.ForeignKey{Detail}
     }
 }
 
@@ -47,6 +54,13 @@ ngx.header.content_type = "text/plain; charset=utf-8"
 
 --User:instance({name='Kate', age='20', money='1000'})
 local statement_string = [[
+
+Record:select{'id'}:where{buyer__detail__money__gt=20}
+
+Record:select{'id'}:where{buyer=1}
+Record:select{'id'}:where{buyer__gt=1}
+Record:select{'id'}:where{buyer__in={1, 2}}
+
 User:select()
 User:create{name='Tom', money=1000, age=12}
 User:update{name='Tom', money=1000.1, age=12}:where{id=1}
@@ -64,6 +78,11 @@ Record:where{Q{buyer__name='Kate'}/Q{product__price__lt=10.2}, seller__name__sta
 Record:where{Q{buyer__name='Kate'}/Q{product__price__lt=10.2}*Q{product__price__gt=10.93}, id__in={1, 2, 3}, seller__name__startswith='k'}:join{'buyer', 'seller', 'product'}
 ]]
 
+local statement_string = [[
+Record:select{'id'}:where{buyer__detail__money__gt=20}
+Record:select{'id'}:where{buyer__detail__gt=20}
+Record:select{'id'}:where{buyer__gt=20}:join{'buyer'}
+]]
 
 for e in statement_string:gmatch('[^\n]+') do
   to_html(e)

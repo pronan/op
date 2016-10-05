@@ -787,7 +787,7 @@ end
 local FK_meta = {__index = __index}
 local ForeignKey = Field:new{
     db_type = 'INT', 
-    on_delete=false, on_update=false}
+    on_delete=nil, on_update=nil}
 function ForeignKey.get_internal_type(self)
     return "ForeignKey"
 end

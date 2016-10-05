@@ -109,7 +109,7 @@ local RELATIONS = {
     lt='%s < %s', lte='%s <= %s', gt='%s > %s', gte='%s >= %s', 
     ne='%s <> %s', eq='%s = %s', ['in']='%s IN %s', 
     exact = '%s = %s', iexact = '%s COLLATE UTF8_GENERAL_CI = %s',}
-local STRING_LIKE_RELATIONS = {
+local STRING_RELATIONS = {
     contains = '%s LIKE "%%%s%%"',
     icontains = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s%%"',
     startswith = '%s LIKE "%s%%"',
@@ -118,46 +118,72 @@ local STRING_LIKE_RELATIONS = {
     iendswith = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s"',
 }
 function Manager._parse_kv(self, key, value)
-    local field, operator, template, add_foreignkey_prefix
-    local pos = key:find('__', 1, true)
-    if pos then
-        field = key:sub(1, pos-1)
-        operator = key:sub(pos+2)
-        local ref = self.foreignkeys[field]
-        if ref then
-            --                 field, operator
-            -- fk__name__eq ->    fk, name__eq -> fk__name, eq
-            -- fk__name     ->    fk, name     -> fk__name
-            -- fk__eq       ->    fk, eq       -> fk,       eq
-            if not self._join then
-                self._join = {}
+    local field, template
+    local prefix = self.table_name
+    local operator = 'exact'
+    local current_model = self
+    local left_join_name = self.table_name
+    local state = 'init'
+
+    for e in utils.split(key, '__') do
+        if state == 'init' then
+            local f = current_model.fields[e]
+            if not f then
+                assert(nil, e..' is not a valid field name.')
             end
-            self._join[field] = ref
-            local pos = operator:find('__', 1, true)
-            if pos then
-                -- fk, name__eq -> `fk`.`name`, eq
-                add_foreignkey_prefix = true
-                field = string_format('`%s`.`%s`', field, operator:sub(1, pos-1)) 
-                operator = operator:sub(pos+2)
-            else
-                -- fk, name     -> `fk`.`name`
-                -- fk, eq       -> fk, eq
-                if not RELATIONS[operator] then
-                    -- fk, name     -> `fk`.`name`
-                    add_foreignkey_prefix = true
-                    field = string_format('`%s`.`%s`', field, operator) 
-                    operator = 'exact'
+            if current_model.foreignkeys[e] then
+                -- buyer
+                state = 'init_fk' 
+                current_model = f.reference -- User
+                field = e
+            else -- name
+                state = 'init_nfk' 
+                field = e
+            end
+        elseif state == 'init_fk' then
+            if RELATIONS[e] then -- buyer__lt
+                state = 'end'
+                operator = e
+            else --non-relation operator, a join is needed 
+                 -- feild: buyer
+                if not self._join then
+                    self._join = {}
+                end
+                self._join[field] = {left=left_join_name, right=current_model.table_name}
+                local fk_model = current_model.foreignkeys[e]
+                if fk_model then -- buyer__detail
+                    -- feild: buyer, e: detail (another foreign key)
+                    state = 'init_fk'
+                    left_join_name = field -- buyer
+                    current_model = fk_model -- Detail
+                    prefix = field -- buyer
+                    field = e -- detail
+                elseif current_model.fields[e] then -- buyer__name
+                    -- feild: buyer, e: name
+                    state = 'init_nfk'
+                    prefix = field
+                    field = e
+                else
+                    assert(nil, e..' is not a valid field name.')
                 end
             end
+        elseif state == 'init_nfk' then
+            state = 'end'
+            operator = e
+        -- elseif state == 'init_fk' then
+        -- elseif state == 'init_fk' then
+        -- elseif state == 'init_fk' then
+        -- elseif state == 'init_fk' then
+        elseif state == 'end' then
+            assert(nil, 'no more field or operator')
+        else
         end
-    else
-        field = key
-        operator = 'exact'
     end
-    template = RELATIONS[operator] or STRING_LIKE_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
+    local template = RELATIONS[operator] or STRING_RELATIONS[operator] or assert(nil, 'invalid operator.')
     if type(value) == 'string' then
         value = string_format("%q", value)
-        if STRING_LIKE_RELATIONS[operator] then
+        if STRING_RELATIONS[operator] then
+            loger('like..')
             value = value:sub(2, -2)
             -- value = value:sub(2, -2):gsub([[\\]], [[\\\]]) --search for backslash, seems rare
         end
@@ -167,10 +193,7 @@ function Manager._parse_kv(self, key, value)
     else -- number
         value = tostring(value)
     end
-    if not add_foreignkey_prefix then
-        field = string_format('`%s`.`%s`', self.table_name, field)
-    end
-    return string_format(template, field, value)
+    return string_format(template, string_format('`%s`.`%s`', prefix, field), value)
 end 
 function Manager._parse_Q(self, qobj)
     return qobj:serialize(self)
@@ -202,10 +225,10 @@ end
 function Manager.parse_from(self)
     local res = string_format('`%s`', self.table_name)
     if self._join then
-        -- k : mom, v: User, v.table_name: user
+        -- k : mom, v.left: Pet, v.right: User
         for k, v in pairs(self._join) do
             res = string_format('(%s) INNER JOIN `%s` AS `%s` ON `%s`.`id` = `%s`.`%s`', 
-                res, v.table_name, k, k, self.table_name, k)
+                res, v.right, k, k, v.left, k)
         end
     end
     return res
@@ -276,10 +299,10 @@ function Manager.parse_having(self)
                 field = key
                 operator = 'exact'
             end
-            template = RELATIONS[operator] or STRING_LIKE_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
+            template = RELATIONS[operator] or STRING_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
             if type(value) == 'string' then
                 value = string_format("%q", value)
-                if STRING_LIKE_RELATIONS[operator] then
+                if STRING_RELATIONS[operator] then
                     value = value:sub(2, -2)
                 end
             elseif type(value) == 'table' then 
@@ -433,7 +456,8 @@ function Manager.join(self, params)
         self._select_join = {}
     end
     for i, v in ipairs(params) do
-        self._join[v] = self.foreignkeys[v]
+        -- v: mom, left = Pet, right = User
+        self._join[v] = {left=self.table_name, right=self.foreignkeys[v].table_name}
         self._select_join[v] = self.foreignkeys[v]
     end
     return self

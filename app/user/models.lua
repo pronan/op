@@ -2,12 +2,18 @@
 local Model = require"resty.mvc.model"
 local Field = require"resty.mvc.modelfield"
 
+local Detail = Model:class{table_name = "detail", 
+    fields = {
+        sex = Field.CharField{maxlen=1},
+        age = Field.IntegerField{},
+        money = Field.FloatField{}, 
+    }
+}
 
 local User = Model:class{table_name = "user", 
     fields = {
         name = Field.CharField{maxlen=50},
-        age = Field.IntegerField{},
-        money = Field.FloatField{}
+        detail = Field.ForeignKey{Detail}
     }
 }
 -- function User.method(self)
@@ -16,4 +22,5 @@ local User = Model:class{table_name = "user",
 
 return {
   User = User, 
+  Detail = Detail, 
 }
