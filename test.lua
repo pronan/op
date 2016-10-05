@@ -1,7 +1,7 @@
 local encode = require"cjson".encode
 local Model = require"resty.mvc.model"
 local Field = require"resty.mvc.modelfield"
-local Q = require"resty.mvc.query".Q
+local Q = require"resty.mvc.q"
 
 local User = Model:class{
     table_name = "user", 
@@ -53,6 +53,10 @@ User:update{name='Tom', money=1000.1, age=12}:where{id=1}
 User:where{age__lt=10}:delete()
 User:where{Q{name='Kate'}/Q{age__gt=20}}
 User:where{Q{name='Kate'}}:where{Q{age__gt=20}}:where{name__endswith='aha'}
+
+Record:where{Q{buyer=1}}
+Record:where{Q{buyer__gt=1}}
+Record:where{Q{buyer__in={1, 2}}}
 
 Record:join{'buyer', 'seller', 'product'}
 Record:select{'id'}:where{Q{product__name='cup'}/Q{buyer__name='Tom'}*Q{product__price__gt=10.93}}

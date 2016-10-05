@@ -177,11 +177,15 @@ function Manager._parse_Q(self, qobj)
 end
 function Manager._parse_params(self, args, kwargs)
     local results = {}
-    for i, qobj in ipairs(args or {}) do
-        results[#results+1] = self:_parse_Q(qobj)
+    if args then
+        for i, qobj in ipairs(args) do
+            results[#results+1] = self:_parse_Q(qobj)
+        end
     end
-    for key, value in pairs(kwargs or {}) do
-        results[#results+1] = self:_parse_kv(key, value)
+    if kwargs then
+        for key, value in pairs(kwargs) do
+            results[#results+1] = self:_parse_kv(key, value)
+        end
     end
     return table_concat(results, " AND ")
 end
