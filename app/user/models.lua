@@ -2,11 +2,19 @@
 local Model = require"resty.mvc.model"
 local Field = require"resty.mvc.modelfield"
 
+local Moreinfo = Model:class{table_name = "moreinfo", 
+    fields = {
+        content = Field.CharField{maxlen=100},
+        create_time = Field.DateTimeField{}, 
+    }
+}
+
 local Detail = Model:class{table_name = "detail", 
     fields = {
         sex = Field.CharField{maxlen=1},
         age = Field.IntegerField{},
         money = Field.FloatField{}, 
+        moreinfo = Field.ForeignKey{Moreinfo}
     }
 }
 
@@ -21,6 +29,7 @@ local User = Model:class{table_name = "user",
 -- end
 
 return {
+  Moreinfo = Moreinfo, 
   User = User, 
   Detail = Detail, 
 }

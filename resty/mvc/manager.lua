@@ -118,12 +118,12 @@ local STRING_RELATIONS = {
     iendswith = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s"',
 }
 function Manager._parse_kv(self, key, value)
-    local field, template
+    local field, template, left_alias, right_alias, left_fk, right_name
     local prefix = self.table_name
     local operator = 'exact'
     local current_model = self
-    local left_join_name = self.table_name
     local state = 'init'
+    local first_join = true
 
     for e in utils.split(key, '__') do
         if state == 'init' then
@@ -135,7 +135,7 @@ function Manager._parse_kv(self, key, value)
                 -- buyer
                 state = 'init_fk' 
                 current_model = f.reference -- User
-                field = e
+                field = e -- buyer
             else -- name
                 state = 'init_nfk' 
                 field = e
@@ -145,23 +145,37 @@ function Manager._parse_kv(self, key, value)
                 state = 'end'
                 operator = e
             else --non-relation operator, a join is needed 
-                 -- feild: buyer
+                 -- field:buyer, e:detail or name
                 if not self._join then
                     self._join = {}
                 end
-                self._join[field] = {left=left_join_name, right=current_model.table_name}
-                local fk_model = current_model.foreignkeys[e]
+                if first_join then
+                    first_join = false
+                    left_alias = self.table_name -- record
+                    left_fk = field -- buyer
+                    right_alias = field --buyer
+                    right_name = current_model.table_name --user
+                else
+                    left_alias = right_alias -- buyer
+                    right_alias = right_alias..'__'..field -- buyer__detail
+                    left_fk = field --detail 
+                    right_name = current_model.table_name -- detail
+                end
+                self:_add_to_join{
+                    left_alias = left_alias, 
+                    left_fk = left_fk, 
+                    right_alias = right_alias, 
+                    right_name = right_name}
+                prefix = right_alias
+                local fk_model = current_model.foreignkeys[e] -- e: detail or name
                 if fk_model then -- buyer__detail
-                    -- feild: buyer, e: detail (another foreign key)
+                    -- field: buyer, e: detail (another foreign key)
                     state = 'init_fk'
-                    left_join_name = field -- buyer
                     current_model = fk_model -- Detail
-                    prefix = field -- buyer
                     field = e -- detail
                 elseif current_model.fields[e] then -- buyer__name
-                    -- feild: buyer, e: name
+                    -- field: buyer, e: name
                     state = 'init_nfk'
-                    prefix = field
                     field = e
                 else
                     assert(nil, e..' is not a valid field name.')
@@ -170,22 +184,17 @@ function Manager._parse_kv(self, key, value)
         elseif state == 'init_nfk' then
             state = 'end'
             operator = e
-        -- elseif state == 'init_fk' then
-        -- elseif state == 'init_fk' then
-        -- elseif state == 'init_fk' then
-        -- elseif state == 'init_fk' then
         elseif state == 'end' then
             assert(nil, 'no more field or operator')
         else
+            assert(nil, 'in valid parsing state')
         end
     end
     local template = RELATIONS[operator] or STRING_RELATIONS[operator] or assert(nil, 'invalid operator.')
     if type(value) == 'string' then
         value = string_format("%q", value)
         if STRING_RELATIONS[operator] then
-            loger('like..')
-            value = value:sub(2, -2)
-            -- value = value:sub(2, -2):gsub([[\\]], [[\\\]]) --search for backslash, seems rare
+            value = value:sub(2, -2) --strip the double quote
         end
     elseif type(value) == 'table' then 
         -- turn table like {'a', 'b', 1} to string ('a', 'b', 1)
@@ -195,43 +204,49 @@ function Manager._parse_kv(self, key, value)
     end
     return string_format(template, string_format('`%s`.`%s`', prefix, field), value)
 end 
-function Manager._parse_Q(self, qobj)
-    return qobj:serialize(self)
-end
-function Manager._parse_params(self, args, kwargs)
-    local results = {}
-    if args then
-        for i, qobj in ipairs(args) do
-            results[#results+1] = self:_parse_Q(qobj)
-        end
-    end
-    if kwargs then
-        for key, value in pairs(kwargs) do
-            results[#results+1] = self:_parse_kv(key, value)
-        end
-    end
-    return table_concat(results, " AND ")
-end
-function Manager.parse_where(self)
-    -- complidated part is foreign key stuff
-    if self._where_string then
-        return ' WHERE '..self._where_string
-    elseif self._where_args or self._where_kwargs then
-        return ' WHERE '..self:_parse_params(self._where_args, self._where_kwargs)
-    else
-        return ''
-    end
-end
 function Manager.parse_from(self)
     local res = string_format('`%s`', self.table_name)
     if self._join then
-        -- k : mom, v.left: Pet, v.right: User
-        for k, v in pairs(self._join) do
-            res = string_format('(%s) INNER JOIN `%s` AS `%s` ON `%s`.`id` = `%s`.`%s`', 
-                res, v.right, k, k, v.left, k)
+        -- k : mom, v.left: pet, v.right: user
+        for i, v in ipairs(self._join) do
+            res = string_format('%s INNER JOIN `%s` AS `%s` ON (`%s`.`%s` = `%s`.`id`)', 
+                res, v.right_name, v.right_alias, v.left_alias, v.left_fk, v.right_alias)
         end
     end
     return res
+end
+function Manager._add_to_join(self, t)
+    local already_has
+    for i, v in ipairs(self._join) do
+        if (t.left_alias==v.left_alias and t.left_fk==v.left_fk 
+            and t.right_alias==v.right_alias and t.right_name==v.right_name) then
+            already_has = true
+            break
+        end
+    end
+    if not already_has then
+        self._join[#self._join+1] = t
+    end
+end
+function Manager.join(self, params)
+    if self._join == nil then
+        self._join = {} 
+    end
+    if self._select_join == nil then
+        self._select_join = {}
+    end
+    -- 
+    for i, fk_alias in ipairs(params) do
+        -- order matters,  so used as a array
+        self:_add_to_join{
+            left_alias = self.table_name,  -- record
+            left_fk = fk_alias, -- buyer
+            right_alias = fk_alias, -- buyer
+            right_name = self.foreignkeys[fk_alias].table_name} -- user
+        -- order doesn't matters and left join table is fixed(self.table_name), so used as a hash
+        self._select_join[fk_alias] = self.foreignkeys[fk_alias]
+    end
+    return self
 end
 function Manager.parse_select(self)
     local res = {}
@@ -254,13 +269,44 @@ function Manager.parse_select(self)
     -- extra fields needed if Manager:join is used
     if self._select_join then
         for fk, fk_model in pairs(self._select_join) do
+            -- fk:buyer, fk_model:User, 
             for k, v in pairs(fk_model.fields) do
-                -- `dad`.`name` AS dad__name
                 res[#res+1] = string_format('`%s`.`%s` AS %s__%s', fk, k, fk, k)
             end
         end
     end
     return table_concat(res, ', ')
+end
+function Manager._parse_Q(self, qobj)
+    return qobj:serialize(self)
+end
+function Manager._parse_params(self, args, kwargs)
+    local results = {}
+    if args then
+        for i, qobj in ipairs(args) do
+            results[#results+1] = self:_parse_Q(qobj)
+        end
+    end
+    if kwargs then
+        for key, value in pairs(kwargs) do
+            results[#results+1] = self:_parse_kv(key, value)
+        end
+    end
+    return table_concat(results, " AND ")
+end
+function Manager.parse_where(self)
+    -- complidated part is foreign key stuff
+    if self._where_string then
+        return ' WHERE '..self._where_string
+    elseif self._where_args or self._where_kwargs then
+        local _where_string = self:_parse_params(self._where_args, self._where_kwargs)
+        if _where_string == '' then
+            return ''
+        end
+        return ' WHERE '.._where_string
+    else
+        return ''
+    end
 end
 function Manager.parse_group(self)
     if self._group_string then
@@ -284,6 +330,7 @@ function Manager.parse_order(self)
 end
 function Manager.parse_having(self)
     -- this is simpler than `parse_where` because no foreign key stuff involved
+    -- and no need to check a field name is valid or not
     if self._having_string then
         return ' HAVING '..self._having_string
     elseif self._having then
@@ -334,7 +381,6 @@ function Manager.to_sql(self)
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     else 
         self.is_select = true --for the `exec` method
-        --local limit_clause = self:parse_page()
         -- note `parse_where` must be called before `parse_from` because foreignkeys stuff
         local where_clause = self:parse_where()
         return string_format('SELECT %s FROM %s %s%s%s%s%s;', 
@@ -445,20 +491,6 @@ function Manager.order(self, params)
         end
     else
         self._order_string = params
-    end
-    return self
-end
-function Manager.join(self, params)
-    if self._join == nil then
-        self._join = {}
-    end
-    if self._select_join == nil then
-        self._select_join = {}
-    end
-    for i, v in ipairs(params) do
-        -- v: mom, left = Pet, right = User
-        self._join[v] = {left=self.table_name, right=self.foreignkeys[v].table_name}
-        self._select_join[v] = self.foreignkeys[v]
     end
     return self
 end

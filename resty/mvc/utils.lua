@@ -163,7 +163,8 @@ local function serialize_attrs(attrs, table_name)
     -- {a=1, b='bar'} -> `foo`.`a` = 1, `foo`.`b` = "bar"
     local res = {}
     for k, v in pairs(attrs) do
-        res[#res+1] = string_format('%s = %s', string_format('`%s`.`%s`', table_name, k), serialize_basetype(v))
+        res[#res+1] = string_format('%s = %s', 
+            string_format('`%s`.`%s`', table_name, k), serialize_basetype(v))
     end
     return table_concat(res, ", ")
 end

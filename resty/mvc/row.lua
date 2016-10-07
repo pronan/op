@@ -44,10 +44,12 @@ function Row.create(self)
         if value == nil then
             -- no value, try to get from default or auto_now/auto_now_add
             if field.default then
-                valid_attrs[name] = field:get_default()
+                value = field:get_default()
             elseif field.auto_now or field.auto_now_add then
-                valid_attrs[name] = ngx_localtime()
+                value = ngx_localtime()
             end
+            valid_attrs[name] = value
+            self[name] = value
         else
             -- if value is given, auto_now/auto_now_add will be ignored
             local value, errors = field:clean(value)

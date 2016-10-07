@@ -12,7 +12,7 @@ http {
     keepalive_timeout  65;
     #autoindex on;
     init_by_lua_file app/init.lua;
-    init_worker_by_lua_file app/migrations.lua;
+    #init_worker_by_lua_file app/migrations.lua;
     lua_package_path './?.lua;./?/init.lua;;';
     
     client_body_temp_path temp/client_body_temp;

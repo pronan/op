@@ -4,8 +4,6 @@
 -- http://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html
 local query = require"resty.mvc.query".single
 
-local drop_existed_table = true
-
 local function make_file(fn, content)
   local f, e = io.open(fn, "w+")
   if not f then
@@ -153,7 +151,20 @@ local function has_values(t, e)
     end
     return false
 end
-local function migrate_models(models)
+
+local function get_models()
+    -- default function to get models list
+    local res = {}
+    for i, name in ipairs(settings.APP) do
+        local models = require("app."..name..".models")
+        for name, model in pairs(models) do
+            res[#res+1] = model
+        end
+    end
+    return res
+end
+
+local function migrate_models(models, drop_existed_table)
     local res = {}
     -- name: User, model: User
     for i, model in ipairs(models) do
@@ -176,7 +187,6 @@ local function migrate_models(models)
         end
     end
 
-    loger('end.....')
     local defs = {}
     for i, model in ipairs(res) do
         defs[#defs+1] = write_model_to_db(model, drop_existed_table)
@@ -184,21 +194,18 @@ local function migrate_models(models)
     return defs
 end
 
-
-local function get_models()
-    local res = {}
-    for i, name in ipairs(settings.APP) do
-        local models = require("app."..name..".models")
-        for name, model in pairs(models) do
-            res[#res+1] = model
-        end
+local function main(get_models_func, drop_existed_table)
+    local models
+    get_models_func = get_models_func or get_models
+    if type(get_models_func) == 'function' then
+        models = get_models_func()
+    elseif type(get_models_func) == 'table' then
+        models = get_models_func
+    else
+        assert(nil, 'invalid argument, should be either a function or table.')
     end
-    return res
-end
-
-local function main()
-    return migrate_models(get_models())
+    return migrate_models(models, drop_existed_table)
 end
 
 
-ngx.timer.at(0, main)
+return main
