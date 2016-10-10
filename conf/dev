@@ -7,13 +7,16 @@ events {worker_connections  1024;}
 http {
     lua_code_cache off;
     default_type  "text/html; charset=utf-8";
-    #access_log  off;
+    
     sendfile        on;
     keepalive_timeout  65;
-    #autoindex on;
+    lua_package_path './?.lua;./?/init.lua;;';    
     init_by_lua_file app/init.lua;
+
+    #access_log  off;
+    #autoindex on;
     #init_worker_by_lua_file app/migrations.lua;
-    lua_package_path './?.lua;./?/init.lua;;';
+
     
     client_body_temp_path temp/client_body_temp;
     fastcgi_temp_path temp/fastcgi_temp;

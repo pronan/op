@@ -1,3 +1,6 @@
+require "resty.core"
+collectgarbage("collect")  -- just to collect any garbage
+
 utils = require"resty.utils"
 loger = utils.loger
 repr = utils.repr
