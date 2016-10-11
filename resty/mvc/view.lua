@@ -10,8 +10,16 @@ local function include(class, ...)
     return class
 end
 
-local View = {template_name=false, model=false, key='id',context_object_name=false, context_object_list_name=false}
-View.http_method_names = {get=true, post=true, put=true, patch=true, delete=true, 
+local View = {
+    key='id',
+    template_name=false, 
+    model=false, 
+    context_object_name=false, 
+    context_object_list_name=false,
+}
+View.http_method_names = {
+    get=true, post=true, put=true, 
+    patch=true, delete=true, 
     head=true, options=true, trace=true}
 function View.new(self, opts)
     opts = opts or {}
@@ -106,7 +114,11 @@ function DetailView.get_template_name(self)
     return self.model.table_name..'/detail.html'
 end
 
-local FormView = View:new{success_url=false, fields=false, initial=false ,form_class=false,}
+local FormView = View:new{
+    success_url=false, 
+    fields=false, 
+    initial=false ,
+    form_class=false,}
 function FormView.get(self, request)
     local form, err = self:get_form()
     if not form then
@@ -193,7 +205,7 @@ function CreateView.form_valid(self, form)
     return FormView.form_valid(self, form)
 end
 function CreateView.get_template_name(self)
-    return self.model.table_name..'/create.html'
+    return self.template_name or self.model.table_name..'/create.html'
 end
 function CreateView.get_success_url(self)
     return string.format('/%s/%s', self.model.table_name, self.object.id)
@@ -217,7 +229,7 @@ function UpdateView.post(self, request)
     return FormView.post(self, request)
 end
 function UpdateView.get_template_name(self)
-    return self.model.table_name..'/update.html'
+    return self.template_name or self.model.table_name..'/update.html'
 end
 function UpdateView.get_success_url(self)
     return string.format('/%s/%s', self.model.table_name, self.object.id)
@@ -265,7 +277,7 @@ function ListView.get(self, request)
     return self:render_to_response(context)
 end
 function ListView.get_template_name(self)
-    return self.model.table_name..'/list.html'
+    return self.template_name or self.model.table_name..'/list.html'
 end
 function ListView.get_queryset(self)
     local page = tonumber(self.kwargs.page)

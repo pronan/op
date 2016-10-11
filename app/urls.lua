@@ -1,10 +1,6 @@
 local response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
 local views = require"app.views"
-local User = require"app.models".User
-local forms = require"app.forms"
-
-local sub = string.sub
 
 local function login_require(func)
     return function(request)
@@ -18,10 +14,6 @@ local function login_require(func)
 end
 
 return{
-    -- {'^/user/create$', ClassView.CreateView:as_view{model=User,form_class=forms.UserForm}}, 
-    -- {'^/user/update/(?<id>\\d+?)$', ClassView.UpdateView:as_view{model=User,form_class=forms.UserUpdateForm}}, 
-    -- {'^/user/list/(?<page>\\d+?)$', ClassView.ListView:as_view{model=User}}, 
-    -- {'^/user/(?<id>\\d+?)$', ClassView.DetailView:as_view{model=User}}, 
 
     {'^/$', views.home}, 
     {'^/profile$', views.profile}, 

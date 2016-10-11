@@ -3,11 +3,13 @@ local ClassView = require"resty.mvc.view"
 local views = require"app.user.views"
 local models = require"app.user.models"
 local forms = require"app.user.forms"
+local q = require "resty.query"
 
 local User = models.User
 
 return {
-  {'^/user/create$',              ClassView.CreateView:as_view{model=User,form_class=forms.UserCreateForm}}, 
+  {'^/user/create$',              ClassView.CreateView:as_view{template_name='create.html',
+    model=User,form_class=forms.UserCreateForm}}, 
   {'^/user/update/(?<id>\\d+?)$', ClassView.UpdateView:as_view{model=User,form_class=forms.UserUpdateForm}}, 
   {'^/user/list/(?<page>\\d+?)$', ClassView.ListView:as_view{model=User}}, 
   {'^/user/(?<id>\\d+?)$',        ClassView.DetailView:as_view{model=User}}, 

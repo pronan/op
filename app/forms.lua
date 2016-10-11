@@ -1,9 +1,7 @@
 local Form = require"resty.mvc.form"
 local Field = require"resty.mvc.formfield"
--- local BootsForm = require"resty.mvc.bootstrap_form"
--- local BootsField = require"resty.mvc.bootstrap_field"
 local validator = require"resty.mvc.validator"
-local User = require"app.models".User
+local User = require"app.user.models".User
 
 local forms = {}
 

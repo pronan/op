@@ -1,43 +1,43 @@
 local template = require"resty.mvc.template"
 local encode = require "cjson.safe".encode
-local DEBUG = require"app.settings".DEBUG
-local APP = require"app.settings".APP
 local open = io.open
 local sub = string.sub
 
-local vars = ngx.var
+--@./resty/mvc/response.lua
+--@/usr/local/openresty/site/lualib/resty/response.lua
+local CD = debug.getinfo(1,"S").source:match'^@(.*)response.lua$'
+
+local GLOBAL_CONTEXT = {
+    __domain='example.com',
+}
 
 local function readfile(path)
     local file = open(path, "rb")
-    if not file then return nil end
+    if not file then 
+        return nil 
+    end
     local content = file:read "*a"
     file:close()
     return content
 end
-local root = vars.document_root or ngx.config.prefix()
-if sub(root, -1) == "/" then 
-    root = sub(root, 1, -2) 
+
+local default_loader = template.load
+local function admin_loader(path)
+    return readfile(table.concat{CD..'admin_html/', path})
 end
-local function app_loader( path )
-    local res = readfile(table.concat{ root, "/", path })
-    if not res then
-        for i, name in ipairs(APP) do
-            res = readfile(table.concat{"app/", name, "/html/", path })
-            if res then
-                break
-            end
+template.loaders = {default_loader, admin_loader}
+local function load_from_loaders(path)
+    -- first try lua-resty-template's loader
+    local res
+    for i, loader in ipairs(template.loaders) do
+        res = loader(path)
+        if res ~= nil and res ~= path then
+            return res
         end
     end
-    return res or path
+    return path
 end
-template.load = app_loader
-
-local template_cache;
-if DEBUG then
-    template_cache = 'no-cache'
-end
-
-local GLOBAL_CONTEXT = {pjl='yeal'}
+template.load = load_from_loaders
 
 local compile = template.compile
 local function render(request, path, context)
@@ -54,10 +54,11 @@ local function render(request, path, context)
             res[k] = v
         end
     end
-    return compile(path, template_cache)(res)
+    return compile(path)(res)
 end
 
-local M = {}
+-- response object access to template so you can modify loaders if needed
+local M = {template_class=template}
 function M.new(self, init)
     init = init or {}
     self.__index = self

@@ -1,29 +1,40 @@
 {% layout = "layout/two.html" %}
-{-sidebar_percent-}5{-sidebar_percent-}
-{-content_percent-}5{-content_percent-}
 
-{-sidebar-}
-<div class='section'>
-    <div class='para'>
+{-n1-}5{-n1-}
+{-n2-}7{-n2-}
+
+{-nc1-}
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">登陆须知</h3>
+  </div>
+  <div class="panel-body">
+    <p>
     如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。
-    </div>
+    </p>
     
-    <div class='para'>
+    <p>
       如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。
-    </div>
-    <div class='para'>
+    </p>
+    
+    <p>
       如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。
-    </div>
-    <div class='para'>
+    </p>
+    
+    <p>
       如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。
-    </div>
-    <div class='para'>
+    </p>
+    
+    <p>
       如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。
-    </div>
+    </p>
+  </div>
 </div>
-{-sidebar-}
 
-{-content-}
+{-nc1-}
+
+{-nc2-}
 <form method="post" action="">
   {*form:render()*}
   <button type="submit" class="btn btn-default">登陆</button>
@@ -36,6 +47,6 @@
 	  </a>
 	</div>
 </form>
-{-content-}
+{-nc2-}
 
 

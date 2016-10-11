@@ -333,7 +333,7 @@ function ChoiceField.valid_value(self, value)
 end
 
 -- file api is based on lua-resty-reqargs
-local FileField = Field:new{}
+local FileField = Field:new{upload_to=nil}
 function FileField.instance(cls, attrs)
     local self = Field.instance(cls, attrs)
     self.upload_to = self.upload_to or 'static/files/' -- assert(nil, 'upload_to is required for FileField')
@@ -372,6 +372,12 @@ function ForeignKey.instance(cls, attrs)
     -- end
     -- self.choices = choices
     return self
+end
+function ForeignKey.client_to_lua(self, value)
+    if utils.is_empty_value(value) then
+        return 
+    end
+    return value
 end
 
 
@@ -423,5 +429,5 @@ return{
     FileField = FileField, 
     
     -- MultipleChoiceField = MultipleChoiceField, -- todo
-    -- ForeignKey = ForeignKey, -- to do
+    ForeignKey = ForeignKey, 
 }

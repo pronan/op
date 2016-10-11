@@ -4,7 +4,7 @@ local response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
 local utils = require"resty.mvc.utils"
 local User = require"app.user.models".User
-local Pet = require"app.pet.models".Pet
+-- local Pet = require"app.pet.models".Pet
 local forms = require"app.forms"
 
 local function eval(s, context)

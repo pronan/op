@@ -20,7 +20,8 @@ local Detail = Model:class{table_name = "detail",
 
 local User = Model:class{table_name = "user", 
     fields = {
-        name = Field.CharField{maxlen=50},
+        username = Field.CharField{maxlen=50},
+        password = Field.CharField{maxlen=50},
         detail = Field.ForeignKey{Detail}
     }
 }

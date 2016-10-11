@@ -153,6 +153,7 @@ function BoundField.css_classes(self, extra_classes)
     if self.field.required and self.form.required_css_class then
         extra_classes[#extra_classes+1] = self.form.required_css_class
     end
+    extra_classes[#extra_classes+1] = self.form.field_html_class
     return table_concat(extra_classes, ' ') 
 end
 function BoundField.is_hidden(self)

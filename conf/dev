@@ -12,10 +12,11 @@ http {
     keepalive_timeout  65;
     lua_package_path './?.lua;./?/init.lua;;';    
     init_by_lua_file app/init.lua;
-
+    init_worker_by_lua_file app/init_worker.lua;
+    
     #access_log  off;
     #autoindex on;
-    #init_worker_by_lua_file app/migrations.lua;
+    
 
     
     client_body_temp_path temp/client_body_temp;

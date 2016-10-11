@@ -1,0 +1,1295 @@
+2016/10/10 09:34:45 [alert] 6198#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/10 09:34:46 [error] 6200#0: *1 lua entry thread aborted: runtime error: ./app/views.lua:7: module 'app.pet.models' not found:
+	no field package.preload['app.pet.models']
+	no file './app/pet/models.lua'
+	no file './app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models/init.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models/init.lua'
+	no file './app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.so'
+	no file '/usr/local/openresty/lualib/app/pet/models.so'
+	no file './app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.14, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:34:55 [error] 6200#0: *2 lua entry thread aborted: runtime error: ./app/views.lua:7: module 'app.pet.models' not found:
+	no field package.preload['app.pet.models']
+	no file './app/pet/models.lua'
+	no file './app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models/init.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models/init.lua'
+	no file './app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.so'
+	no file '/usr/local/openresty/lualib/app/pet/models.so'
+	no file './app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.240, server: localhost, request: "GET / HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://ide.c9.io/pronan/openresty"
+2016/10/10 09:35:07 [error] 6200#0: *3 lua entry thread aborted: runtime error: ./app/views.lua:7: module 'app.pet.models' not found:
+	no field package.preload['app.pet.models']
+	no file './app/pet/models.lua'
+	no file './app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models/init.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models/init.lua'
+	no file './app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.so'
+	no file '/usr/local/openresty/lualib/app/pet/models.so'
+	no file './app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.5, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:35:30 [error] 6200#0: *4 lua entry thread aborted: runtime error: ./app/views.lua:7: module 'app.pet.models' not found:
+	no field package.preload['app.pet.models']
+	no file './app/pet/models.lua'
+	no file './app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models/init.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models.lua'
+	no file '/usr/local/openresty/lualib/app/pet/models/init.lua'
+	no file './app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/pet/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/pet/models.so'
+	no file '/usr/local/openresty/lualib/app/pet/models.so'
+	no file './app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/pet/models.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.30, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:35:35 [error] 6200#0: *5 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.33, server: localhost, request: "GET / HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://ide.c9.io/pronan/openresty"
+2016/10/10 09:35:51 [error] 6200#0: *6 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.213, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:36:12 [error] 6200#0: *7 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.16, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:36:33 [error] 6200#0: *8 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.33, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:36:54 [error] 6200#0: *9 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.214, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:37:15 [error] 6200#0: *10 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.12, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:37:37 [error] 6200#0: *11 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.12, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:37:58 [error] 6200#0: *12 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.240, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:38:19 [error] 6200#0: *13 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.12, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:38:40 [error] 6200#0: *14 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.5, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:39:02 [error] 6200#0: *15 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.30, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:39:23 [error] 6200#0: *16 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.14, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:39:46 [error] 6200#0: *17 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.12, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:40:07 [error] 6200#0: *18 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.33, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:40:29 [error] 6200#0: *19 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.213, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:40:51 [error] 6200#0: *20 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.30, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:41:12 [error] 6200#0: *21 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.213, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:41:33 [error] 6200#0: *22 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.33, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:41:54 [error] 6200#0: *23 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.14, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:42:16 [error] 6200#0: *24 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.33, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:42:37 [error] 6200#0: *25 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.240, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:42:58 [error] 6200#0: *26 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.14, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:43:19 [error] 6200#0: *27 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.5, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:43:40 [error] 6200#0: *28 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.214, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:44:01 [error] 6200#0: *29 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.33, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:44:23 [error] 6200#0: *30 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.0.213, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:44:44 [error] 6200#0: *31 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.14, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 09:45:05 [error] 6200#0: *32 lua entry thread aborted: runtime error: ./app/record/forms.lua:14: attempt to call field 'ForeignKey' (a nil value)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:45):2: in function <content_by_lua(dev:45):1>, client: 10.240.1.12, server: localhost, request: "GET /__webpack_hmr HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 10:47:06 [alert] 10333#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/10 10:47:06 [emerg] 10333#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/10 10:47:06 [emerg] 10333#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/10 10:47:06 [emerg] 10333#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/10 10:47:06 [emerg] 10333#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/10 10:47:06 [emerg] 10333#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/10 10:47:06 [emerg] 10333#0: still could not bind()
+2016/10/10 10:47:21 [error] 6200#0: *39 open() "./static/js/a.js" failed (2: No such file or directory), client: 10.240.0.240, server: localhost, request: "GET /static/js/a.js HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/"
+2016/10/10 10:47:29 [error] 6200#0: *42 open() "./static/js/a.js" failed (2: No such file or directory), client: 10.240.1.12, server: localhost, request: "GET /static/js/a.js HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/"
+2016/10/10 23:52:58 [alert] 3536#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 04:53:36 [alert] 10826#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 04:53:36 [notice] 10826#0: signal process started
+2016/10/11 04:53:36 [alert] 3537#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 04:54:39 [alert] 10835#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 04:54:39 [notice] 10835#0: signal process started
+2016/10/11 04:54:51 [alert] 10839#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 10:37:37 [alert] 17794#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 10:37:46 [error] 17796#0: *2 open() "./static/js/index.js.map" failed (2: No such file or directory), client: 10.240.0.213, server: localhost, request: "GET /static/js/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 13:24:10 [alert] 22199#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 13:24:10 [emerg] 22199#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 13:24:10 [emerg] 22199#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 13:24:10 [emerg] 22199#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 13:24:10 [emerg] 22199#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 13:24:10 [emerg] 22199#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 13:24:10 [emerg] 22199#0: still could not bind()
+2016/10/11 14:48:30 [alert] 23640#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:48:30 [notice] 23640#0: signal process started
+2016/10/11 14:48:30 [alert] 17795#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:48:30 [error] 23644#0: init_worker_by_lua_file error: ./resty/mysql.lua:470: API disabled in the context of init_worker_by_lua*
+stack traceback:
+	[C]: in function 'tcp'
+	./resty/mysql.lua:470: in function 'new'
+	./resty/mvc/query.lua:12: in function 'query'
+	./resty/mvc/migrate.lua:128: in function 'write_model_to_db'
+	./resty/mvc/migrate.lua:192: in function 'migrate'
+	./app/init_worker.lua:3: in main chunk
+2016/10/11 14:48:52 [alert] 23647#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:48:52 [notice] 23647#0: signal process started
+2016/10/11 14:48:57 [alert] 23651#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:48:57 [error] 23653#0: init_worker_by_lua_file error: ./resty/mysql.lua:470: API disabled in the context of init_worker_by_lua*
+stack traceback:
+	[C]: in function 'tcp'
+	./resty/mysql.lua:470: in function 'new'
+	./resty/mvc/query.lua:12: in function 'query'
+	./resty/mvc/migrate.lua:128: in function 'write_model_to_db'
+	./resty/mvc/migrate.lua:192: in function 'migrate'
+	./app/init_worker.lua:3: in main chunk
+2016/10/11 14:50:05 [alert] 23664#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:50:05 [notice] 23664#0: signal process started
+2016/10/11 14:50:07 [alert] 23668#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:50:07 [error] 23670#0: init_worker_by_lua_file error: ./app/init_worker.lua:3: attempt to call field 'timer' (a table value)
+stack traceback:
+	./app/init_worker.lua:3: in main chunk
+2016/10/11 14:52:52 [alert] 23682#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:52:52 [emerg] 23682#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 14:52:52 [emerg] 23682#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 14:52:52 [emerg] 23682#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 14:52:52 [emerg] 23682#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 14:52:52 [emerg] 23682#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/11 14:52:52 [emerg] 23682#0: still could not bind()
+2016/10/11 14:52:56 [alert] 23686#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 14:52:56 [notice] 23686#0: signal process started
+2016/10/11 14:53:00 [alert] 23690#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 15:18:04 [error] 23692#0: *10 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/欢迎您,\n{% if user then%}\n    {{user.username}}\n{% else%}\n    游客\n{% end%}"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET / HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:18:04 [error] 23692#0: *10 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="c10_10 content"><div class="oi">\n\t{* blocks.content *}\n</div></div>\n\n<div class="clear"></div>"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET / HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:18:07 [error] 23692#0: *12 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/5"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/"
+2016/10/11 15:18:07 [error] 23692#0: *12 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/7"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/"
+2016/10/11 15:18:07 [error] 23692#0: *12 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/\n<div class="panel panel-default">\n  <div class="panel-heading">\n    <h3 class="panel-title">登陆须知</h3>\n  </div>\n  <div class="panel-body">\n    <p>\n    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。\n    </p>\n    \n    <p>\n      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。\n    </p>\n    \n    <p>\n      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。\n    </p>\n    \n    <p>\n      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。\n    </p>\n    \n    <p>\n      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。\n    </p>\n  </div>\n</div>\n"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/"
+2016/10/11 15:18:07 [error] 23692#0: *12 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<form method="post" action="">\n  {*form:render()*}\n  <button type="submit" class="btn btn-default">登陆</button>\n\t<div>\n\t  <a href="/oauth/qq{{redi}}">\n\t  <img width="56" height="56" src="/static/images/qq.jpg" />\n\t  </a>\n\t  <a href="/oauth/github{{redi}}">\n\t  <img width="56" height="56" src="/static/images/github.png" />\n\t  </a>\n\t</div>\n</form>"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/"
+2016/10/11 15:18:07 [error] 23692#0: *12 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/"
+2016/10/11 15:18:10 [error] 23692#0: *14 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/5"
+**************************************************, client: 10.240.0.230, server: localhost, request: "GET /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:18:10 [error] 23692#0: *14 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/7"
+**************************************************, client: 10.240.0.230, server: localhost, request: "GET /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:18:10 [error] 23692#0: *14 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="panel panel-default">\n  <div class="panel-heading">\n    <h3 class="panel-title">注册须知</h3>\n  </div>\n  <div class="panel-body">\n    <p>\n    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。\n    </p>\n    \n    <p>\n      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。\n    </p>\n    \n    <p>\n      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。\n    </p>\n    \n    <p>\n      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。\n    </p>\n    \n    <p>\n      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。\n    </p>\n  </div>\n</div>"
+**************************************************, client: 10.240.0.230, server: localhost, request: "GET /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:18:10 [error] 23692#0: *14 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<form method="post" action="">\n  {*form:render()*}\n  <button type="submit">注册</button>\n</form>"
+**************************************************, client: 10.240.0.230, server: localhost, request: "GET /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:18:10 [error] 23692#0: *14 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.0.230, server: localhost, request: "GET /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:18:13 [error] 23692#0: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/5"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:13 [error] 23692#0: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/7"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:13 [error] 23692#0: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="panel panel-default">\n  <div class="panel-heading">\n    <h3 class="panel-title">注册须知</h3>\n  </div>\n  <div class="panel-body">\n    <p>\n    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。\n    </p>\n    \n    <p>\n      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。\n    </p>\n    \n    <p>\n      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。\n    </p>\n    \n    <p>\n      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。\n    </p>\n    \n    <p>\n      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。\n    </p>\n  </div>\n</div>"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:13 [error] 23692#0: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<form method="post" action="">\n  {*form:render()*}\n  <button type="submit">注册</button>\n</form>"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:13 [error] 23692#0: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /register HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:15 [error] 23692#0: *18 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/5"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:15 [error] 23692#0: *18 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/7"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:15 [error] 23692#0: *18 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/\n<div class="panel panel-default">\n  <div class="panel-heading">\n    <h3 class="panel-title">登陆须知</h3>\n  </div>\n  <div class="panel-body">\n    <p>\n    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。\n    </p>\n    \n    <p>\n      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。\n    </p>\n    \n    <p>\n      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。\n    </p>\n    \n    <p>\n      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。\n    </p>\n    \n    <p>\n      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。\n    </p>\n  </div>\n</div>\n"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:15 [error] 23692#0: *18 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<form method="post" action="">\n  {*form:render()*}\n  <button type="submit" class="btn btn-default">登陆</button>\n\t<div>\n\t  <a href="/oauth/qq{{redi}}">\n\t  <img width="56" height="56" src="/static/images/qq.jpg" />\n\t  </a>\n\t  <a href="/oauth/github{{redi}}">\n\t  <img width="56" height="56" src="/static/images/github.png" />\n\t  </a>\n\t</div>\n</form>"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:18:15 [error] 23692#0: *18 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/register"
+2016/10/11 15:19:05 [error] 23692#0: *22 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/5"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:19:05 [error] 23692#0: *22 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/7"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:19:05 [error] 23692#0: *22 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/\n<div class="panel panel-default">\n  <div class="panel-heading">\n    <h3 class="panel-title">登陆须知</h3>\n  </div>\n  <div class="panel-body">\n    <p>\n    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。\n    </p>\n    \n    <p>\n      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。\n    </p>\n    \n    <p>\n      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。\n    </p>\n    \n    <p>\n      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。\n    </p>\n    \n    <p>\n      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。\n    </p>\n  </div>\n</div>\n"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:19:05 [error] 23692#0: *22 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<form method="post" action="">\n  {*form:render()*}\n  <button type="submit" class="btn btn-default">登陆</button>\n\t<div>\n\t  <a href="/oauth/qq{{redi}}">\n\t  <img width="56" height="56" src="/static/images/qq.jpg" />\n\t  </a>\n\t  <a href="/oauth/github{{redi}}">\n\t  <img width="56" height="56" src="/static/images/github.png" />\n\t  </a>\n\t</div>\n</form>"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:19:05 [error] 23692#0: *22 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:22:01 [alert] 23818#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 15:22:01 [notice] 23818#0: signal process started
+2016/10/11 15:22:04 [alert] 23822#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/11 15:22:09 [error] 23824#0: *4 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/5"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:22:09 [error] 23824#0: *4 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/7"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:22:09 [error] 23824#0: *4 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/\n<div class="panel panel-default">\n  <div class="panel-heading">\n    <h3 class="panel-title">登陆须知</h3>\n  </div>\n  <div class="panel-body">\n    <p>\n    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。\n    </p>\n    \n    <p>\n      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。\n    </p>\n    \n    <p>\n      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。\n    </p>\n    \n    <p>\n      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。\n    </p>\n    \n    <p>\n      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。\n    </p>\n  </div>\n</div>\n"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:22:09 [error] 23824#0: *4 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<form method="post" action="">\n  {*form:render()*}\n  <button type="submit" class="btn btn-default">登陆</button>\n\t<div>\n\t  <a href="/oauth/qq{{redi}}">\n\t  <img width="56" height="56" src="/static/images/qq.jpg" />\n\t  </a>\n\t  <a href="/oauth/github{{redi}}">\n\t  <img width="56" height="56" src="/static/images/github.png" />\n\t  </a>\n\t</div>\n</form>"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:22:09 [error] 23824#0: *4 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /login HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:22:11 [error] 23824#0: *6 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/5"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:22:11 [error] 23824#0: *6 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/7"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:22:11 [error] 23824#0: *6 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/\n<div class="panel panel-default">\n  <div class="panel-heading">\n    <h3 class="panel-title">登陆须知</h3>\n  </div>\n  <div class="panel-body">\n    <p>\n    如果您还没有账号，请使用<b style="color:red">本人身份证号</b><a href="/register" title="">点击此处注册</a>。\n    </p>\n    \n    <p>\n      如果您替他人报名，请使用他人的身份证号注册，因为报名表的身份证号是以注册身份证号为准。\n    </p>\n    \n    <p>\n      如果您忘记了密码，请<a href="/register" title="">点击此处找回</a>。\n    </p>\n    \n    <p>\n      如果您的身份证号被他人注册无法找回，请携带本人身份证前往江安县人社局信息中心进行处理，地址：江安县政务中心9号窗口。\n    </p>\n    \n    <p>\n      如果报名过程中出现异常导致报名无法进行，请致电江安县人社局信息中心（0831-2622839）。\n    </p>\n  </div>\n</div>\n"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:22:11 [error] 23824#0: *6 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<form method="post" action="">\n  {*form:render()*}\n  <button type="submit" class="btn btn-default">登陆</button>\n\t<div>\n\t  <a href="/oauth/qq{{redi}}">\n\t  <img width="56" height="56" src="/static/images/qq.jpg" />\n\t  </a>\n\t  <a href="/oauth/github{{redi}}">\n\t  <img width="56" height="56" src="/static/images/github.png" />\n\t  </a>\n\t</div>\n</form>"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:22:11 [error] 23824#0: *6 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.0.213, server: localhost, request: "POST /login HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/login"
+2016/10/11 15:27:45 [error] 23824#0: *11 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x41a67300
+  1 : {\\table: 0x4107be88
+         1: "^/$",
+         2: "function: 0x41c03808",
+       },
+  10: {\\table: 0x4107c0c8
+         1: "^/guide$",
+       },
+  11: {\\table: 0x4107c108
+         1: "^/log/(?<n>\d*?)$",
+         2: "function: 0x4107bd98",
+       },
+  12: {\\table: 0x4107c148
+         1: "^/global$",
+         2: "function: 0x41c03850",
+       },
+  13: {\\table: 0x410827a8
+         1: "^/user/create$",
+         3: "Only accept arguments that class can find",
+       },
+  14: {\\table: 0x410828a8
+         1: "^/user/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  15: {\\table: 0x41082978
+         1: "^/user/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  16: {\\table: 0x41082a48
+         1: "^/user/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  17: {\\table: 0x41082b18
+         1: "^/user/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  18: {\\table: 0x41088620
+         1: "^/product/create$",
+         3: "Only accept arguments that class can find",
+       },
+  19: {\\table: 0x410886f0
+         1: "^/product/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  2 : {\\table: 0x4107bec8
+         1: "^/profile$",
+         2: "function: 0x41c03780",
+       },
+  20: {\\table: 0x410887c0
+         1: "^/product/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  21: {\\table: 0x41088890
+         1: "^/product/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  22: {\\table: 0x41088960
+         1: "^/product/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  23: {\\table: 0x40a32830
+         1: "^/record/create$",
+         3: "Only accept arguments that class can find",
+       },
+  24: {\\table: 0x40a32900
+         1: "^/record/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  25: {\\table: 0x40a329d0
+         1: "^/record/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  26: {\\table: 0x40a32aa0
+         1: "^/record/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  27: {\\table: 0x40a32b70
+         1: "^/record/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  3 : {\\table: 0x4107bf08
+         1: "^/login$",
+         2: "function: 0x41c035e8",
+       },
+  4 : {\\table: 0x4107bf48
+         1: "^/oauth/(?<name>.+?)$",
+         2: "function: 0x4107bd28",
+       },
+  5 : {\\table: 0x4107bf88
+         1: "^/oauth2/qq$",
+         2: "function: 0x4107bd48",
+       },
+  6 : {\\table: 0x4107bfc8
+         1: "^/oauth2/github$",
+         2: "function: 0x4107bd70",
+       },
+  7 : {\\table: 0x4107c008
+         1: "^/logout$",
+         2: "function: 0x41c03678",
+       },
+  8 : {\\table: 0x4107c048
+         1: "^/register$",
+         2: "function: 0x41c03580",
+       },
+  9 : {\\table: 0x4107c088
+         1: "^/q$",
+         2: "function: 0x41c03518",
+       },
+}
+**************************************************, client: 10.240.0.214, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:27:45 [error] 23824#0: *12 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x4088e9d8
+  1 : {\\table: 0x414b2450
+         1: "^/$",
+         2: "function: 0x418744d8",
+       },
+  10: {\\table: 0x414b2690
+         1: "^/guide$",
+       },
+  11: {\\table: 0x414b26d0
+         1: "^/log/(?<n>\d*?)$",
+         2: "function: 0x414b2360",
+       },
+  12: {\\table: 0x414b2710
+         1: "^/global$",
+         2: "function: 0x418746a8",
+       },
+  13: {\\table: 0x414b8eb0
+         1: "^/user/create$",
+         3: "Only accept arguments that class can find",
+       },
+  14: {\\table: 0x414b8fb0
+         1: "^/user/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  15: {\\table: 0x414b9080
+         1: "^/user/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  16: {\\table: 0x414b9150
+         1: "^/user/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  17: {\\table: 0x414b9220
+         1: "^/user/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  18: {\\table: 0x414bf108
+         1: "^/product/create$",
+         3: "Only accept arguments that class can find",
+       },
+  19: {\\table: 0x414bf1d8
+         1: "^/product/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  2 : {\\table: 0x414b2490
+         1: "^/profile$",
+         2: "function: 0x41874450",
+       },
+  20: {\\table: 0x414bf2a8
+         1: "^/product/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  21: {\\table: 0x414bf378
+         1: "^/product/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  22: {\\table: 0x414bf448
+         1: "^/product/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  23: {\\table: 0x417b4408
+         1: "^/record/create$",
+         3: "Only accept arguments that class can find",
+       },
+  24: {\\table: 0x417b44d8
+         1: "^/record/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  25: {\\table: 0x417b45a8
+         1: "^/record/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  26: {\\table: 0x417b4678
+         1: "^/record/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  27: {\\table: 0x417b4748
+         1: "^/record/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  3 : {\\table: 0x414b24d0
+         1: "^/login$",
+         2: "function: 0x418742b8",
+       },
+  4 : {\\table: 0x414b2510
+         1: "^/oauth/(?<name>.+?)$",
+         2: "function: 0x414b22f0",
+       },
+  5 : {\\table: 0x414b2550
+         1: "^/oauth2/qq$",
+         2: "function: 0x414b2310",
+       },
+  6 : {\\table: 0x414b2590
+         1: "^/oauth2/github$",
+         2: "function: 0x414b2338",
+       },
+  7 : {\\table: 0x414b25d0
+         1: "^/logout$",
+         2: "function: 0x41874348",
+       },
+  8 : {\\table: 0x414b2610
+         1: "^/register$",
+         2: "function: 0x41874250",
+       },
+  9 : {\\table: 0x414b2650
+         1: "^/q$",
+         2: "function: 0x418741e8",
+       },
+}
+**************************************************, client: 10.240.0.214, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:30:49 [error] 23824#0: *13 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x41842830
+  1 : {\\table: 0x4191c538
+         1: "^/$",
+         2: "function: 0x41849850",
+       },
+  10: {\\table: 0x4191c778
+         1: "^/guide$",
+       },
+  11: {\\table: 0x4191c7b8
+         1: "^/log/(?<n>\d*?)$",
+         2: "function: 0x4191c448",
+       },
+  12: {\\table: 0x4191c7f8
+         1: "^/global$",
+         2: "function: 0x41849a20",
+       },
+  13: {\\table: 0x41922dc8
+         1: "^/user/create$",
+         3: "Only accept arguments that class can find",
+       },
+  14: {\\table: 0x41922e98
+         1: "^/user/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  15: {\\table: 0x41922f68
+         1: "^/user/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  16: {\\table: 0x41923038
+         1: "^/user/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  17: {\\table: 0x41923108
+         1: "^/user/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  18: {\\table: 0x41928b18
+         1: "^/product/create$",
+         3: "Only accept arguments that class can find",
+       },
+  19: {\\table: 0x41928be8
+         1: "^/product/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  2 : {\\table: 0x4191c578
+         1: "^/profile$",
+         2: "function: 0x418497c8",
+       },
+  20: {\\table: 0x41088180
+         1: "^/product/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  21: {\\table: 0x41088250
+         1: "^/product/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  22: {\\table: 0x41088320
+         1: "^/product/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  23: {\\table: 0x406fbe50
+         1: "^/record/create$",
+         3: "Only accept arguments that class can find",
+       },
+  24: {\\table: 0x406fbf20
+         1: "^/record/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  25: {\\table: 0x406fbff0
+         1: "^/record/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  26: {\\table: 0x406fc0c0
+         1: "^/record/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  27: {\\table: 0x406fc190
+         1: "^/record/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  3 : {\\table: 0x4191c5b8
+         1: "^/login$",
+         2: "function: 0x41849630",
+       },
+  4 : {\\table: 0x4191c5f8
+         1: "^/oauth/(?<name>.+?)$",
+         2: "function: 0x4191c3d8",
+       },
+  5 : {\\table: 0x4191c638
+         1: "^/oauth2/qq$",
+         2: "function: 0x4191c3f8",
+       },
+  6 : {\\table: 0x4191c678
+         1: "^/oauth2/github$",
+         2: "function: 0x4191c420",
+       },
+  7 : {\\table: 0x4191c6b8
+         1: "^/logout$",
+         2: "function: 0x418496c0",
+       },
+  8 : {\\table: 0x4191c6f8
+         1: "^/register$",
+         2: "function: 0x418495c8",
+       },
+  9 : {\\table: 0x4191c738
+         1: "^/q$",
+         2: "function: 0x41849528",
+       },
+}
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:30:49 [error] 23824#0: *14 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x4111f830
+  1 : {\\table: 0x404cc538
+         1: "^/$",
+         2: "function: 0x41126850",
+       },
+  10: {\\table: 0x404cc778
+         1: "^/guide$",
+       },
+  11: {\\table: 0x404cc7b8
+         1: "^/log/(?<n>\d*?)$",
+         2: "function: 0x404cc448",
+       },
+  12: {\\table: 0x404cc7f8
+         1: "^/global$",
+         2: "function: 0x41126a20",
+       },
+  13: {\\table: 0x404d2dc8
+         1: "^/user/create$",
+         3: "Only accept arguments that class can find",
+       },
+  14: {\\table: 0x404d2e98
+         1: "^/user/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  15: {\\table: 0x404d2f68
+         1: "^/user/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  16: {\\table: 0x404d3038
+         1: "^/user/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  17: {\\table: 0x404d3108
+         1: "^/user/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  18: {\\table: 0x404d8b18
+         1: "^/product/create$",
+         3: "Only accept arguments that class can find",
+       },
+  19: {\\table: 0x404d8be8
+         1: "^/product/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  2 : {\\table: 0x404cc578
+         1: "^/profile$",
+         2: "function: 0x411267c8",
+       },
+  20: {\\table: 0x40364180
+         1: "^/product/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  21: {\\table: 0x40364250
+         1: "^/product/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  22: {\\table: 0x40364320
+         1: "^/product/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  23: {\\table: 0x41dd6e50
+         1: "^/record/create$",
+         3: "Only accept arguments that class can find",
+       },
+  24: {\\table: 0x41dd6f20
+         1: "^/record/update/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  25: {\\table: 0x41dd6ff0
+         1: "^/record/list/(?<page>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  26: {\\table: 0x41dd70c0
+         1: "^/record/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  27: {\\table: 0x41dd7190
+         1: "^/record/delete/(?<id>\d+?)$",
+         3: "Only accept arguments that class can find",
+       },
+  3 : {\\table: 0x404cc5b8
+         1: "^/login$",
+         2: "function: 0x41126630",
+       },
+  4 : {\\table: 0x404cc5f8
+         1: "^/oauth/(?<name>.+?)$",
+         2: "function: 0x404cc3d8",
+       },
+  5 : {\\table: 0x404cc638
+         1: "^/oauth2/qq$",
+         2: "function: 0x404cc3f8",
+       },
+  6 : {\\table: 0x404cc678
+         1: "^/oauth2/github$",
+         2: "function: 0x404cc420",
+       },
+  7 : {\\table: 0x404cc6b8
+         1: "^/logout$",
+         2: "function: 0x411266c0",
+       },
+  8 : {\\table: 0x404cc6f8
+         1: "^/register$",
+         2: "function: 0x411265c8",
+       },
+  9 : {\\table: 0x404cc738
+         1: "^/q$",
+         2: "function: 0x41126528",
+       },
+}
+**************************************************, client: 10.240.0.5, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:35:36 [error] 23824#0: *15 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x416cb830
+  1 : {\\table: 0x400ab758
+         1: "^/$",
+         2: "function: 0x416d29f8",
+       },
+  10: {\\table: 0x400ab998
+         1: "^/guide$",
+       },
+  11: {\\table: 0x400ab9d8
+         1: "^/log/(?<n>\d*?)$",
+         2: "function: 0x400ab668",
+       },
+  12: {\\table: 0x400aba18
+         1: "^/global$",
+         2: "function: 0x416d2bc8",
+       },
+  13: {\\table: 0x400b1fe8
+         1: "^/user/create$",
+         2: "function: 0x400b2088",
+       },
+  14: {\\table: 0x400b2158
+         1: "^/user/update/(?<id>\d+?)$",
+         2: "function: 0x400b21d0",
+       },
+  15: {\\table: 0x400b2238
+         1: "^/user/list/(?<page>\d+?)$",
+         2: "function: 0x400b22d8",
+       },
+  16: {\\table: 0x400b2340
+         1: "^/user/(?<id>\d+?)$",
+         2: "function: 0x400b23e0",
+       },
+  17: {\\table: 0x400b2448
+         1: "^/user/delete/(?<id>\d+?)$",
+         2: "function: 0x400b24e8",
+       },
+  18: {\\table: 0x400b7e90
+         1: "^/product/create$",
+         2: "function: 0x400b7f30",
+       },
+  19: {\\table: 0x400b7f98
+         1: "^/product/update/(?<id>\d+?)$",
+         2: "function: 0x400b8038",
+       },
+  2 : {\\table: 0x400ab798
+         1: "^/profile$",
+         2: "function: 0x416d2970",
+       },
+  20: {\\table: 0x400b80a0
+         1: "^/product/list/(?<page>\d+?)$",
+         2: "function: 0x400b8140",
+       },
+  21: {\\table: 0x400b81a8
+         1: "^/product/(?<id>\d+?)$",
+         2: "function: 0x400b8248",
+       },
+  22: {\\table: 0x400b82b0
+         1: "^/product/delete/(?<id>\d+?)$",
+         2: "function: 0x400b8350",
+       },
+  23: {\\table: 0x41137250
+         1: "^/record/create$",
+         2: "function: 0x411372f0",
+       },
+  24: {\\table: 0x41137358
+         1: "^/record/update/(?<id>\d+?)$",
+         2: "function: 0x411373f8",
+       },
+  25: {\\table: 0x41137460
+         1: "^/record/list/(?<page>\d+?)$",
+         2: "function: 0x41137500",
+       },
+  26: {\\table: 0x41137568
+         1: "^/record/(?<id>\d+?)$",
+         2: "function: 0x41137608",
+       },
+  27: {\\table: 0x41137670
+         1: "^/record/delete/(?<id>\d+?)$",
+         2: "function: 0x41137710",
+       },
+  3 : {\\table: 0x400ab7d8
+         1: "^/login$",
+         2: "function: 0x416d27d8",
+       },
+  4 : {\\table: 0x400ab818
+         1: "^/oauth/(?<name>.+?)$",
+         2: "function: 0x400ab5f8",
+       },
+  5 : {\\table: 0x400ab858
+         1: "^/oauth2/qq$",
+         2: "function: 0x400ab618",
+       },
+  6 : {\\table: 0x400ab898
+         1: "^/oauth2/github$",
+         2: "function: 0x400ab640",
+       },
+  7 : {\\table: 0x400ab8d8
+         1: "^/logout$",
+         2: "function: 0x416d2868",
+       },
+  8 : {\\table: 0x400ab918
+         1: "^/register$",
+         2: "function: 0x416d2770",
+       },
+  9 : {\\table: 0x400ab958
+         1: "^/q$",
+         2: "function: 0x416d2708",
+       },
+}
+**************************************************, client: 10.240.0.214, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:35:36 [error] 23824#0: *15 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/user/create.html"
+**************************************************, client: 10.240.0.214, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:35:37 [error] 23824#0: *16 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x410bf830
+  1 : {\\table: 0x41792758
+         1: "^/$",
+         2: "function: 0x410c69f8",
+       },
+  10: {\\table: 0x41792998
+         1: "^/guide$",
+       },
+  11: {\\table: 0x417929d8
+         1: "^/log/(?<n>\d*?)$",
+         2: "function: 0x41792668",
+       },
+  12: {\\table: 0x41792a18
+         1: "^/global$",
+         2: "function: 0x410c6bc8",
+       },
+  13: {\\table: 0x41798fe8
+         1: "^/user/create$",
+         2: "function: 0x41799088",
+       },
+  14: {\\table: 0x41799158
+         1: "^/user/update/(?<id>\d+?)$",
+         2: "function: 0x417991d0",
+       },
+  15: {\\table: 0x41799238
+         1: "^/user/list/(?<page>\d+?)$",
+         2: "function: 0x417992d8",
+       },
+  16: {\\table: 0x41799340
+         1: "^/user/(?<id>\d+?)$",
+         2: "function: 0x417993e0",
+       },
+  17: {\\table: 0x41799448
+         1: "^/user/delete/(?<id>\d+?)$",
+         2: "function: 0x417994e8",
+       },
+  18: {\\table: 0x4179ee90
+         1: "^/product/create$",
+         2: "function: 0x4179ef30",
+       },
+  19: {\\table: 0x4179ef98
+         1: "^/product/update/(?<id>\d+?)$",
+         2: "function: 0x4179f038",
+       },
+  2 : {\\table: 0x41792798
+         1: "^/profile$",
+         2: "function: 0x410c6970",
+       },
+  20: {\\table: 0x4179f0a0
+         1: "^/product/list/(?<page>\d+?)$",
+         2: "function: 0x4179f140",
+       },
+  21: {\\table: 0x4179f1a8
+         1: "^/product/(?<id>\d+?)$",
+         2: "function: 0x4179f248",
+       },
+  22: {\\table: 0x4179f2b0
+         1: "^/product/delete/(?<id>\d+?)$",
+         2: "function: 0x4179f350",
+       },
+  23: {\\table: 0x41ff9250
+         1: "^/record/create$",
+         2: "function: 0x41ff92f0",
+       },
+  24: {\\table: 0x41ff9358
+         1: "^/record/update/(?<id>\d+?)$",
+         2: "function: 0x41ff93f8",
+       },
+  25: {\\table: 0x41ff9460
+         1: "^/record/list/(?<page>\d+?)$",
+         2: "function: 0x41ff9500",
+       },
+  26: {\\table: 0x41ff9568
+         1: "^/record/(?<id>\d+?)$",
+         2: "function: 0x41ff9608",
+       },
+  27: {\\table: 0x41ff9670
+         1: "^/record/delete/(?<id>\d+?)$",
+         2: "function: 0x41ff9710",
+       },
+  3 : {\\table: 0x417927d8
+         1: "^/login$",
+         2: "function: 0x410c67d8",
+       },
+  4 : {\\table: 0x41792818
+         1: "^/oauth/(?<name>.+?)$",
+         2: "function: 0x417925f8",
+       },
+  5 : {\\table: 0x41792858
+         1: "^/oauth2/qq$",
+         2: "function: 0x41792618",
+       },
+  6 : {\\table: 0x41792898
+         1: "^/oauth2/github$",
+         2: "function: 0x41792640",
+       },
+  7 : {\\table: 0x417928d8
+         1: "^/logout$",
+         2: "function: 0x410c6868",
+       },
+  8 : {\\table: 0x41792918
+         1: "^/register$",
+         2: "function: 0x410c6770",
+       },
+  9 : {\\table: 0x41792958
+         1: "^/q$",
+         2: "function: 0x410c6708",
+       },
+}
+**************************************************, client: 10.240.0.214, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:37:01 [error] 23824#0: *17 lua entry thread aborted: runtime error: error loading module 'app.user.urls' from file './app/user/urls.lua':
+	./app/user/urls.lua:10: '}' expected near 'model'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:46):2: in function <content_by_lua(dev:46):1>, client: 10.240.1.16, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:37:01 [error] 23824#0: *18 lua entry thread aborted: runtime error: error loading module 'app.user.urls' from file './app/user/urls.lua':
+	./app/user/urls.lua:10: '}' expected near 'model'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:46):2: in function <content_by_lua(dev:46):1>, client: 10.240.1.16, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:37:52 [error] 23824#0: *19 [lua] repr.lua:92: loger(): 
+**************************************************
+"xxx" "../html/create.html"
+**************************************************, client: 10.240.1.14, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:43:46 [error] 23824#0: *27 [lua] repr.lua:92: loger(): 
+**************************************************
+"@./resty/mvc/response.lua"
+**************************************************, client: 10.240.0.5, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:43:47 [error] 23824#0: *28 [lua] repr.lua:92: loger(): 
+**************************************************
+"@./resty/mvc/response.lua"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:50:37 [error] 23824#0: *29 [lua] repr.lua:92: loger(): 
+**************************************************
+"in query:" "@/usr/local/openresty/site/lualib/resty/query.lua"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 15:50:37 [error] 23824#0: *30 [lua] repr.lua:92: loger(): 
+**************************************************
+"in query:" "@/usr/local/openresty/site/lualib/resty/query.lua"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:06:18 [error] 23824#0: *31 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD"
+**************************************************, client: 10.240.1.14, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:06:18 [error] 23824#0: *32 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD"
+**************************************************, client: 10.240.1.16, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:06:58 [error] 23824#0: *33 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD"
+**************************************************, client: 10.240.1.14, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:06:59 [error] 23824#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:07:22 [error] 23824#0: *35 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "@./resty/mvc/response.lua"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:07:22 [error] 23824#0: *36 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "@./resty/mvc/response.lua"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:12:37 [error] 23824#0: *37 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "@./resty/mvc/response.lua"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:12:37 [error] 23824#0: *38 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "@./resty/mvc/response.lua"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:13:20 [error] 23824#0: *39 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:13:21 [error] 23824#0: *40 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD"
+**************************************************, client: 10.240.0.214, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:13:42 [error] 23824#0: *41 lua entry thread aborted: runtime error: error loading module 'resty.mvc.response' from file './resty/mvc/response.lua':
+	./resty/mvc/response.lua:8: invalid escape sequence near ''^@(.*)response'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:46):2: in function <content_by_lua(dev:46):1>, client: 10.240.0.5, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:13:43 [error] 23824#0: *42 lua entry thread aborted: runtime error: error loading module 'resty.mvc.response' from file './resty/mvc/response.lua':
+	./resty/mvc/response.lua:8: invalid escape sequence near ''^@(.*)response'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:46):2: in function <content_by_lua(dev:46):1>, client: 10.240.0.5, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:14:55 [error] 23824#0: *43 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "./resty/mvc/"
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:14:56 [error] 23824#0: *44 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "./resty/mvc/"
+**************************************************, client: 10.240.0.230, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:18:45 [error] 23824#0: *45 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "./resty/mvc/"
+**************************************************, client: 10.240.0.230, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:18:46 [error] 23824#0: *46 [lua] repr.lua:92: loger(): 
+**************************************************
+"CD" "./resty/mvc/"
+**************************************************, client: 10.240.0.33, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:21:06 [error] 23824#0: *47 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/create.html"
+**************************************************, client: 10.240.0.5, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:22:01 [error] 23824#0: *49 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/create.html"
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:22:01 [error] 23824#0: *49 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/8"
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:22:01 [error] 23824#0: *49 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/4"
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:22:01 [error] 23824#0: *49 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/<form method="post">\n  {*form:render()*}\n  <button type="submit">创建</button>\n</form>"
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:22:01 [error] 23824#0: *49 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/11 16:22:55 [error] 23824#0: *52 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/create.html"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/11 16:22:55 [error] 23824#0: *52 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/8"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/11 16:22:55 [error] 23824#0: *52 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/4"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/11 16:22:55 [error] 23824#0: *52 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/<form method="post">\n  {*form:render()*}\n  <button type="submit">创建</button>\n</form>"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/11 16:22:55 [error] 23824#0: *52 [lua] repr.lua:92: loger(): 
+**************************************************
+"./resty/mvc/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
