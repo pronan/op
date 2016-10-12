@@ -1293,3 +1293,71 @@ coroutine 0:
 **************************************************
 "./resty/mvc/<div class="col-md-{* blocks.n1 *}">{* blocks.nc1 *}</div>\n<div class="col-md-{* blocks.n2 *}">{* blocks.nc2 *}</div>"
 **************************************************, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/12 03:16:11 [alert] 34783#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 03:16:11 [emerg] 34783#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/12 03:16:11 [emerg] 34783#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/12 03:16:11 [emerg] 34783#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/12 03:16:11 [emerg] 34783#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/12 03:16:11 [emerg] 34783#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2016/10/12 03:16:11 [emerg] 34783#0: still could not bind()
+2016/10/12 04:40:50 [error] 23824#0: *95 [lua] main.lua:60: `form:save` failed: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1, client: 10.240.0.214, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:41:31 [error] 23824#0: *97 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `user` SET ;"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:41:31 [error] 23824#0: *97 [lua] main.lua:60: `form:save` failed: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1, client: 10.240.1.16, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:43:31 [error] 23824#0: *100 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins" {\\table: 0x412622f8
+  "age"  : 11,
+  "money": 11,
+  "name" : "11",
+}
+**************************************************, client: 10.240.1.30, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:43:31 [error] 23824#0: *100 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `user` SET ;"
+**************************************************, client: 10.240.1.30, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:43:31 [error] 23824#0: *100 [lua] main.lua:60: `form:save` failed: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1, client: 10.240.1.30, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:45:35 [error] 23824#0: *103 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins" {\\table: 0x41927348
+  "age"  : 11,
+  "money": 11,
+  "name" : "11",
+}
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:45:35 [error] 23824#0: *103 [lua] repr.lua:92: loger(): 
+**************************************************
+{\\table: 0x41927348
+  "age"  : 11,
+  "money": 11,
+  "name" : "11",
+}
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:45:35 [error] 23824#0: *103 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `user` SET ;"
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:45:35 [error] 23824#0: *103 [lua] main.lua:60: `form:save` failed: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1, client: 10.240.0.214, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:46:02 [error] 23824#0: *106 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins" {\\table: 0x401f9a20
+  "age"  : 11,
+  "money": 11,
+  "name" : "11",
+}
+**************************************************, client: 10.240.1.14, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:46:02 [error] 23824#0: *106 [lua] repr.lua:92: loger(): 
+**************************************************
+"row:" {\\table: 0x401f9a20
+  "age"  : 11,
+  "money": 11,
+  "name" : "11",
+}
+**************************************************, client: 10.240.1.14, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:46:02 [error] 23824#0: *106 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `user` SET ;"
+**************************************************, client: 10.240.1.14, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 04:46:02 [error] 23824#0: *106 [lua] main.lua:60: `form:save` failed: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1, client: 10.240.1.14, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"

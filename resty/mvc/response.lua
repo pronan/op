@@ -23,7 +23,8 @@ end
 
 local default_loader = template.load
 local function admin_loader(path)
-    return readfile(table.concat{CD..'admin_html/', path})
+    --loger('admin loaer path')
+    return readfile(table.concat{CD, path})
 end
 template.loaders = {default_loader, admin_loader}
 local function load_from_loaders(path)

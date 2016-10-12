@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang='zh'>
+<head>
+  {* blocks.page_css *}
+  <title>{* blocks.title *}</title> 
+</head>
+
+<body>
+<div class="container-fluid">
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">LUA-RESTY-ADMIN</a>
+    </div>
+      
+      <ul class="nav navbar-nav navbar-right">
+        <li role="presentation"{% if navbar=='site' then%} class="active"{% end %}><a href="/">查看站点</a></li>
+        {%if user then%}
+          <li role="presentation"{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
+        {%else%}
+          <li role="presentation"{% if navbar=='login' then%} class="active"{% end %}><a href="/login">登陆</a></li>
+        {%end%}
+      </ul>
+      
+    </div><!-- /.container-fluid -->
+  </nav>
+  {% if message then %}
+  <div class="message">{{message}}</div>
+  {% end %}  
+  <div  id="main">
+    {* blocks.main *}
+  </div>
+  <footer> 
+     lua-resty-mvc
+  </footer> 
+</div>
+
+<script type="text/javascript" src="/static/js/default.js"></script> 
+{* blocks.page_js *}
+
+</body>
+</html>

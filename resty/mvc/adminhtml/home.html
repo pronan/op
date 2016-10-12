@@ -1,0 +1,10 @@
+{% layout = "layout/c10.html" %}
+
+{-content-}
+欢迎您,
+{% if user then%}
+    {{user.username}}
+{% else%}
+    游客
+{% end%}
+{-content-}

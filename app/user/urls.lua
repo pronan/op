@@ -8,7 +8,7 @@ local q = require "resty.query"
 local User = models.User
 
 return {
-  {'^/user/create$',              ClassView.CreateView:as_view{template_name='create.html',
+  {'^/user/create$',              ClassView.CreateView:as_view{template_name='adminhtml/create.html',
     model=User,form_class=forms.UserCreateForm}}, 
   {'^/user/update/(?<id>\\d+?)$', ClassView.UpdateView:as_view{model=User,form_class=forms.UserUpdateForm}}, 
   {'^/user/list/(?<page>\\d+?)$', ClassView.ListView:as_view{model=User}}, 
