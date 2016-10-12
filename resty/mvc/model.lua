@@ -90,11 +90,13 @@ for i, method_name in ipairs(chain_methods) do
     end
 end
 function Model.get(self, params)
-    -- params cannot be empty table
-    local res, err = self:_proxy_sql('where', params):exec()
+    -- call `exec_raw` instead of `exec` here to avoid unneccessary 
+    -- initialization of row instance for #res > 1 
+    -- because join is impossible for this api, so no need to call `exec`.
+    local res, err = self:_proxy_sql('where', params):exec_raw()
     if not res then
         return nil, err
-    elseif #res~=1 then
+    elseif #res ~= 1 then
         return nil, 'should return 1 row, but get '..#res
     end
     return self.row_class:instance(res[1])

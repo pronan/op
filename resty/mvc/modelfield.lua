@@ -478,7 +478,10 @@ local DateTimeField = DateField:new{
 }
 utils.dict_update(DateTimeField, DateTimeCheckMixin)
 function DateTimeField.db_to_lua(self, value)
-    return datetime.new(value)
+    --loger('DateTimeField.db_to_lua:', type(value), value)
+    local res = datetime.new(value)
+    --loger('DateTimeField.db_to_lua res:', res.number)
+    return res
 end
 function DateTimeField.lua_to_db(self, value)
     if type(value)~='string' then
