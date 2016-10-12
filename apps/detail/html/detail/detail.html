@@ -1,0 +1,14 @@
+{% layout = "base.html" %}
+
+{-main-}
+<table class="table">
+{% for k, v in pairs(object) do %}
+  <tr>
+    <th>{{k}}</th>
+    <td>{{v}}</td>
+  </tr>
+{% end %}
+</table>
+<a href="/detail/update/{{object.id}}" >edit</a>
+
+{-main-}

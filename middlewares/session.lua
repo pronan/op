@@ -1,6 +1,6 @@
 local json = require "cjson.safe"
-local SESSION_PATH = require"app.settings".SESSION.path
-local SESSION_EXPIRES = require"app.settings".SESSION.expires
+local SESSION_PATH = require"main.settings".SESSION.path
+local SESSION_EXPIRES = require"main.settings".SESSION.expires
 local tonumber = tonumber
 local time         = ngx.time
 local http_time    = ngx.http_time

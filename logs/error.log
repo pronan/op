@@ -1361,3 +1361,759 @@ coroutine 0:
 "INSERT INTO `user` SET ;"
 **************************************************, client: 10.240.1.14, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
 2016/10/12 04:46:02 [error] 23824#0: *106 [lua] main.lua:60: `form:save` failed: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1, client: 10.240.1.14, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io", referrer: "https://openresty-pronan.c9users.io/user/create"
+2016/10/12 10:17:47 [error] 23824#0: *115 init_by_lua_file error: cannot open ./app/init.lua: No such file or directory, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:17:47 [error] 23824#0: *116 init_by_lua_file error: cannot open ./app/init.lua: No such file or directory, client: 10.240.0.33, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:18:44 [alert] 46900#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 10:18:44 [error] 46900#0: init_by_lua_file error: ./main/init.lua:7: module 'app.settings' not found:
+	no field package.preload['app.settings']
+	no file './app/settings.lua'
+	no file './app/settings/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/settings.lua'
+	no file '/usr/local/openresty/site/lualib/app/settings/init.lua'
+	no file '/usr/local/openresty/lualib/app/settings.lua'
+	no file '/usr/local/openresty/lualib/app/settings/init.lua'
+	no file './app/settings.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/settings.lua'
+	no file '/usr/local/share/lua/5.1/app/settings.lua'
+	no file '/usr/local/share/lua/5.1/app/settings/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/settings.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/settings/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/settings.so'
+	no file '/usr/local/openresty/lualib/app/settings.so'
+	no file './app/settings.so'
+	no file '/usr/local/lib/lua/5.1/app/settings.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/settings.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+	[C]: in function 'require'
+	./main/init.lua:7: in main chunk
+2016/10/12 10:19:26 [alert] 46909#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 10:19:26 [error] 46909#0: init_by_lua_file error: ./middlewares/cookie.lua:6: module 'app.settings' not found:
+	no field package.preload['app.settings']
+	no file './app/settings.lua'
+	no file './app/settings/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/settings.lua'
+	no file '/usr/local/openresty/site/lualib/app/settings/init.lua'
+	no file '/usr/local/openresty/lualib/app/settings.lua'
+	no file '/usr/local/openresty/lualib/app/settings/init.lua'
+	no file './app/settings.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/settings.lua'
+	no file '/usr/local/share/lua/5.1/app/settings.lua'
+	no file '/usr/local/share/lua/5.1/app/settings/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/settings.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/settings/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/settings.so'
+	no file '/usr/local/openresty/lualib/app/settings.so'
+	no file './app/settings.so'
+	no file '/usr/local/lib/lua/5.1/app/settings.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/settings.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+	[C]: in function 'require'
+	./middlewares/cookie.lua:6: in main chunk
+	[C]: in function 'require'
+	./main/init.lua:19: in main chunk
+2016/10/12 10:21:01 [alert] 46927#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 10:21:01 [notice] 46927#0: signal process started
+2016/10/12 10:21:08 [alert] 46931#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 10:21:08 [error] 46933#0: *2 lua entry thread aborted: runtime error: ./resty/mvc/migrate.lua:158: attempt to index global 'settings' (a nil value)
+stack traceback:
+coroutine 0:
+	./resty/mvc/migrate.lua: in function 'get_models_func'
+	./resty/mvc/migrate.lua:201: in function <./resty/mvc/migrate.lua:197>, context: ngx.timer
+2016/10/12 10:21:12 [error] 46933#0: *3 lua entry thread aborted: runtime error: content_by_lua(dev:44):2: module 'app.main' not found:
+	no field package.preload['app.main']
+	no file './app/main.lua'
+	no file './app/main/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/main.lua'
+	no file '/usr/local/openresty/site/lualib/app/main/init.lua'
+	no file '/usr/local/openresty/lualib/app/main.lua'
+	no file '/usr/local/openresty/lualib/app/main/init.lua'
+	no file './app/main.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/main.lua'
+	no file '/usr/local/share/lua/5.1/app/main.lua'
+	no file '/usr/local/share/lua/5.1/app/main/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/main.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/main/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/main.so'
+	no file '/usr/local/openresty/lualib/app/main.so'
+	no file './app/main.so'
+	no file '/usr/local/lib/lua/5.1/app/main.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/main.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.1.12, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:21:13 [error] 46933#0: *4 lua entry thread aborted: runtime error: content_by_lua(dev:44):2: module 'app.main' not found:
+	no field package.preload['app.main']
+	no file './app/main.lua'
+	no file './app/main/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/main.lua'
+	no file '/usr/local/openresty/site/lualib/app/main/init.lua'
+	no file '/usr/local/openresty/lualib/app/main.lua'
+	no file '/usr/local/openresty/lualib/app/main/init.lua'
+	no file './app/main.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/main.lua'
+	no file '/usr/local/share/lua/5.1/app/main.lua'
+	no file '/usr/local/share/lua/5.1/app/main/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/main.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/main/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/main.so'
+	no file '/usr/local/openresty/lualib/app/main.so'
+	no file './app/main.so'
+	no file '/usr/local/lib/lua/5.1/app/main.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/main.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.1.16, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:21:59 [alert] 46961#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 10:21:59 [notice] 46961#0: signal process started
+2016/10/12 10:22:01 [alert] 46965#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 10:22:01 [error] 46967#0: *2 lua entry thread aborted: runtime error: ./resty/mvc/migrate.lua:158: attempt to index global 'settings' (a nil value)
+stack traceback:
+coroutine 0:
+	./resty/mvc/migrate.lua: in function 'get_models_func'
+	./resty/mvc/migrate.lua:201: in function <./resty/mvc/migrate.lua:197>, context: ngx.timer
+2016/10/12 10:22:05 [error] 46967#0: *3 lua entry thread aborted: runtime error: ./main/forms.lua:4: module 'app.user.models' not found:
+	no field package.preload['app.user.models']
+	no file './app/user/models.lua'
+	no file './app/user/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/user/models.lua'
+	no file '/usr/local/openresty/site/lualib/app/user/models/init.lua'
+	no file '/usr/local/openresty/lualib/app/user/models.lua'
+	no file '/usr/local/openresty/lualib/app/user/models/init.lua'
+	no file './app/user/models.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/user/models.lua'
+	no file '/usr/local/share/lua/5.1/app/user/models.lua'
+	no file '/usr/local/share/lua/5.1/app/user/models/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/user/models.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/user/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/user/models.so'
+	no file '/usr/local/openresty/lualib/app/user/models.so'
+	no file './app/user/models.so'
+	no file '/usr/local/lib/lua/5.1/app/user/models.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/user/models.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.0.230, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:22:05 [error] 46967#0: *4 lua entry thread aborted: runtime error: ./main/forms.lua:4: module 'app.user.models' not found:
+	no field package.preload['app.user.models']
+	no file './app/user/models.lua'
+	no file './app/user/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/user/models.lua'
+	no file '/usr/local/openresty/site/lualib/app/user/models/init.lua'
+	no file '/usr/local/openresty/lualib/app/user/models.lua'
+	no file '/usr/local/openresty/lualib/app/user/models/init.lua'
+	no file './app/user/models.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/app/user/models.lua'
+	no file '/usr/local/share/lua/5.1/app/user/models.lua'
+	no file '/usr/local/share/lua/5.1/app/user/models/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/user/models.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/app/user/models/init.lua'
+	no file '/usr/local/openresty/site/lualib/app/user/models.so'
+	no file '/usr/local/openresty/lualib/app/user/models.so'
+	no file './app/user/models.so'
+	no file '/usr/local/lib/lua/5.1/app/user/models.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app/user/models.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/app.so'
+	no file '/usr/local/openresty/lualib/app.so'
+	no file './app.so'
+	no file '/usr/local/lib/lua/5.1/app.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/app.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.0.230, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:22:31 [error] 46967#0: *5 lua entry thread aborted: runtime error: ./main/main.lua:22: bad argument #1 to 'ipairs' (table expected, got nil)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.0.240, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:22:31 [error] 46967#0: *6 lua entry thread aborted: runtime error: ./main/main.lua:22: bad argument #1 to 'ipairs' (table expected, got nil)
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.0.240, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:23:16 [error] 46967#0: *7 lua entry thread aborted: runtime error: ./main/main.lua:23: module 'apps.product.urls' not found:
+	no field package.preload['apps.product.urls']
+	no file './apps/product/urls.lua'
+	no file './apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls/init.lua'
+	no file './apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.so'
+	no file '/usr/local/openresty/lualib/apps/product/urls.so'
+	no file './apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/apps.so'
+	no file '/usr/local/openresty/lualib/apps.so'
+	no file './apps.so'
+	no file '/usr/local/lib/lua/5.1/apps.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.0.5, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:23:17 [error] 46967#0: *8 lua entry thread aborted: runtime error: ./main/main.lua:23: module 'apps.product.urls' not found:
+	no field package.preload['apps.product.urls']
+	no file './apps/product/urls.lua'
+	no file './apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls/init.lua'
+	no file './apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.so'
+	no file '/usr/local/openresty/lualib/apps/product/urls.so'
+	no file './apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/apps.so'
+	no file '/usr/local/openresty/lualib/apps.so'
+	no file './apps.so'
+	no file '/usr/local/lib/lua/5.1/apps.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.1.14, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:31:17 [error] 46967#0: *9 lua entry thread aborted: runtime error: ./main/main.lua:23: module 'apps.product.urls' not found:
+	no field package.preload['apps.product.urls']
+	no file './apps/product/urls.lua'
+	no file './apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls/init.lua'
+	no file './apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.so'
+	no file '/usr/local/openresty/lualib/apps/product/urls.so'
+	no file './apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/apps.so'
+	no file '/usr/local/openresty/lualib/apps.so'
+	no file './apps.so'
+	no file '/usr/local/lib/lua/5.1/apps.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.0.230, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 10:31:18 [error] 46967#0: *10 lua entry thread aborted: runtime error: ./main/main.lua:23: module 'apps.product.urls' not found:
+	no field package.preload['apps.product.urls']
+	no file './apps/product/urls.lua'
+	no file './apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls.lua'
+	no file '/usr/local/openresty/lualib/apps/product/urls/init.lua'
+	no file './apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1.0-beta2/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/apps/product/urls/init.lua'
+	no file '/usr/local/openresty/site/lualib/apps/product/urls.so'
+	no file '/usr/local/openresty/lualib/apps/product/urls.so'
+	no file './apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps/product/urls.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/apps.so'
+	no file '/usr/local/openresty/lualib/apps.so'
+	no file './apps.so'
+	no file '/usr/local/lib/lua/5.1/apps.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/apps.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(dev:44):2: in function <content_by_lua(dev:44):1>, client: 10.240.1.30, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 11:08:11 [error] 46967#0: *11 init_by_lua_file error: error loading module 'apps.user.models' from file './apps/user/models.lua':
+	./apps/user/models.lua:4: unexpected symbol near '.'
+stack traceback:
+	[C]: at 0x7fbb8023deb0
+	[C]: in function 'require'
+	./middlewares/auth.lua:2: in main chunk
+	[C]: in function 'require'
+	./main/init.lua:19: in main chunk, client: 10.240.1.12, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 11:08:12 [error] 46967#0: *12 init_by_lua_file error: error loading module 'apps.user.models' from file './apps/user/models.lua':
+	./apps/user/models.lua:4: unexpected symbol near '.'
+stack traceback:
+	[C]: at 0x7fbb8023deb0
+	[C]: in function 'require'
+	./middlewares/auth.lua:2: in main chunk
+	[C]: in function 'require'
+	./main/init.lua:19: in main chunk, client: 10.240.1.16, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 11:10:04 [error] 46967#0: *13 init_by_lua_file error: error loading module 'apps.user.models' from file './apps/user/models.lua':
+	./apps/user/models.lua:4: unexpected symbol near '.'
+stack traceback:
+	[C]: at 0x7fbb8023deb0
+	[C]: in function 'require'
+	./middlewares/auth.lua:2: in main chunk
+	[C]: in function 'require'
+	./main/init.lua:19: in main chunk, client: 10.240.0.214, server: localhost, request: "GET /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 11:10:05 [error] 46967#0: *14 init_by_lua_file error: error loading module 'apps.user.models' from file './apps/user/models.lua':
+	./apps/user/models.lua:4: unexpected symbol near '.'
+stack traceback:
+	[C]: at 0x7fbb8023deb0
+	[C]: in function 'require'
+	./middlewares/auth.lua:2: in main chunk
+	[C]: in function 'require'
+	./main/init.lua:19: in main chunk, client: 10.240.1.14, server: localhost, request: "GET /user/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 12:18:11 [error] 46967#0: *25 [lua] main.lua:60: `form:save` failed: Unknown column 'user.money' in 'field list', client: 10.240.0.5, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/12 12:19:44 [error] 46967#0: *28 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `user` SET `user`.`password` = "111", `user`.`username` = "abc", `user`.`money` = 11, `user`.`age` = 11;"
+**************************************************, client: 10.240.1.30, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/12 12:19:44 [error] 46967#0: *28 [lua] main.lua:60: `form:save` failed: Unknown column 'user.money' in 'field list', client: 10.240.1.30, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/12 12:20:40 [alert] 51387#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 12:20:40 [notice] 51387#0: signal process started
+2016/10/12 12:20:40 [alert] 46966#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 12:20:40 [error] 51391#0: *32 lua entry thread aborted: runtime error: ./resty/mvc/migrate.lua:158: attempt to index global 'settings' (a nil value)
+stack traceback:
+coroutine 0:
+	./resty/mvc/migrate.lua: in function 'get_models_func'
+	./resty/mvc/migrate.lua:201: in function <./resty/mvc/migrate.lua:197>, context: ngx.timer
+2016/10/12 12:21:49 [alert] 51401#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 12:21:49 [notice] 51401#0: signal process started
+2016/10/12 12:21:49 [alert] 46966#0: lua_code_cache is off; this will hurt performance in ./conf/dev:8
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS record"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS product"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS user"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS detail"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS moreinfo"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"SHOW TABLES LIKE 'moreinfo'"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS moreinfo"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"CREATE TABLE moreinfo(weight FLOAT NOT NULL,\n    height FLOAT NOT NULL,\n    id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY)DEFAULT CHARSET=utf8;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"show create table moreinfo;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"SHOW TABLES LIKE 'detail'"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS detail"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"CREATE TABLE detail(sex TINYINT NOT NULL,\n    age INT NOT NULL,\n    info INT UNSIGNED NOT NULL,\n    id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,\n    FOREIGN KEY (info) REFERENCES moreinfo(id) ON DELETE CASCADE ON UPDATE CASCADE)DEFAULT CHARSET=utf8;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"show create table detail;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"SHOW TABLES LIKE 'user'"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS user"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"CREATE TABLE user(password VARCHAR(50) NOT NULL,\n    id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,\n    detail INT UNSIGNED NOT NULL,\n    username VARCHAR(50) NOT NULL,\n    age INT NOT NULL,\n    money FLOAT NOT NULL,\n    FOREIGN KEY (detail) REFERENCES detail(id) ON DELETE CASCADE ON UPDATE CASCADE)DEFAULT CHARSET=utf8;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"show create table user;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"SHOW TABLES LIKE 'product'"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS product"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"CREATE TABLE product(price FLOAT NOT NULL,\n    name VARCHAR(50) NOT NULL,\n    id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY)DEFAULT CHARSET=utf8;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"show create table product;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"SHOW TABLES LIKE 'record'"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"DROP TABLE IF EXISTS record"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"CREATE TABLE record(buyer INT UNSIGNED NOT NULL,\n    seller INT UNSIGNED NOT NULL,\n    id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY,\n    product INT UNSIGNED NOT NULL,\n    time DATETIME NOT NULL,\n    count INT NOT NULL,\n    FOREIGN KEY (buyer) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE,\n    FOREIGN KEY (seller) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE,\n    FOREIGN KEY (product) REFERENCES product(id) ON DELETE CASCADE ON UPDATE CASCADE)DEFAULT CHARSET=utf8;"
+**************************************************, context: ngx.timer
+2016/10/12 12:21:49 [error] 51405#0: *34 [lua] repr.lua:92: loger(): 
+**************************************************
+"show create table record;"
+**************************************************, context: ngx.timer
+2016/10/12 12:22:04 [error] 51405#0: *36 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `user` SET `user`.`password` = "111", `user`.`username` = "abc", `user`.`money` = 11, `user`.`age` = 11;"
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/12 12:22:04 [error] 51405#0: *36 [lua] main.lua:60: `form:save` failed: Cannot add or update a child row: a foreign key constraint fails (`test`.`user`, CONSTRAINT `user_ibfk_1` FOREIGN KEY (`detail`) REFERENCES `detail` (`id`) ON DELETE CASCADE ON UPDATE CASCADE), client: 10.240.0.214, server: localhost, request: "POST /user/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/user/create"
+2016/10/12 12:23:42 [error] 51405#0: *41 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `moreinfo` SET `moreinfo`.`height` = 12.2, `moreinfo`.`weight` = 13.3;"
+**************************************************, client: 10.240.0.240, server: localhost, request: "POST /moreinfo/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/create"
+2016/10/12 12:23:42 [error] 51405#0: *43 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `moreinfo`.`weight`, `moreinfo`.`height`, `moreinfo`.`id` FROM `moreinfo`  WHERE `moreinfo`.`id` = "1";"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /moreinfo/1 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/create"
+2016/10/12 12:24:03 [error] 51405#0: *46 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `moreinfo`.`weight`, `moreinfo`.`height`, `moreinfo`.`id` FROM `moreinfo`  WHERE `moreinfo`.`id` = "1";"
+**************************************************, client: 10.240.1.16, server: localhost, request: "GET /moreinfo/update/1 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/1"
+2016/10/12 12:24:06 [error] 51405#0: *49 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `moreinfo`.`weight`, `moreinfo`.`height`, `moreinfo`.`id` FROM `moreinfo`  WHERE `moreinfo`.`id` = "1";"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /moreinfo/update/1 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/update/1"
+2016/10/12 12:24:06 [error] 51405#0: *49 [lua] repr.lua:92: loger(): 
+**************************************************
+"UPDATE `moreinfo` SET `moreinfo`.`weight` = 13.31, `moreinfo`.`height` = 12.2, `moreinfo`.`id` = 1 WHERE id=1;"
+**************************************************, client: 10.240.1.16, server: localhost, request: "POST /moreinfo/update/1 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/update/1"
+2016/10/12 12:24:06 [error] 51405#0: *51 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `moreinfo`.`weight`, `moreinfo`.`height`, `moreinfo`.`id` FROM `moreinfo`  WHERE `moreinfo`.`id` = "1";"
+**************************************************, client: 10.240.1.16, server: localhost, request: "GET /moreinfo/1 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/update/1"
+2016/10/12 12:27:29 [error] 51405#0: *54 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "1";"
+**************************************************, client: 10.240.1.14, server: localhost, request: "GET /detail/1 HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 12:27:29 [error] 51405#0: *54 [lua] main.lua:60: can not get object, should return 1 row, but get 0, client: 10.240.1.14, server: localhost, request: "GET /detail/1 HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 12:27:59 [error] 51405#0: *59 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `detail` SET `detail`.`sex` = 1, `detail`.`age` = 18;"
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 12:27:59 [error] 51405#0: *59 [lua] main.lua:60: `form:save` failed: Cannot add or update a child row: a foreign key constraint fails (`test`.`detail`, CONSTRAINT `detail_ibfk_1` FOREIGN KEY (`info`) REFERENCES `moreinfo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE), client: 10.240.0.214, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:00:21 [error] 51405#0: *66 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `detail` SET sex = 1, age = 18;"
+**************************************************, client: 10.240.0.230, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:00:21 [error] 51405#0: *66 [lua] main.lua:60: `form:save` failed: Cannot add or update a child row: a foreign key constraint fails (`test`.`detail`, CONSTRAINT `detail_ibfk_1` FOREIGN KEY (`info`) REFERENCES `moreinfo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE), client: 10.240.0.230, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:01:43 [error] 51405#0: *71 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `detail` SET sex = 1, age = 88;"
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:01:43 [error] 51405#0: *71 [lua] main.lua:60: `form:save` failed: Cannot add or update a child row: a foreign key constraint fails (`test`.`detail`, CONSTRAINT `detail_ibfk_1` FOREIGN KEY (`info`) REFERENCES `moreinfo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE), client: 10.240.0.214, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:03:57 [error] 51405#0: *74 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins" {\\table: 0x41c7bb60
+  "age" : 88,
+  "info": "1",
+  "sex" : "true",
+}
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:03:57 [error] 51405#0: *74 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `detail` SET sex = 1, age = 88;"
+**************************************************, client: 10.240.0.214, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:03:57 [error] 51405#0: *74 [lua] main.lua:60: `form:save` failed: Cannot add or update a child row: a foreign key constraint fails (`test`.`detail`, CONSTRAINT `detail_ibfk_1` FOREIGN KEY (`info`) REFERENCES `moreinfo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE), client: 10.240.0.214, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:10:28 [error] 51405#0: *77 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins" {\\table: 0x41e8d778
+  "age" : 88,
+  "info": {\\table: 0x41e8dc70
+             "id": 1,
+           },
+  "sex" : "true",
+}
+**************************************************, client: 10.240.1.12, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:10:28 [error] 51405#0: *77 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `detail` SET sex = 1, age = 88, info = 1;"
+**************************************************, client: 10.240.1.12, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:10:28 [error] 51405#0: *77 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins2" {\\table: 0x41e8d778
+  "age" : 88,
+  "id"  : 5,
+  "info": {\\table: 0x41e8dc70
+             "id": 1,
+           },
+  "sex" : "true",
+}
+**************************************************, client: 10.240.1.12, server: localhost, request: "POST /detail/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:10:28 [error] 51405#0: *79 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.0.214, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:14:53 [error] 51405#0: *83 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:15:32 [error] 51405#0: *87 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.0.240, server: localhost, request: "GET /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/5"
+2016/10/12 15:19:52 [error] 51405#0: *91 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.14, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:19:52 [error] 51405#0: *91 [lua] repr.lua:92: loger(): 
+**************************************************
+"object:" {\\table: 0x41786688
+  "age" : 88,
+  "id"  : 5,
+  "info": {\\table: 0x41788ad0
+             "__ref": {\\table: 0x408da230
+                         "field_order": {\\table: 0x41dd4d78
+                                        1: "weight",
+                                        2: "height",
+                                        3: "id",
+                                      },
+                         "fields"  : {\\table: 0x41dd09f8
+                                        "height": {\\table: 0x41dc6718
+                                                     "auto_created": "false",
+                                                     "blank"   : "false",
+                                                     "db_index": "false",
+                                                     "editable": "true",
+                                                     "error_messages": {\\table: 0x41ba6360
+                                                                    "blank"   : "This field cannot be blank.",
+                                                                    "invalid" : "value must be a float.",
+                                                                    "invalid_choice": "%s is not a valid choice.",
+                                                                    "null"    : "This field cannot be null.",
+                                                                    "unique"  : "This field already exists.",
+                                                                  },
+                                                     "help_text": "",
+                                                     "is_relation": "false",
+                                                     "name"    : "height",
+                                                     "null"    : "false",
+                                                     "serialize": "true",
+                                                     "unique"  : "false",
+                                                     "validators": {},
+                                                   },
+                                        "id"    : {\\table: 0x408df950
+                                                     "auto_created": "false",
+                                                     "blank"   : "true",
+                                                     "db_index": "false",
+                                                     "editable": "true",
+                                                     "error_messages": {\\table: 0x41dc1098
+                                                                    "blank"   : "This field cannot be blank.",
+                                                                    "invalid" : "value must be an integer.",
+                                                                    "invalid_choice": "%s is not a valid choice.",
+                                                                    "null"    : "This field cannot be null.",
+                                                                    "unique"  : "This field already exists.",
+                                                                  },
+                                                     "help_text": "",
+                                                     "is_relation": "false",
+                                                     "name"    : "id",
+                                                     "null"    : "false",
+                                                     "primary_key": "true",
+                                                     "serialize": "true",
+                                                     "unique"  : "false",
+                                                     "validators": {},
+                                                   },
+                                        "weight": {\\table: 0x408c20d0
+                                                     "auto_created": "false",
+
+2016/10/12 15:21:27 [error] 51405#0: *95 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.14, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:21:27 [error] 51405#0: *95 [lua] repr.lua:92: loger(): 
+**************************************************
+"object:" {\\table: 0x413784e8
+  "age" : 88,
+  "id"  : 5,
+  "info": {\\table: 0x4137aab8
+             "__ref": "*exceed max deepth*",
+             "id"   : "*exceed max deepth*",
+           },
+  "sex" : 1,
+}
+**************************************************, client: 10.240.1.14, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:27:02 [error] 51405#0: *105 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id`, `info`.`weight` AS info__weight, `info`.`height` AS info__height, `info`.`id` AS info__id FROM `detail` INNER JOIN `moreinfo` AS `info` ON (`detail`.`info` = `info`.`id`)  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:27:02 [error] 51405#0: *105 [lua] repr.lua:92: loger(): 
+**************************************************
+"object:" {\\table: 0x41364408
+  "age" : 88,
+  "id"  : 5,
+  "info": {\\table: 0x413668f0
+             "height": 12.2,
+             "id"    : 1,
+             "weight": 13.31,
+           },
+  "sex" : 1,
+}
+**************************************************, client: 10.240.1.30, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:55:24 [error] 51405#0: *109 init_by_lua_file error: error loading module 'resty.mvc.formfield' from file './resty/mvc/formfield.lua':
+	./resty/mvc/formfield.lua:374: '(' expected near '.'
+stack traceback:
+	[C]: at 0x7fbb8023deb0
+	[C]: in function 'require'
+	./resty/mvc/modelfield.lua:3: in main chunk
+	[C]: in function 'require'
+	./resty/mvc/model.lua:4: in main chunk
+	[C]: in function 'require'
+	./apps/user/models.lua:2: in main chunk
+	[C]: in function 'require'
+	./middlewares/auth.lua:2: in main chunk
+	[C]: in function 'require'
+	./main/init.lua:19: in main chunk, client: 10.240.0.213, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:55:24 [error] 51405#0: *110 init_by_lua_file error: error loading module 'resty.mvc.formfield' from file './resty/mvc/formfield.lua':
+	./resty/mvc/formfield.lua:374: '(' expected near '.'
+stack traceback:
+	[C]: at 0x7fbb8023deb0
+	[C]: in function 'require'
+	./resty/mvc/modelfield.lua:3: in main chunk
+	[C]: in function 'require'
+	./resty/mvc/model.lua:4: in main chunk
+	[C]: in function 'require'
+	./apps/user/models.lua:2: in main chunk
+	[C]: in function 'require'
+	./middlewares/auth.lua:2: in main chunk
+	[C]: in function 'require'
+	./main/init.lua:19: in main chunk, client: 10.240.0.213, server: localhost, request: "GET /detail/index.js.map HTTP/1.1", host: "openresty-pronan.c9users.io:80"
+2016/10/12 15:56:09 [error] 51405#0: *111 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/create"
+2016/10/12 15:56:13 [error] 51405#0: *115 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/5"
+2016/10/12 15:56:21 [error] 51405#0: *118 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.14, server: localhost, request: "POST /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/update/5"
+2016/10/12 15:56:21 [error] 51405#0: *118 [lua] repr.lua:92: loger(): 
+**************************************************
+"UPDATE `detail` SET sex = 1, age = 88, info = 2, id = 5 WHERE id = 5;"
+**************************************************, client: 10.240.1.14, server: localhost, request: "POST /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/update/5"
+2016/10/12 15:56:21 [error] 51405#0: *118 [lua] main.lua:60: `form:save` failed: Cannot add or update a child row: a foreign key constraint fails (`test`.`detail`, CONSTRAINT `detail_ibfk_1` FOREIGN KEY (`info`) REFERENCES `moreinfo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE), client: 10.240.1.14, server: localhost, request: "POST /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/update/5"
+2016/10/12 15:56:26 [error] 51405#0: *121 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.1.16, server: localhost, request: "GET /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/5"
+2016/10/12 15:56:54 [error] 51405#0: *125 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins" {\\table: 0x40e89148
+  "height": 11,
+  "weight": 44,
+}
+**************************************************, client: 10.240.0.230, server: localhost, request: "POST /moreinfo/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/create"
+2016/10/12 15:56:54 [error] 51405#0: *125 [lua] repr.lua:92: loger(): 
+**************************************************
+"INSERT INTO `moreinfo` SET weight = 44, height = 11;"
+**************************************************, client: 10.240.0.230, server: localhost, request: "POST /moreinfo/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/create"
+2016/10/12 15:56:54 [error] 51405#0: *125 [lua] repr.lua:92: loger(): 
+**************************************************
+"new_ins2" {\\table: 0x40e89148
+  "height": 11,
+  "id"    : 2,
+  "weight": 44,
+}
+**************************************************, client: 10.240.0.230, server: localhost, request: "POST /moreinfo/create HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/create"
+2016/10/12 15:56:54 [error] 51405#0: *127 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `moreinfo`.`weight`, `moreinfo`.`height`, `moreinfo`.`id` FROM `moreinfo`  WHERE `moreinfo`.`id` = "2";"
+**************************************************, client: 10.240.1.12, server: localhost, request: "GET /moreinfo/2 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/moreinfo/create"
+2016/10/12 15:56:59 [error] 51405#0: *129 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.0.230, server: localhost, request: "POST /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/update/5"
+2016/10/12 15:56:59 [error] 51405#0: *129 [lua] repr.lua:92: loger(): 
+**************************************************
+"UPDATE `detail` SET sex = 1, age = 88, info = 2, id = 5 WHERE id = 5;"
+**************************************************, client: 10.240.0.230, server: localhost, request: "POST /detail/update/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/update/5"
+2016/10/12 15:57:00 [error] 51405#0: *131 [lua] repr.lua:92: loger(): 
+**************************************************
+"SELECT `detail`.`sex`, `detail`.`age`, `detail`.`info`, `detail`.`id` FROM `detail`  WHERE `detail`.`id` = "5";"
+**************************************************, client: 10.240.0.213, server: localhost, request: "GET /detail/5 HTTP/1.1", host: "openresty-pronan.c9users.io:80", referrer: "http://openresty-pronan.c9users.io/detail/update/5"

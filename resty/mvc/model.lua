@@ -69,16 +69,11 @@ function Model.class(cls, attrs)
     return subclass
 end
 function Model.instance(cls, attrs, commit)
-    local ins = cls.row_class:new(attrs)
+    local row = cls.row_class:new(attrs)
     if commit then
-        local res, errors = ins:create()
-        if not res then
-            return nil, errors
-        else
-            return ins
-        end
+        return row:create()
     else
-        return ins
+        return row
     end
 end
 

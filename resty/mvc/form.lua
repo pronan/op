@@ -172,14 +172,14 @@ function Form.save(self)
         for k, v in pairs(self.cleaned_data) do
             ins[k] = v
         end
-        local res, errors = ins:update_without_clean()
+        local res, errors = ins:update()
         if not res then
             return nil, errors
         end
         return ins
     elseif self.model then
         local new_ins = self.cleaned_data
-        local res, errors = self.model:instance(new_ins):create_without_clean()
+        local res, errors = self.model:instance(new_ins):create()
         if not res then
             return nil, errors
         end

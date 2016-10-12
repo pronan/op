@@ -1,0 +1,26 @@
+{% layout = "base.html" %}
+
+{-main-}
+<table class="table">
+  {% if object_list[1] then %}
+    <tr>
+      {%for k, v in pairs(object_list[1]) do%}
+        <th>{{k}}</th>
+      {% end%}
+      <th>EDIT</th>
+      <th>DELETE</th>
+    </tr>
+    {% for i, object in ipairs(object_list) do%}
+    <tr>
+      {%for k, v in pairs(object) do%}
+      <td> {{v}} </td>
+      {% end%}
+      <td><a href="/product/update/{{object.id}}" >edit</a></td>
+      <td><a href="/product/delete/{{object.id}}" >delete</a></td>
+    </tr>
+    {% end%}
+  {% else%}
+    <p>No records</p>
+  {% end%}
+</table>
+{-main-}

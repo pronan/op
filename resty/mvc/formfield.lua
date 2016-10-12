@@ -358,6 +358,22 @@ function FileField.clean(self, value)
     return value
 end
 
+local function fk_search(t, key)
+    local res, err = query(string_format(
+        'select * from `%s` where id = %s;', t.__ref.table_name, t.id))
+    if not res or res[1] == nil then
+        return nil
+    end
+    for k, v in pairs(res[1]) do
+        t[k] = v
+    end
+    t.__ref.row_class:instance(t)
+    return t[key]
+end
+local ForeignObject = {__index = fk_search}
+function ForeignObject.new(attrs)
+    return setmetatable(attrs, ForeignObject)
+end
 
 local ForeignKey = IntegerField:new{}
 function ForeignKey.instance(cls, attrs)
@@ -377,7 +393,7 @@ function ForeignKey.client_to_lua(self, value)
     if utils.is_empty_value(value) then
         return 
     end
-    return value
+    return ForeignObject.new{id=tonumber(value), __ref=self.reference}
 end
 
 
@@ -430,4 +446,5 @@ return{
     
     -- MultipleChoiceField = MultipleChoiceField, -- todo
     ForeignKey = ForeignKey, 
+    ForeignObject = ForeignObject,
 }

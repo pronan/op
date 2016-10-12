@@ -3,8 +3,8 @@ local cookie_bake = require"resty.cookie".bake
 -- expire time set
 local time          = ngx.time
 local http_time     = ngx.http_time
-local COOKIE_PATH = require"app.settings".COOKIE.path
-local COOKIE_EXPIRES = require"app.settings".COOKIE.expires
+local COOKIE_PATH = require"main.settings".COOKIE.path
+local COOKIE_EXPIRES = require"main.settings".COOKIE.expires
 
 local function before(request)
     request.cookies = cookie_new()

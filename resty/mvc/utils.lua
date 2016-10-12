@@ -134,88 +134,27 @@ local function curry(func, kwargs)
     return _curry
 end
 local function serialize_basetype(v)
-    if type(v) == 'number' then
-        return tostring(v)
-    else
+    if type(v) == 'string' then
         return string_format("%q", v)
+    else
+        return tostring(v)
     end
-end
-local function _get_column_name(name, table_name)
-    return name
-    -- if name:find(' ', 1) then
-    --     return name
-    -- elseif table_name then
-    --     return string_format("`%s`.`%s`", table_name, name)
-    -- else
-    --     return "`"..name.."`"
-    -- end
-end
-local function serialize_columns(columns, table_name)
-    -- convert a table named `foo` with columns like {'age', 'name'} 
-    -- to string `foo`.`age`, `foo`.`name`
-    local res = {}
-    for i, v in ipairs(columns) do
-        res[#res+1] = _get_column_name(v, table_name)
-    end
-    return table_concat(res, ", ")
 end
 local function serialize_attrs(attrs, table_name)
     -- {a=1, b='bar'} -> `foo`.`a` = 1, `foo`.`b` = "bar"
+    -- {a=1, b='bar'} -> a = 1, b = "bar"
     local res = {}
-    for k, v in pairs(attrs) do
-        res[#res+1] = string_format('%s = %s', 
-            string_format('`%s`.`%s`', table_name, k), serialize_basetype(v))
+    if table_name then
+        for k, v in pairs(attrs) do
+            k = string_format('`%s`.`%s`', table_name, k)
+            res[#res+1] = string_format('%s = %s', k, serialize_basetype(v))
+        end
+    else
+        for k, v in pairs(attrs) do
+            res[#res+1] = string_format('%s = %s', k, serialize_basetype(v))
+        end
     end
     return table_concat(res, ", ")
-end
-local RELATIONS = {
-    lt='%s < %s', lte='%s <= %s', gt='%s > %s', gte='%s >= %s', 
-    ne='%s <> %s', eq='%s = %s', ['in']='%s IN %s', 
-    exact = '%s = %s', iexact = '%s COLLATE UTF8_GENERAL_CI = %s',}
-local STRING_LIKE_RELATIONS = {
-    contains = '%s LIKE "%%%s%%"',
-    icontains = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s%%"',
-    startswith = '%s LIKE "%s%%"',
-    istartswith = '%s COLLATE UTF8_GENERAL_CI LIKE "%s%%"',
-    endswith = '%s LIKE "%%%s"',
-    iendswith = '%s COLLATE UTF8_GENERAL_CI LIKE "%%%s"',
-}
-
-local function serialize_andkwargs(andkwargs, table_name)
-    -- {age=23, id__in={1, 2, 3}, name='kat'} ->
-    -- `foo`.`age` = 23 AND `foo`.`id` IN (1, 2, 3) AND `foo`.`name` = "kat"
-    local results = {}
-    for key, value in pairs(andkwargs) do
-        -- try pattern `foo__bar` to split key
-        local field, operator, template
-        local pos = key:find('__', 1, true)
-        if pos then
-            field = key:sub(1, pos-1)
-            operator = key:sub(pos+2)
-        else
-            field = key
-            operator = 'exact'
-        end
-        template = RELATIONS[operator] or STRING_LIKE_RELATIONS[operator] or assert(nil, 'invalid operator:'..operator)
-        if type(value) == 'string' then
-            value = string_format("%q", value)
-            if STRING_LIKE_RELATIONS[operator] then
-                value = value:sub(2, -2)
-                -- value = value:sub(2, -2):gsub([[\\]], [[\\\]]) --search for backslash, seems rare
-            end
-        elseif type(value) == 'table' then 
-            -- turn table like {'a', 'b', 1} to string ('a', 'b', 1)
-            local res = {}
-            for i,v in ipairs(value) do
-                res[i] = serialize_basetype(v)
-            end
-            value = '('..table_concat(res, ", ")..')'
-        else -- number
-            value = tostring(value)
-        end
-        results[#results+1] = string_format(template, _get_column_name(field, table_name), value)
-    end
-    return table_concat(results, " AND ")
 end
 local function split(s, sep)
     local i = 1
@@ -254,7 +193,6 @@ return {
     serialize_basetype = serialize_basetype, 
     serialize_andkwargs = serialize_andkwargs, 
     serialize_attrs = serialize_attrs, 
-    serialize_columns = serialize_columns, 
     map = map, 
     split = split, 
 }

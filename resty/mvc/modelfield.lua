@@ -115,11 +115,11 @@ end
 --         return 'Primary keys must not have null=true.'
 --     end
 -- end
--- function Field.client_to_lua(self, value)
---     -- Converts the input value or value returned by lua-resty-mysql 
---     -- into the expected lua data type.
---     return value
--- end
+function Field.client_to_lua(self, value)
+    -- Converts the input value or value returned by lua-resty-mysql 
+    -- into the expected lua data type.
+    return value
+end
 -- function Field.lua_to_db(self, value)
 --     -- get value prepared for database.
 --     return value
@@ -771,20 +771,6 @@ function BooleanField.formfield(self, kwargs)
     return Field.formfield(self, defaults)
 end
 
-local function __index(t, key)
-    local res, err = query(string_format('select * from `%s` where id=%s;', t.__ref.table_name, t.id))
-    if not res or res[1] == nil then
-        return nil
-    end
-    for k, v in pairs(res[1]) do
-        if rawget(t, k) == nil then
-            t[k] = v
-        end
-    end
-    t.__ref.row_class:instance(t)
-    return t[key]
-end
-local FK_meta = {__index = __index}
 local ForeignKey = Field:new{
     db_type = 'INT', 
     on_delete=nil, on_update=nil}
@@ -792,10 +778,13 @@ function ForeignKey.get_internal_type(self)
     return "ForeignKey"
 end
 function ForeignKey.db_to_lua(self, value)
-    return setmetatable({id=value, __ref=self.reference}, FK_meta)
+    return FormField.ForeignObject.new{id=value, __ref=self.reference}
 end
 function ForeignKey.lua_to_db(self, value)
-    return value.id
+    if type(value) == 'table' then
+        return value.id
+    end
+    return value
 end
 function ForeignKey.instance(cls, attrs)
     local self = cls:new(attrs)

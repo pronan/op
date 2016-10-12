@@ -9,8 +9,7 @@ local type = type
 local pairs = pairs
 local string_format = string.format
 local table_concat = table.concat
-local ngx_log = ngx.log
-local ngx_ERR = ngx.ERR
+
 --todo add `:count()` method
 
 -- >>> x=u.objects.filter(sfzh__startswith='5').filter(Q(id__gt=5)).filter(Q(id__lt=30))
@@ -66,18 +65,23 @@ function Manager.flush(self)
         self['_'..v..'_string'] = nil
     end
     self.is_select = nil
+    self._select_join = nil
     return self
 end
 function Manager.exec_raw(self)
     return query(self:to_sql())
 end
 local function _get_fk_table(attrs, fk)
+    -- in : attrs = {id=1, buyer__name='tom', buyer__id=2}, fk = 'buyer'
+    -- out: attrs = {id=1}, res = {name='tom', id=2}
     local res = {}
-    local prefix = fk..'__'
-    for k,v in pairs(attrs) do
-        if k:sub(1, #fk+2) == prefix then
-            res[k:sub(#fk+3)] = v
-            attrs[k] = nil
+    local prefix = fk..'__' -- buyer__
+    -- collect attributes belongs to fk
+    for k, v in pairs(attrs) do
+        if k:sub(1, #prefix) == prefix then
+            res[k:sub(#prefix+1)] = v
+            -- attrs.buyer__name finish its mission, delete it from attrs.
+            attrs[k] = nil 
         end
     end
     return res
@@ -91,6 +95,8 @@ function Manager.exec(self)
         self._group or self._group_string or self._having or self._having_string) then
         -- none-group SELECT clause, wrap the results
         if self._select_join then
+            -- this is a join-select clause, wrap the related fields to a row
+            -- to get a foreign key model instance.
             for i, attrs in ipairs(res) do
                 res[i] = self.row_class:instance(attrs)
                 for fk, fk_model in pairs(self._select_join) do 
@@ -216,17 +222,13 @@ function Manager.parse_from(self)
     return res
 end
 function Manager._add_to_join(self, t)
-    local already_has
     for i, v in ipairs(self._join) do
         if (t.left_alias==v.left_alias and t.left_fk==v.left_fk 
             and t.right_alias==v.right_alias and t.right_name==v.right_name) then
-            already_has = true
-            break
+            return
         end
     end
-    if not already_has then
-        self._join[#self._join+1] = t
-    end
+    self._join[#self._join+1] = t
 end
 function Manager.join(self, params)
     if self._join == nil then
@@ -235,7 +237,6 @@ function Manager.join(self, params)
     if self._select_join == nil then
         self._select_join = {}
     end
-    -- 
     for i, fk_alias in ipairs(params) do
         -- order matters,  so used as a array
         self:_add_to_join{

@@ -2,10 +2,11 @@ local template = require"resty.mvc.template"
 local encode = require "cjson.safe".encode
 local open = io.open
 local sub = string.sub
+local APPS = require"main.settings".APPS
 
 --@./resty/mvc/response.lua
 --@/usr/local/openresty/site/lualib/resty/response.lua
-local CD = debug.getinfo(1,"S").source:match'^@(.*)response.lua$'
+local ADMIN_TEMPLATE_DIR = (debug.getinfo(1,"S").source:match'^@(.*)response.lua$')..'html/'
 
 local GLOBAL_CONTEXT = {
     __domain='example.com',
@@ -24,9 +25,18 @@ end
 local default_loader = template.load
 local function admin_loader(path)
     --loger('admin loaer path')
-    return readfile(table.concat{CD, path})
+    return readfile(table.concat{ADMIN_TEMPLATE_DIR, path})
 end
-template.loaders = {default_loader, admin_loader}
+local function app_loader(path)
+    for i, name in ipairs(APPS) do
+        local res = readfile('apps/'..name..'/html/'..path)
+        if res then
+            return res
+        end
+    end
+    return path
+end
+template.loaders = {default_loader, app_loader, admin_loader}
 local function load_from_loaders(path)
     -- first try lua-resty-template's loader
     local res
