@@ -121,7 +121,6 @@ local  datetime = {}
 local function index(t, k)
     if k=='string' then 
         if rawget(t,'table') then
-            loger('t.table',t.table)
             t.string = strfmt(t.table)
             return t.string
         elseif rawget(t,'number') then
@@ -204,7 +203,6 @@ datetime.__add=add
 datetime.__tostring=function(t) return t.string end
 
 function datetime.new(arg)    
-    loger('arg:', arg)
     return setmetatable({[type(arg)]=arg}, datetime)
 end
 
