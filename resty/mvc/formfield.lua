@@ -43,7 +43,7 @@ function Field.new(cls, self)
     return setmetatable(self, cls)
 end
 function Field.instance(cls, attrs)
-    -- widget stuff
+    -- used when defining a form
     local self = cls:new(attrs)
     local widget = self.widget 
     if not rawget(widget, 'is_instance') then
@@ -65,6 +65,13 @@ function Field.instance(cls, attrs)
     self.error_messages = utils.dict(messages, self.error_messages) 
     self.validators = utils.list(self.default_validators, self.validators)
     return self
+end
+function Field.copy(self)
+    -- used when make a form instance 
+    local field = self:new()
+    -- `widget` is a special attribute, mainly due to `choices` render logic
+    field.widget = self.widget:new{field=field}
+    return field
 end
 function Field.widget_attrs(self, widget)
     return {}
@@ -324,6 +331,8 @@ function ChoiceField.valid_value(self, value)
                 end
             end
         else
+            -- todo this is a simple version of checking.
+            -- because TypedChoiceField is not used.
             if value == k or value == tostring(k) then
                 return true
             end

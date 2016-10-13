@@ -43,10 +43,7 @@ function Form.instance(cls, attrs)
     -- some attributes of the field, e.g. `choices` of ChoiceField
     local fields = {}
     for name, field in pairs(self.fields) do 
-        local nf = field:new()
-        -- `widget` is a special attribute, mainly due to `choices` render logic
-        nf.widget = field.widget:new{field=nf}
-        fields[name] = nf
+        fields[name] = field:copy()
     end
     self.fields = fields
     self._bound_fields_cache = {}

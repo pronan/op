@@ -44,12 +44,16 @@ function Field.new(cls, self)
     return setmetatable(self, cls)
 end
 function Field.instance(cls, attrs)
-    -- widget stuff
     local self = cls:new(attrs)
     self.help_text = self.help_text or ''
-    self.choices = self.choices -- or {}
-    self.validators = utils.list(self.default_validators, self.validators)
+    -- todo
+    -- self.choices = self.choices or {} 
+    -- self.default = self.default or NOT_PROVIDED
     -- self.primary_key = self.primary_key or false
+    -- if self.serialize == nil then
+    --     self.serialize = true
+    -- end
+    self.validators = utils.list(self.default_validators, self.validators)
     self.blank = self.blank or false
     self.null = self.null or false
     self.db_index = self.db_index or false
@@ -57,12 +61,7 @@ function Field.instance(cls, attrs)
     if self.editable == nil then
         self.editable = true
     end
-    if self.serialize == nil then
-        self.serialize = true
-    end
     self.unique = self.unique or false
-    self.is_relation = self.remote_field ~= nil
-    self.default = self.default 
     local messages = {}
     for parent in utils.reversed_metatables(self) do
         utils.dict_update(messages, parent.default_error_messages)
@@ -116,8 +115,6 @@ end
 --     end
 -- end
 function Field.client_to_lua(self, value)
-    -- Converts the input value or value returned by lua-resty-mysql 
-    -- into the expected lua data type.
     return value
 end
 -- function Field.lua_to_db(self, value)
@@ -251,8 +248,7 @@ local valid_typed_kwargs = {
     label = true,
     initial = true,
     help_text = true,
-    error_messages = true,
-    show_hidden_initial = true,}
+    error_messages = true}
 function Field.formfield(self, kwargs)
     local form_class = kwargs.form_class 
     local choices_form_class = kwargs.choices_form_class
@@ -261,7 +257,6 @@ function Field.formfield(self, kwargs)
     if self:has_default() then
         if type(self.default) == 'function' then
             defaults.initial = self.default
-            defaults.show_hidden_initial = true
         else
             defaults.initial = self:get_default()
         end
@@ -280,8 +275,8 @@ function Field.formfield(self, kwargs)
             -- form_class = FormField.TypedChoiceField
             form_class = FormField.ChoiceField
         end
-        -- Many of the subclass-specific formfield arguments (min_value,
-        -- max_value) don't apply for choice fields, so be sure to only pass
+        -- Many of the subclass-specific formfield arguments (min,
+        -- max) don't apply for choice fields, so be sure to only pass
         -- the values that TypedChoiceField will understand.
         for k, v in pairs(kwargs) do
             if not valid_typed_kwargs[k] then
@@ -296,7 +291,7 @@ function Field.formfield(self, kwargs)
     return form_class:instance(defaults)
 end
 function Field.flatchoices(self)
-    -- """Flattened version of choices tuple."""
+    -- Flattened version of choices tuple
     local flat = {}
     for i, e in ipairs(self.choices) do
         local choice, value = e[1], e[2]
