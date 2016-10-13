@@ -1,22 +1,24 @@
 {% layout = "base.html" %}
 
 {-main-}
-<table class="table">
+<table class="table  table-hover table-striped">
   {% if object_list[1] then %}
     <tr>
       {%for k, v in pairs(object_list[1]) do%}
         <th>{{k}}</th>
       {% end%}
-      <th>EDIT</th>
-      <th>DELETE</th>
+      <th>Actions</th>
     </tr>
     {% for i, object in ipairs(object_list) do%}
     <tr>
       {%for k, v in pairs(object) do%}
       <td> {{v}} </td>
       {% end%}
-      <td><a href="/product/update/{{object.id}}" >edit</a></td>
-      <td><a href="/product/delete/{{object.id}}" >delete</a></td>
+      <td>
+        <a href="/product/{{object.id}}" class="btn btn-default">detail</a>
+        <a href="/product/update/{{object.id}}" class="btn btn-default">edit</a>
+        <a href="/product/delete/{{object.id}}" class="btn btn-default">delete</a>
+      </td>
     </tr>
     {% end%}
   {% else%}

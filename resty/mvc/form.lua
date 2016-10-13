@@ -42,8 +42,11 @@ function Form.instance(cls, attrs)
     -- make instances of fields so we can safely dynamically overwrite 
     -- some attributes of the field, e.g. `choices` of ChoiceField
     local fields = {}
-    for name, field_class in pairs(self.fields) do 
-        fields[name] = field_class:new()
+    for name, field in pairs(self.fields) do 
+        local nf = field:new()
+        -- `widget` is a special attribute, mainly due to `choices` render logic
+        nf.widget = field.widget:new{field=nf}
+        fields[name] = nf
     end
     self.fields = fields
     self._bound_fields_cache = {}

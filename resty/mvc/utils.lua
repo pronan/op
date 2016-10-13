@@ -16,6 +16,50 @@ local function map(tbl, func)
     end
     return res
 end
+local function filter(tbl, func)
+    local res = {}
+    for i=1, #tbl do
+        local v = tbl[i]
+        if func(v) then
+            res[#res+1] = v
+        end
+    end
+    return res
+end
+local function list(...)
+    local total = {}
+    for _, t in next, {...}, nil do -- not `ipairs` in case of sparse {...}
+        for i = 1, #t do
+            total[#total+1] = t[i]
+        end
+    end
+    return total
+end
+local function list_extend(t, ...)
+    for _, a in next, {...}, nil do 
+        for i = 1, #a do
+            t[#t+1] = a[i]
+        end
+    end
+    return t
+end
+local function dict(...)
+    local total = {}
+    for i, t in next, {...}, nil do
+        for k, v in pairs(t) do
+            total[k] = v
+        end
+    end
+    return total
+end
+local function dict_update(t, ...)
+    for i, d in next, {...}, nil do
+        for k, v in pairs(d) do
+            t[k] = v
+        end
+    end
+    return t
+end
 local function string_strip(value)
     return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
 end
@@ -40,40 +84,6 @@ local function to_html_attrs(tbl)
         end
     end
     return table_concat(attrs, "")..table_concat(boolean_attrs, "")
-end
-local function list(...)
-    local total = {}
-    for i, t in next, {...}, nil do -- not `ipairs` in case of sparse {...}
-        for i, v in ipairs(t) do
-            total[#total+1] = v
-        end
-    end
-    return total
-end
-local function dict(...)
-    local total = {}
-    for i, t in next, {...}, nil do
-        for k, v in pairs(t) do
-            total[k] = v
-        end
-    end
-    return total
-end
-local function dict_update(t, ...)
-    for i, d in next, {...}, nil do
-        for k, v in pairs(d) do
-            t[k] = v
-        end
-    end
-    return t
-end
-local function list_extend(t, ...)
-    for i, l in next, {...}, nil do 
-        for i, v in ipairs(l) do
-            t[#t+1] = v
-        end
-    end
-    return t
 end
 local function reversed_metatables(self)
     local depth = 0

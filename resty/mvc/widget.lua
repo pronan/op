@@ -11,10 +11,10 @@ local table_remove = table.remove
 local default_widget_class = 'form-control'
 
 local Widget = {multipart=false}
-function Widget.new(cls, init)
-    init = init or {}
+function Widget.new(cls, self)
+    self = self or {}
     cls.__index = cls
-    return setmetatable(init, cls)
+    return setmetatable(self, cls)
 end
 function Widget.instance(cls, attrs)
     local self = cls:new()

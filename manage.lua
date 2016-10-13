@@ -150,6 +150,12 @@ local <*model_name*>CreateForm = Form:class{
         <*fields*>
     }, 
 }
+-- function <*model_name*>CreateForm.instance(cls, attrs)
+--     -- custom form initialization here
+--     local self = Form.instance(cls, attrs)
+--     return self
+-- end
+
 -- function <*model_name*>CreateForm.clean_fieldname(self, value)
 --     -- define your form method here
 --     return value
@@ -162,6 +168,11 @@ local <*model_name*>UpdateForm = Form:class{
         <*fields*>
     }, 
 }
+-- function <*model_name*>UpdateForm.instance(cls, attrs)
+--     -- custom form initialization here
+--     local self = Form.instance(cls, attrs)
+--     return self
+-- end
 -- function <*model_name*>UpdateForm.clean_fieldname(self, value)
 --     -- define your form method here
 --     return value
@@ -185,7 +196,7 @@ local html_map = {
   <button type="submit">update</button>
 </form>]], 
   detail = [[
-<table class="table">
+<table class="table table-hover table-striped">
 {% for k, v in pairs(object) do %}
   <tr>
     <th>{{k}}</th>
@@ -193,25 +204,27 @@ local html_map = {
   </tr>
 {% end %}
 </table>
-<a href="/<*name*>/update/{{object.id}}" >edit</a>
+<a href="/<*name*>/update/{{object.id}}" class="btn btn-default">edit</a>
 ]], 
   list = [[
-<table class="table">
+<table class="table table-hover table-striped">
   {% if object_list[1] then %}
     <tr>
       {%for k, v in pairs(object_list[1]) do%}
         <th>{{k}}</th>
       {% end%}
-      <th>EDIT</th>
-      <th>DELETE</th>
+      <th>Actions</th>
     </tr>
     {% for i, object in ipairs(object_list) do%}
     <tr>
       {%for k, v in pairs(object) do%}
       <td> {{v}} </td>
       {% end%}
-      <td><a href="/<*name*>/update/{{object.id}}" >edit</a></td>
-      <td><a href="/<*name*>/delete/{{object.id}}" >delete</a></td>
+      <td>
+        <a href="/<*name*>/{{object.id}}" class="btn btn-default">detail</a>
+        <a href="/<*name*>/update/{{object.id}}" class="btn btn-default">edit</a>
+        <a href="/<*name*>/delete/{{object.id}}" class="btn btn-default">delete</a>
+      </td>
     </tr>
     {% end%}
   {% else%}
@@ -297,25 +310,25 @@ while true do
   if not s then
     break
   end
-  local column_name,column_type 
+  local coln,colt 
   local foreignkey = false
-  column_name = string.match(s, [[^([%w_]+)$]])
-  if column_name then -- shortcuts for string type
-    column_type = 'string'
+  coln = string.match(s, [[^([%w_]+)$]])
+  if coln then -- shortcuts for string type
+    colt = 'string'
   else
-    column_name,column_type  = string.match(s, [[^([%w_]+):([%w_]+)$]])
-    if not column_name then --check foreign key
-      column_name,column_type  = string.match(s, [[^([%w_]+)::([%w_]+)$]])
-      assert(column_name, string.format(
+    coln, colt  = string.match(s, [[^([%w_]+):([%w_]+)$]])
+    if not coln then --check foreign key
+      coln, colt  = string.match(s, [[^([%w_]+)::([%w_]+)$]])
+      assert(coln, string.format(
         'fail to parse `%s`, valid form is `name:type` or `name::type`', s))
       foreignkey = true
     end
   end
   local field_string = ''
   if foreignkey then
-    local model = column_type
-    local model_module = column_type:lower()
-    field_string = string.format('%s = Field.ForeignKey{%s}', column_name, model)
+    local model = colt
+    local model_module = colt:lower()
+    field_string = string.format('%s = Field.ForeignKey{%s}', coln, model)
     if not foreignkeys[model_module] then
       foreignkeys[model_module] = true
       require_hooks[#require_hooks+1] = string.format('local %s = require"%s%s.models".%s', 
@@ -323,12 +336,12 @@ while true do
     end
   else
     local field_template;
-    if column_type == 'string' or column_type == 'text' then
+    if colt == 'string' or colt == 'text' then
       field_template = '%s = Field.%s{maxlen=50}'
     else
       field_template = '%s = Field.%s{}'
     end
-    field_string = string.format(field_template, column_name, field_map[column_type] or 'CharField')
+    field_string = string.format(field_template, coln, field_map[colt] or 'CharField')
   end
   fields[#fields+1] = field_string
   i = i+1

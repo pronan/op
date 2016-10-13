@@ -11,20 +11,21 @@ local Product = models.Product
 local ProductCreateForm = Form:class{
     model  = Product, 
     fields = {
-        name = Field.CharField{maxlen=50},
+        name = Field.ChoiceField{choices={{'SR','Senior Res'},{'HR','Hire Res'}}},
         price = Field.FloatField{}
     }, 
 }
--- function ProductCreateForm.clean_fieldname(self, value)
---     -- define your form method here
---     return value
--- end
+function ProductCreateForm.instance(cls, attrs)
+    local self = Form.instance(cls, attrs)
+    self.fields.name.choices = {{'SRR','Senior RRR'}, {'HRA','Hire Res AA'}}
+    return self
+end
 
 
 local ProductUpdateForm = Form:class{
     model  = Product, 
     fields = {
-        name = Field.CharField{maxlen=50},
+        name = Field.ChoiceField{choices={{'SR','Senior Res'},{'HR','Hire Res'}}},
         price = Field.FloatField{}
     }, 
 }

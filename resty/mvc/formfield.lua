@@ -49,7 +49,7 @@ function Field.instance(cls, attrs)
     if not rawget(widget, 'is_instance') then
         widget = widget:instance()
     end
-    -- big different from Django: widget should be capable to refer to field
+    -- big different from Django: widget gets access to field
     -- currently mainly for easy override of `choices` attribute of `Select` and `RadioSelect`
     widget.field = self 
     -- Let the widget know whether it should display as required.
