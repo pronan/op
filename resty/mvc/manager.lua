@@ -59,15 +59,6 @@ local chain_methods = {
     "select", "where", "group", "having", "order", "page", 'join', 
     "create", "update", "delete", 
 }
-function Manager.flush(self)
-    for i,v in ipairs(chain_methods) do
-        self['_'..v] = nil
-        self['_'..v..'_string'] = nil
-    end
-    self.is_select = nil
-    self._select_join = nil
-    return self
-end
 function Manager.exec_raw(self)
     return query(self:to_sql())
 end
@@ -94,18 +85,19 @@ function Manager.exec(self)
     if self.is_select and not(
         self._group or self._group_string or self._having or self._having_string) then
         -- none-group SELECT clause, wrap the results
+        local row_class = self.__model.row_class
         if self._select_join then
             -- this is a join-select clause, wrap the related fields to a row
             -- to get a foreign key model instance.
             for i, attrs in ipairs(res) do
-                res[i] = self.row_class:instance(attrs)
+                res[i] = row_class:instance(attrs)
                 for fk, fk_model in pairs(self._select_join) do 
                     attrs[fk] = fk_model.row_class:instance(_get_fk_table(attrs, fk))
                 end
             end
         else
             for i, attrs in ipairs(res) do
-                res[i] = self.row_class:instance(attrs)
+                res[i] = row_class:instance(attrs)
             end
         end            
     end
@@ -125,9 +117,9 @@ local STRING_RELATIONS = {
 }
 function Manager._parse_kv(self, key, value)
     local field, template, left_alias, right_alias, left_fk, right_name
-    local prefix = self.table_name
+    local current_model = self.__model
+    local prefix = current_model.table_name
     local operator = 'exact'
-    local current_model = self
     local state = 'init'
     local first_join = true
 
@@ -157,7 +149,7 @@ function Manager._parse_kv(self, key, value)
                 end
                 if first_join then
                     first_join = false
-                    left_alias = self.table_name -- record
+                    left_alias = prefix -- record
                     left_fk = field -- buyer
                     right_alias = field --buyer
                     right_name = current_model.table_name --user
@@ -211,7 +203,7 @@ function Manager._parse_kv(self, key, value)
     return string_format(template, string_format('`%s`.`%s`', prefix, field), value)
 end 
 function Manager.parse_from(self)
-    local res = string_format('`%s`', self.table_name)
+    local res = string_format('`%s`', self.__model.table_name)
     if self._join then
         -- k : mom, v.left: pet, v.right: user
         for i, v in ipairs(self._join) do
@@ -240,12 +232,12 @@ function Manager.join(self, params)
     for i, fk_alias in ipairs(params) do
         -- order matters,  so used as a array
         self:_add_to_join{
-            left_alias = self.table_name,  -- record
+            left_alias = self.__model.table_name,  -- record
             left_fk = fk_alias, -- buyer
             right_alias = fk_alias, -- buyer
-            right_name = self.foreignkeys[fk_alias].table_name} -- user
+            right_name = self.__model.foreignkeys[fk_alias].table_name} -- user
         -- order doesn't matters and left join table is fixed(self.table_name), so used as a hash
-        self._select_join[fk_alias] = self.foreignkeys[fk_alias]
+        self._select_join[fk_alias] = self.__model.foreignkeys[fk_alias]
     end
     return self
 end
@@ -265,7 +257,7 @@ function Manager.parse_select(self)
             end
         end
     else
-        res[#res+1] = self.fields_string -- this is what '*' means
+        res[#res+1] = self.__model.fields_string -- this is what '*' means
     end
     -- extra fields needed if Manager:join is used
     if self._select_join then
@@ -368,17 +360,19 @@ function Manager.parse_having(self)
 end
 function Manager.to_sql(self)
     -- note `parse_where` must be called before `parse_from` because foreignkeys stuff
+    local table_name = self.__model.table_name
     if self._update then
         local where_clause = self:parse_where()
         local from_clause = self:parse_from()
         return string_format('UPDATE %s SET %s%s;', from_clause, 
-            utils.serialize_attrs(self._update, self.table_name), where_clause)
+            utils.serialize_attrs(self._update, table_name), where_clause)
     elseif self._create then
         -- this is always a single table operation
-        return string_format('INSERT INTO `%s` SET %s;', self.table_name, utils.serialize_attrs(self._create, self.table_name))
+        return string_format('INSERT INTO `%s` SET %s;', table_name, 
+            utils.serialize_attrs(self._create, table_name))
     elseif self._delete then 
         -- this is always a single table operation
-        return string_format('DELETE FROM `%s`%s;', self.table_name, self:parse_where())
+        return string_format('DELETE FROM `%s`%s;', table_name, self:parse_where())
     --SELECT..FROM..WHERE..GROUP BY..HAVING..ORDER BY
     else 
         self.is_select = true --for the `exec` method
@@ -389,7 +383,7 @@ function Manager.to_sql(self)
             where_clause, 
             self:parse_group(), self:parse_having(), 
             self:parse_order(), 
-            self._page_string  and ' LIMIT '..self._page_string or '')
+            (self._page_string  and ' LIMIT '..self._page_string) or '')
     end
 end
 function Manager.create(self, params)
@@ -500,4 +494,14 @@ function Manager.page(self, params)
     self._page_string = params
     return self
 end
+function Manager.flush(self)
+    for i,v in ipairs(chain_methods) do
+        self['_'..v] = nil
+        self['_'..v..'_string'] = nil
+    end
+    self.is_select = nil
+    self._select_join = nil
+    return self
+end
+
 return Manager

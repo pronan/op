@@ -8,12 +8,15 @@ local pairs = pairs
 local string_format = string.format
 local table_concat = table.concat
 
-local Form = {field_order=nil, prefix=nil,field_html_class='form-group'}
-Form.row_template = [[<div%s>%s%s%s%s</div>]]
-Form.error_list_template = [[<ul class="error">%s</ul>]]
-Form.error_template = [[<li>%s</li>]]
-Form.help_text_html = [[<p class="help_text">%s</p>]]
-
+local Form = {
+    field_order=nil, 
+    prefix=nil,
+    field_html_class='form-group',
+    row_template = [[<div%s>%s%s%s%s</div>]],
+    error_list_template = [[<ul class="error">%s</ul>]],
+    error_template = [[<li>%s</li>]],
+    help_text_html = [[<p class="help_text">%s</p>]],
+}
 function Form.new(self, attrs)
     attrs = attrs or {}
     self.__index = self
@@ -60,12 +63,8 @@ function Form.get(self, name)
     return self._bound_fields_cache[name]
 end
 function Form.add_prefix(self, field_name)
-    -- """
     -- Returns the field name with a prefix appended, if this Form has a
-    -- prefix set.
-
-    -- Subclasses may wish to override.
-    -- """
+    -- prefix set. subclasses may wish to override.
     if self.prefix then
         return string_format('%s-%s', self.prefix, field_name)
     end

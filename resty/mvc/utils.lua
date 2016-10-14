@@ -9,6 +9,8 @@ local string_format = string.format
 local ngx_re_gsub = ngx.re.gsub
 local ngx_re_match = ngx.re.match
 
+local is_windows = package.config:sub(1,1) == '\\'
+
 local function map(tbl, func)
     local res = {}
     for i=1, #tbl do
@@ -186,6 +188,7 @@ local function split(s, sep)
     end
     return _get
 end
+
 
 return {
     dict = dict, 

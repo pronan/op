@@ -479,7 +479,7 @@ function DateTimeField.db_to_lua(self, value)
     return res
 end
 function DateTimeField.lua_to_db(self, value)
-    if type(value)~='string' then
+    if type(value) == 'table' then
         value = value.string
     end
     return value
@@ -769,6 +769,28 @@ function BooleanField.formfield(self, kwargs)
     return Field.formfield(self, defaults)
 end
 
+
+local function fk_index(t, key)
+    local res, err = query(string_format(
+        'select * from `%s` where id = %s;', t.__ref.table_name, t.id))
+    if not res or res[1] == nil then
+        return nil
+    end
+    for k, v in pairs(res[1]) do
+        t[k] = v
+    end
+    t.__ref.row_class:instance(t)
+    return t[key]
+end
+local function fk_tostring(t)
+    return t.__ref.render(t)
+end
+local ForeignObject = {__index = fk_index, __tostring = fk_tostring}
+function ForeignObject.new(attrs)
+    return setmetatable(attrs, ForeignObject)
+end
+
+
 local ForeignKey = Field:new{
     db_type = 'INT', 
     on_delete=nil, on_update=nil}
@@ -776,12 +798,14 @@ function ForeignKey.get_internal_type(self)
     return "ForeignKey"
 end
 function ForeignKey.db_to_lua(self, value)
-    return FormField.ForeignObject.new{id=value, __ref=self.reference}
+    return ForeignObject.new{id=value, __ref=self.reference}
 end
 function ForeignKey.lua_to_db(self, value)
+    -- you can pass either an integer or a table (row object) as value
     if type(value) == 'table' then
         return value.id
     end
+    -- if not table, it's a number
     return value
 end
 function ForeignKey.instance(cls, attrs)
@@ -791,6 +815,11 @@ function ForeignKey.instance(cls, attrs)
     assert(e.table_name and e.fields, 'It seems that you did not provide a model')
     self.validators = self.validators or {}
     return self
+end
+function ForeignKey.formfield(self, kwargs)
+    local defaults = {form_class = FormField.ForeignKey}
+    utils.dict_update(defaults, kwargs)
+    return Field.formfield(self, defaults)
 end
 
 
@@ -808,5 +837,5 @@ return {
     
     AutoField = AutoField, 
     ForeignKey = ForeignKey,
-    -- FileField = FileField,
+    -- FileField = FileField, -- todo
 }

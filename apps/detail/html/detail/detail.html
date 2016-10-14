@@ -1,14 +1,19 @@
 {% layout = "base.html" %}
 
 {-main-}
-<table class="table">
+<table class="table table-hover table-striped">
 {% for k, v in pairs(object) do %}
   <tr>
     <th>{{k}}</th>
-    <td>{{v}}</td>
+    {% local fk = object.__model.foreignkeys[k] %}
+    {% if fk then %}
+      <td><a href="/{{fk.table_name}}/update/{{v.id}}">{{v}}</a></td>
+    {% else %}
+      <td>{{v}}</td>
+    {% end %}
   </tr>
 {% end %}
 </table>
-<a href="/detail/update/{{object.id}}" >edit</a>
+<a href="/detail/update/{{object.id}}" class="btn btn-default">edit</a>
 
 {-main-}

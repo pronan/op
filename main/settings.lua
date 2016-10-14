@@ -1,13 +1,6 @@
 local M = {}
 
 M.DEBUG = true
-M.APPS = {
-    'user',
-    'product',
-    'detail',
-    'moreinfo',
-    'record',  
-}
 
 M.DATABASES ={
     default = {

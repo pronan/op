@@ -64,7 +64,7 @@ function View.get_template_name(self)
     return self.template_name
 end
 function View.get_object(self)
-    local id = self.kwargs[self.key]
+    local id = tonumber(self.kwargs[self.key])
     if not id then
         return nil, 'You must provid a argument for id'
     end
@@ -139,14 +139,14 @@ function FormView.post(self, request)
     end
 end
 function FormView.form_valid(self, form)
-    if self.request:is_ajax() then
+    if self.request.is_ajax then
         local data = {valid=true, url=self:get_success_url()}
         return response.Json(data)
     end
     return response.Redirect(self:get_success_url())
 end
 function FormView.form_invalid(self, form)
-    if self.request:is_ajax() then
+    if self.request.is_ajax then
         local data = {valid=false, errors=form:errors()}
         return response.Json(data)
     end
@@ -212,6 +212,14 @@ function CreateView.get_success_url(self)
 end
 
 local UpdateView = FormView:new{}
+function UpdateView.get_initial(self, form)
+    -- this is where object attributes passed to form
+    local initial = FormView:get_initial()
+    for k, v in pairs(self.object) do
+        initial[k] = v
+    end
+    return initial
+end
 function UpdateView.get(self, request)
     local object, err = self:get_object()
     if not object then
@@ -241,13 +249,6 @@ function UpdateView.form_valid(self, form)
     end
     self.object = object
     return FormView.form_valid(self, form)
-end
-function UpdateView.get_initial(self, form)
-    local initial = FormView:get_initial()
-    for k,v in pairs(self.object) do
-        initial[k] = v
-    end
-    return initial
 end
 
 local DeleteView = View:new{}

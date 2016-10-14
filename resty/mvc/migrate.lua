@@ -3,7 +3,9 @@
 -- https://dev.mysql.com/doc/refman/5.6/en/create-index.html
 -- http://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html
 local query = require"resty.mvc.query".single
-local settings = require"main.settings"
+local utils = require"resty.mvc.utils"
+local apps = require"resty.mvc.apps"
+
 
 local function make_file(fn, content)
   local f, e = io.open(fn, "w+")
@@ -156,8 +158,8 @@ end
 local function get_models()
     -- default function to get models list
     local res = {}
-    for i, name in ipairs(settings.APPS) do
-        local models = require("apps."..name..".models")
+    for i, name in ipairs(apps.LIST) do
+        local models = require(apps.PACKAGE_PREFIX..name..".models")
         for name, model in pairs(models) do
             res[#res+1] = model
         end

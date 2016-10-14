@@ -1,4 +1,5 @@
 local ErrorResponse = require"resty.mvc.response".Error
+local apps = require"resty.mvc.apps"
 local settings = require"main.settings"
 local match = ngx.re.match
 local MIDDLEWARES = settings.MIDDLEWARES
@@ -6,21 +7,20 @@ local MIDDLEWARES_REVERSED = settings.MIDDLEWARES_REVERSED
 
 local Request = setmetatable({}, {__index=ngx.req})
 Request.__index = Request
-function Request.new(self, opts)
-    opts = opts or {}
-    opts.HEADERS = self.get_headers()
-    return setmetatable(opts, self)
+function Request.new(cls, self)
+    self = self or {}
+    self.HEADERS = cls.get_headers()
+    self.is_ajax = self.HEADERS['x-requested-with'] == 'XMLHttpRequest'
+    return setmetatable(self, cls)
 end
-function Request.is_ajax(self)
-    return self.HEADERS['x-requested-with'] == 'XMLHttpRequest'
-end
+
 
 local patterns = {}
 for i,v in ipairs(require"main.urls") do
     patterns[#patterns+1] = v
 end
-for i, app_name in ipairs(settings.APPS) do
-    for i,v in ipairs(require("apps."..app_name..".urls")) do
+for i, app_name in ipairs(apps.LIST) do
+    for i,v in ipairs(require(apps.PACKAGE_PREFIX..app_name..".urls")) do
         patterns[#patterns+1] = v
     end
 end

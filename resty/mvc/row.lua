@@ -11,6 +11,10 @@ local string_format = string.format
 local table_concat = table.concat
 local ngx_localtime = ngx.localtime
 
+
+local function row_tostring(t)
+    return t.__model.render(t)
+end
 -- `Row` is the main api for create, update and delete a database record.
 -- the instance of `Row` should be a plain table, i.e. key should be a valid lua variable name, 
 -- value should be either a string or a number. if value is a boolean or table and you
@@ -20,6 +24,7 @@ local Row = {}
 function Row.new(cls, attrs)
     attrs = attrs or {}
     cls.__index = cls
+    cls.__tostring = row_tostring
     return setmetatable(attrs, cls)
 end
 function Row.instance(cls, attrs)
@@ -27,7 +32,7 @@ function Row.instance(cls, attrs)
     -- try to use `db_to_lua` to make some data suitable for lua's orm layer.
     -- such as data from DateTimeField or ForeignKey.
     local self = cls:new(attrs)
-    local fields = self.fields
+    local fields = self.__model.fields
     for k, v in pairs(self) do
         local f = fields[k]
         if f and f.db_to_lua then
@@ -55,7 +60,7 @@ function Row.create(self)
     assert(self.id == nil, 'field `id` should be nil')
     local valid_attrs = {}
     local all_errors = {}
-    for name, field in pairs(self.fields) do
+    for name, field in pairs(self.__model.fields) do
         local value = self[name]
         if value == nil then
             -- no value, try to get from default or auto_now/auto_now_add
@@ -75,7 +80,7 @@ function Row.create(self)
         return nil, all_errors
     end
     local res, err = query(string_format('INSERT INTO `%s` SET %s;', 
-        self.table_name, utils.serialize_attrs(valid_attrs)))
+        self.__model.table_name, utils.serialize_attrs(valid_attrs)))
     if res then
         self.id = res.insert_id
         return res
@@ -88,7 +93,7 @@ function Row.update(self)
     assert(self.id, 'field `id` should not be nil')
     local valid_attrs = {}
     local all_errors = {}
-    for name, field in pairs(self.fields) do
+    for name, field in pairs(self.__model.fields) do
         if field.auto_now then
             -- note we check the existence of `auto_now` before checking the value
             -- this is different from Row.create, becuase a field with auto_now 
@@ -105,7 +110,7 @@ function Row.update(self)
         return nil, all_errors
     end
     local res, err = query(string_format('UPDATE `%s` SET %s WHERE id = %s;', 
-        self.table_name, utils.serialize_attrs(valid_attrs), self.id))
+        self.__model.table_name, utils.serialize_attrs(valid_attrs), self.id))
     if res then
         return res
     else
@@ -120,7 +125,7 @@ function Row.save(self, add)
 end
 function Row.direct_create(self)
     local res, err = query(string_format('INSERT INTO `%s` SET %s;', 
-        self.table_name, utils.serialize_attrs(self)))
+        self.__model.table_name, utils.serialize_attrs(self)))
     if not res then
         return nil, {err}
     end
@@ -129,7 +134,7 @@ function Row.direct_create(self)
 end
 function Row.direct_update(self)
     local res, err = query(string_format('UPDATE `%s` SET %s WHERE id = %s;', 
-        self.table_name, utils.serialize_attrs(self), self.id)) 
+        self.__model.table_name, utils.serialize_attrs(self), self.id)) 
     if not res then
         return nil, {err}
     end
@@ -144,7 +149,7 @@ end
 function Row.delete(self)
     assert(self.id, 'field `id` should not be nil')
     return query(string_format('DELETE FROM `%s` WHERE id = %s;', 
-        self.table_name, self.id))
+        self.__model.table_name, self.id))
 end
 
 return Row

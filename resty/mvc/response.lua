@@ -1,8 +1,8 @@
 local template = require"resty.mvc.template"
+local apps = require"resty.mvc.apps"
 local encode = require "cjson.safe".encode
 local open = io.open
-local sub = string.sub
-local APPS = require"main.settings".APPS
+
 
 --@./resty/mvc/response.lua
 --@/usr/local/openresty/site/lualib/resty/response.lua
@@ -28,8 +28,8 @@ local function admin_loader(path)
     return readfile(table.concat{ADMIN_TEMPLATE_DIR, path})
 end
 local function app_loader(path)
-    for i, name in ipairs(APPS) do
-        local res = readfile('apps/'..name..'/html/'..path)
+    for i, name in ipairs(apps.LIST) do
+        local res = readfile(apps.DIR..name..'/html/'..path)
         if res then
             return res
         end

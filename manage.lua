@@ -110,13 +110,14 @@ local models = require"<*package_prefix*><*name*>.models"
 local forms = require"<*package_prefix*><*name*>.forms"
 
 local <*model_name*> = models.<*model_name*>
-local views = {}
 
--- function views.method(request)
+-- function <*name*>_home_view(request)
 --     return Response.Template("/")
 -- end
 
-return views
+return {
+    --  <*name*>_home_view = <*name*>_home_view,
+}
 ]], 
   models = [[local Model = require"resty.mvc.model"
 local Field = require"resty.mvc.modelfield"
@@ -128,8 +129,9 @@ local <*model_name*> = Model:class{
         <*fields*>
     }
 }
--- function <*model_name*>.method(self)
---   -- define your model methods here
+-- define your model methods here
+-- function <*model_name*>.render(self)
+--     return 
 -- end
 
 return {
@@ -150,14 +152,14 @@ local <*model_name*>CreateForm = Form:class{
         <*fields*>
     }, 
 }
+-- custom form initialization
 -- function <*model_name*>CreateForm.instance(cls, attrs)
---     -- custom form initialization here
 --     local self = Form.instance(cls, attrs)
 --     return self
 -- end
 
+-- define your form clean method here
 -- function <*model_name*>CreateForm.clean_fieldname(self, value)
---     -- define your form method here
 --     return value
 -- end
 
@@ -168,15 +170,6 @@ local <*model_name*>UpdateForm = Form:class{
         <*fields*>
     }, 
 }
--- function <*model_name*>UpdateForm.instance(cls, attrs)
---     -- custom form initialization here
---     local self = Form.instance(cls, attrs)
---     return self
--- end
--- function <*model_name*>UpdateForm.clean_fieldname(self, value)
---     -- define your form method here
---     return value
--- end
 
 return {
     <*model_name*>CreateForm = <*model_name*>CreateForm, 
@@ -188,19 +181,24 @@ local html_map = {
   create = [[
 <form method="post">
   {*form:render()*}
-  <button type="submit">create</button>
+  <button type="submit">create <*name*></button>
 </form>]], 
   update = [[
 <form method="post">
   {*form:render()*}
-  <button type="submit">update</button>
+  <button type="submit">update <*name*></button>
 </form>]], 
   detail = [[
 <table class="table table-hover table-striped">
 {% for k, v in pairs(object) do %}
   <tr>
     <th>{{k}}</th>
-    <td>{{v}}</td>
+    {% local fk = object.__model.foreignkeys[k] %}
+    {% if fk then %}
+      <td><a href="/{{fk.table_name}}/update/{{v.id}}">{{v}}</a></td>
+    {% else %}
+      <td>{{v}}</td>
+    {% end %}
   </tr>
 {% end %}
 </table>
@@ -218,18 +216,23 @@ local html_map = {
     {% for i, object in ipairs(object_list) do%}
     <tr>
       {%for k, v in pairs(object) do%}
-      <td> {{v}} </td>
-      {% end%}
+        {% local fk = object.__model.foreignkeys[k] %}
+        {% if fk then %}
+          <td><a href="/{{fk.table_name}}/update/{{v.id}}">{{v}}</a></td>
+        {% else %}
+          <td>{{v}}</td>
+        {% end %}
+      {% end %}
       <td>
         <a href="/<*name*>/{{object.id}}" class="btn btn-default">detail</a>
         <a href="/<*name*>/update/{{object.id}}" class="btn btn-default">edit</a>
         <a href="/<*name*>/delete/{{object.id}}" class="btn btn-default">delete</a>
       </td>
     </tr>
-    {% end%}
-  {% else%}
+    {% end %}
+  {% else %}
     <p>No records</p>
-  {% end%}
+  {% end %}
 </table>]], 
 }
 local function capitalize(name)

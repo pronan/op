@@ -11,24 +11,9 @@ local function eval(s, context)
     setfenv(f, context)
     return f()
 end
-
 local m={}
-function m.q(kwargs)
-    local stms = {
-        Pet:join{'mom', 'dad'}, 
-        Pet:where{mom__name='mike'}, 
-        Pet:select{'id', 'name'}:where{dad__name='tom'}, 
-        Pet:where{mom__name='mike'}:join{'mom', 'dad'}, 
-        Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}, 
-        Pet:select{'id', 'name'}:where{dad__name__startswith='t'}:join{'mom', 'dad'}:order{'-mom__id'}, 
-    }
-    local res = {}
-    for i, str in ipairs(stms) do
-        res[#res+1] = str
-        res[#res+1] = eval(str):to_sql()
-        res[#res+1] = '\n'
-    end
-    return response.Plain(table.concat(res, '\n'))
+function m.q(request)
+    return response.Plain(repr(''))
 end
 function m.register(request)
     if request.user then
