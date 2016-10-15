@@ -1,5 +1,9 @@
 {% layout = "admin/base.html" %}
 
 {-main-}
-Welcome to lua-resty-mvc admin!
+
+{% local name = view.model.table_name %}
+Welcome to lua-resty-mvc {{name}} admin platform.
+<a href="/admin/{{name}}/create" class="btn btn-default">create {{name}}</a>
+<a href="/admin/{{name}}/list/1" class="btn btn-default">view {{name}} list</a>
 {-main-}

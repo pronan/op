@@ -817,7 +817,7 @@ function ForeignKey.instance(cls, attrs)
     return self
 end
 function ForeignKey.formfield(self, kwargs)
-    local defaults = {form_class = FormField.ForeignKey}
+    local defaults = {form_class = FormField.ForeignKey, reference=self.reference}
     utils.dict_update(defaults, kwargs)
     return Field.formfield(self, defaults)
 end

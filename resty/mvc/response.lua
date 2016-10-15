@@ -28,8 +28,8 @@ local function admin_loader(path)
     return readfile(table.concat{ADMIN_TEMPLATE_DIR, path})
 end
 local function app_loader(path)
-    for i, name in ipairs(apps.LIST) do
-        local res = readfile(apps.DIR..name..'/html/'..path)
+    for i, dir in ipairs(apps.TEMPLATE_DIRS) do
+        local res = readfile(dir..path)
         if res then
             return res
         end

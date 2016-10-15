@@ -10,6 +10,7 @@ return {
     modelfield = require"resty.mvc.modelfield",
     q = require"resty.mvc.q",
     query = require"resty.mvc.query",
+    request = require"resty.mvc.request",
     response = require"resty.mvc.response",
     row = require"resty.mvc.row",
     template = require"resty.mvc.template",
@@ -18,4 +19,6 @@ return {
     view = require"resty.mvc.view",
     widget = require"resty.mvc.widget",
     apps = require"resty.mvc.apps",
+    admin = require"resty.mvc.admin",
+    router = require"resty.mvc.router",
 }

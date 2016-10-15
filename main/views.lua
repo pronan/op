@@ -15,6 +15,9 @@ local m={}
 function m.q(request)
     return response.Plain(repr(''))
 end
+local function login_user(request, user)
+    request.session.user = {username=user.username, id=user.id}
+end
 function m.register(request)
     if request.user then
         return response.Redirect('/profile')
@@ -25,11 +28,11 @@ function m.register(request)
         if form:is_valid() then
             local cd=form.cleaned_data
             --local user=User(cd):save()
-            local user, err=User:create(cd)
+            local user, err=User:instance(cd, true)
             if not user then
-                return response.Error(err)
+                return response.Error(repr(err))
             end
-            request.session.user = user
+            login_user(request, user)
             request.session.message = '恭喜您, 注册成功!'
             return response.Redirect('/profile')
         end
@@ -37,9 +40,6 @@ function m.register(request)
         form = forms.UserForm:instance{}
     end
     return response.Template(request, "register.html", {form=form, navbar='register'})
-end
-local function authenticate(request, user)
-    request.session.user = {username=user.username, id=user.id}
 end
 function m.login(request)
     if request.user then
@@ -50,7 +50,7 @@ function m.login(request)
     if request.get_method()=='POST' then
         form = forms.LoginForm:instance{data=request.POST}
         if form:is_valid() then
-            authenticate(request, form.user)
+            login_user(request, form.user)
             request.session.message = '您已成功登录'
             if request.is_ajax then
                 local data = {valid=true, url=redi or '/'}

@@ -381,7 +381,7 @@ function ForeignKey.instance(cls, attrs)
     else
         self.empty_label = self.empty_label or "---------"
     end
-    self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
+    self.reference = self.reference or self[1] or assert(nil, 'a model must be provided for ForeignKey')
     local model = self.reference
     assert(model.table_name and model.fields, 'It seems that you did not provide a model')
     return self

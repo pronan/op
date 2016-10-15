@@ -2,7 +2,7 @@ local zfill = require"resty.utils.base".zfill
 local sorted = require"resty.utils.base".sorted
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
-local MAX_DEEPTH = 3
+local MAX_DEEPTH = 2
 local MAX_LENGTH = 10
 
 local function ok(num)
@@ -44,7 +44,9 @@ local function _repr(obj, ind, deep, already)
         if max_key_len>MAX_LENGTH then
             max_key_len = MAX_LENGTH
         end
-        already[table_key] = table_key
+        if table_key ~= nil then -- todo why this is needed
+            already[table_key] = table_key
+        end
         for k,v in pairs(obj) do
             k = simple(k)
             if type(v) == 'table' then
@@ -56,7 +58,7 @@ local function _repr(obj, ind, deep, already)
                 elseif deep > MAX_DEEPTH then
                     v = simple('*exceed max deepth*')
                 else
-                    v = '{\\\\'..tostring(v).._repr(v, indent..ok(max_key_len+3), deep+1, already)
+                    v = '{\\\\'..(tostring(v) or '').._repr(v, indent..ok(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)

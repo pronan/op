@@ -1,4 +1,4 @@
-local response = require"resty.mvc.response"
+local Response = require"resty.mvc.response"
 local Form = require"resty.mvc.form"
 
 local function include(class, ...)
@@ -36,7 +36,7 @@ function View.dispatch(self, request)
 end
 function View.as_view(cls, init)
     init = init or {}
-    for k,v in pairs(init) do
+    for k, v in pairs(init) do
         if cls.http_method_names[k] then
             return nil, 'Do not set an attribute like http methods'
         end
@@ -58,7 +58,7 @@ function View.as_view(cls, init)
     return _view
 end
 function View.render_to_response(self, context)
-    return response.Template(self.request, self:get_template_name(), context)
+    return Response.Template(self.request, self:get_template_name(), context)
 end
 function View.get_template_name(self)
     return self.template_name
@@ -111,7 +111,7 @@ function DetailView.get(self, request)
     return TemplateView.get(self, request)
 end
 function DetailView.get_template_name(self)
-    return self.model.table_name..'/detail.html'
+    return self.template_name or self.model.table_name..'/detail.html'
 end
 
 local FormView = View:new{
@@ -141,14 +141,14 @@ end
 function FormView.form_valid(self, form)
     if self.request.is_ajax then
         local data = {valid=true, url=self:get_success_url()}
-        return response.Json(data)
+        return Response.Json(data)
     end
-    return response.Redirect(self:get_success_url())
+    return Response.Redirect(self:get_success_url())
 end
 function FormView.form_invalid(self, form)
     if self.request.is_ajax then
         local data = {valid=false, errors=form:errors()}
-        return response.Json(data)
+        return Response.Json(data)
     end
     local context = self:get_context_data{form=form}
     return self:render_to_response(context)
@@ -261,7 +261,7 @@ function DeleteView.get(self, request)
     if not res then
         return nil, 'fail to delete, '..err
     end
-    return response.Redirect(self:get_success_url())
+    return Response.Redirect(self:get_success_url())
 end
 function DeleteView.get_success_url(self)
     return string.format('/%s/list/1', self.model.table_name)

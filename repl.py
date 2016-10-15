@@ -6,7 +6,8 @@ import os
 targets = ['html','lua']
 exclude = [] #['base.lua', 'urls.lua', 'utils.lua', 'manage.lua', 'view.lua']
 repls = [
-(r'\badminhtml\b','client_to_lua'), 
+(r'require"resty.mvc.apps"','NAMES'), 
+# (r'\bURLS\b','NAMES'), 
 #(r'\bto_db\b','lua_to_db'), 
 # (r'\b\b',''), 
 # (r'\b\b',''), 

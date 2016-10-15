@@ -146,34 +146,18 @@ local function write_model_to_db(model, drop_existed_table)
     end
     return get_table_defination(model.table_name)
 end
-local function has_values(t, e)
-    for k, v in pairs(t) do
-        if v == e then
-            return true
-        end
-    end
-    return false
-end
-
 local function get_models()
-    -- default function to get models list
-    local res = {}
-    for i, name in ipairs(apps.LIST) do
-        local models = require(apps.PACKAGE_PREFIX..name..".models")
-        for name, model in pairs(models) do
-            res[#res+1] = model
-        end
-    end
-    return res
+    return apps.get_models()
 end
 
 local function migrate_models(models, drop_existed_table)
     local res = {}
-    -- name: User, model: User
-    for i, model in ipairs(models) do
+    -- sort the models to an array for table creation in database
+    for name, model in pairs(models) do
         local insert_index = nil
         for i, e in ipairs(res) do
-            if has_values(e.foreignkeys, model) then
+            if utils.dict_has(e.foreignkeys, model) then
+                -- table being foreign key referenced should be created first
                 insert_index = i
                 break
             end
@@ -197,14 +181,11 @@ local function migrate_models(models, drop_existed_table)
     return defs
 end
 
-local function main(get_models_func, drop_existed_table)
-    local models
-    get_models_func = get_models_func or get_models
-    if type(get_models_func) == 'function' then
-        models = get_models_func()
-    elseif type(get_models_func) == 'table' then
-        models = get_models_func
-    else
+local function main(models, drop_existed_table)
+    models = models or get_models
+    if type(models) == 'function' then
+        models = models()
+    elseif type(models) ~= 'table' then
         assert(nil, 'invalid argument, should be either a function or table.')
     end
     return migrate_models(models, drop_existed_table)

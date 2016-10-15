@@ -1,25 +1,17 @@
 require "resty.core"
 collectgarbage("collect")  -- just to collect any garbage
-
 utils = require"resty.utils"
 loger = utils.loger
 repr = utils.repr
+
 local settings = require"main.settings"
 
-for i, k in ipairs{'COOKIE', 'SESSION'} do
-    local v = settings[k]
-    v.expires = utils.simple_time_parser(v.expires)
-end
-local v = settings.MIDDLEWARES
-local MIDDLEWARES = {}
-local MIDDLEWARES_REVERSED = {}
-local len = #v
-for i, m in ipairs(v) do
-    if type(m) == 'string' then
-        m = require(m)
+settings.COOKIE.expires = utils.simple_time_parser(settings.COOKIE.expires)
+settings.SESSION.expires = utils.simple_time_parser(settings.SESSION.expires)
+
+
+for i, ware in ipairs(settings.MIDDLEWARES) do
+    if type(ware) == 'string' then
+        settings.MIDDLEWARES[i] = require(ware)
     end
-    MIDDLEWARES[i] = m
-    MIDDLEWARES_REVERSED[len-i+1] = m
 end
-settings.MIDDLEWARES = MIDDLEWARES
-settings.MIDDLEWARES_REVERSED = MIDDLEWARES_REVERSED

@@ -45,6 +45,14 @@ local function list_extend(t, ...)
     end
     return t
 end
+local function list_has(t, e)
+    for i, v in ipairs(t) do
+        if v == e then
+            return true
+        end
+    end
+    return false
+end
 local function dict(...)
     local total = {}
     for i, t in next, {...}, nil do
@@ -61,6 +69,14 @@ local function dict_update(t, ...)
         end
     end
     return t
+end
+local function dict_has(t, e)
+    for k, v in pairs(t) do
+        if v == e then
+            return true
+        end
+    end
+    return false
 end
 local function string_strip(value)
     return ngx_re_gsub(value, [[^\s*(.+)\s*$]], '$1', 'jo')
@@ -117,14 +133,6 @@ local function metatables(self)
         return cls
     end
     return iter
-end
-local function table_has(t, e)
-    for i, v in ipairs(t) do
-        if v == e then
-            return true
-        end
-    end
-    return false
 end
 local function sorted(t, func)
     local keys = {}
@@ -188,11 +196,22 @@ local function split(s, sep)
     end
     return _get
 end
-
+local function cache_result(f)
+    local result
+    local function _cache(...)
+        if not result then
+            result = f(...)
+        end
+        return result
+    end
+    return _cache
+end
 
 return {
     dict = dict, 
     list = list, 
+    dict_has = dict_has,
+    list_has = list_has,
     table_has = table_has, 
     to_html_attrs = to_html_attrs, 
     string_strip = string_strip, 
@@ -208,6 +227,7 @@ return {
     serialize_attrs = serialize_attrs, 
     map = map, 
     split = split, 
+    cache_result = cache_result,
 }
 
 -- mysql> select * from user;
