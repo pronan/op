@@ -50,8 +50,12 @@ local function after(request)
         if next(data) == nil then
             request.cookies.session = nil
         else
-            request.cookies.session = {value=encrypt_session(data), path=SESSION_PATH, 
-                max_age=SESSION_EXPIRES, expires=http_time(time()+SESSION_EXPIRES)}
+            request.cookies.session = {
+                value = encrypt_session(data), 
+                path = SESSION_PATH, 
+                max_age = SESSION_EXPIRES, 
+                expires = http_time(time()+SESSION_EXPIRES),
+            }
         end
     end
 end

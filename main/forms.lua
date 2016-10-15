@@ -42,8 +42,8 @@ forms.UserUpdateForm = Form:class{
 
 forms.LoginForm = Form:class{
     fields = {
-        username = Field.CharField{maxlen=20, validators={validator.minlen(6)}, required=false},    
-        password = Field.PasswordField{maxlen=28, validators={validator.minlen(6)},},    
+        username = Field.CharField{maxlen=20, validators={validator.minlen(1)}},    
+        password = Field.PasswordField{maxlen=28, validators={validator.minlen(1)},},    
     }, 
     field_order = {'username', 'password'}, 
     clean_username = function(self, value)

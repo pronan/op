@@ -2,7 +2,7 @@ local zfill = require"resty.utils.base".zfill
 local sorted = require"resty.utils.base".sorted
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
-local MAX_DEEPTH = 2
+local MAX_DEEPTH = 3
 local MAX_LENGTH = 10
 
 local function ok(num)

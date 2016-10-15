@@ -13,20 +13,18 @@ local function login_require(func)
     end
 end
 
-return{
-
-    {'^/$', views.home}, 
-    {'^/profile$', views.profile}, 
-    {'^/login$', views.login}, 
-    {'^/oauth/(?<name>.+?)$', views.oauth}, 
-    {'^/oauth2/qq$', views.qq}, 
-    {'^/oauth2/github$', views.github}, 
-    {'^/logout$', views.logout}, 
-    {'^/register$', views.register}, 
-
-    {'^/q$', views.q}, 
-    {'^/guide$', views.guide}, 
-
-    {'^/log/(?<n>\\d*?)$', views.log}, 
-    {'^/global$', views.global}, 
+return {
+    {'/', views.home}, 
+    {'/login', views.login}, 
+    {'/register', views.register}, 
+    {'/logout', views.logout}, 
+    {'/profile', views.profile}, 
+    
+    {'^/oauth/(?<name>.+?)', views.oauth}, 
+    {'/oauth2/qq', views.qq}, 
+    {'/oauth2/github', views.github}, 
+    {'/q', views.q}, 
+    {'/guide', views.guide}, 
+    {'^/log/(?<n>\\d*?)', views.log}, 
+    {'/global', views.global}, 
 }

@@ -66,7 +66,7 @@ local <*model_name*> = models.<*model_name*>
 
 return {
     {
-      '^/<*name*>/create$',              
+      '/<*name*>/create$',              
       ClassView.CreateView:as_view{
         model      = <*model_name*>,
         form_class = forms.<*model_name*>CreateForm,
@@ -111,12 +111,12 @@ local forms = require"<*package_prefix*><*name*>.forms"
 
 local <*model_name*> = models.<*model_name*>
 
--- function <*name*>_home_view(request)
---     return Response.Template("/")
+-- function <*name*>_home(request)
+--     return Response.Template(request, "<*name*>/home.html")
 -- end
 
 return {
-    --  <*name*>_home_view = <*name*>_home_view,
+    --  <*name*>_home = <*name*>_home,
 }
 ]], 
   models = [[local Model = require"resty.mvc.model"

@@ -1,11 +1,11 @@
 local Row = require"resty.mvc.row"
 local User = require"apps.user.models".User
-local row_class = Row:new{table_name=User.table_name, fields=User.fields}
+local row_class = Row:new{__model=User}
 
 local function before(request)
 	local user = request.session.user
 	if user then
-    	request.user = row_class:new(user)
+    	request.user = row_class:instance(user)
    	end
 end
 

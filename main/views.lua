@@ -38,6 +38,9 @@ function m.register(request)
     end
     return response.Template(request, "register.html", {form=form, navbar='register'})
 end
+local function authenticate(request, user)
+    request.session.user = {username=user.username, id=user.id}
+end
 function m.login(request)
     if request.user then
         return response.Redirect('/profile')
@@ -47,9 +50,9 @@ function m.login(request)
     if request.get_method()=='POST' then
         form = forms.LoginForm:instance{data=request.POST}
         if form:is_valid() then
-            request.session.user = form.user
+            authenticate(request, form.user)
             request.session.message = '您已成功登录'
-            if request:is_ajax() then
+            if request.is_ajax then
                 local data = {valid=true, url=redi or '/'}
                 return response.Json(data)
             else
@@ -64,7 +67,7 @@ function m.login(request)
     else
         redi = ''
     end
-    if request:is_ajax() then
+    if request.is_ajax then
         local data = {valid=false, errors=form:errors()}
         return response.Json(data)
     else
