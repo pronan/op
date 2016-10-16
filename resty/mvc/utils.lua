@@ -103,36 +103,25 @@ local function to_html_attrs(tbl)
     end
     return table_concat(attrs, "")..table_concat(boolean_attrs, "")
 end
-local function reversed_metatables(self)
-    local depth = 0
-    local _self = self
-    while true do
-        _self = getmetatable(_self)
-        if _self then
-            depth = depth + 1
-        else
-            break
-        end
-    end
-    local function iter()
-        local _self = self
-        for i = 1,  depth do
-            _self = getmetatable(_self)
-        end
-        depth = depth -1
-        if depth ~= -1 then
-            return _self
-        end
-    end
-    return iter
-end
-local function metatables(self)
-    local function iter()
-        local cls = getmetatable(self)
+local function reversed_inherited_chain(self)
+    local res = {self}
+    local cls = getmetatable(self)
+    while cls do
+        table.insert(res, 1, cls)
         self = cls
-        return cls
+        cls = getmetatable(self)
     end
-    return iter
+    return res
+end
+local function inherited_chain(self)
+    local res = {self}
+    local cls = getmetatable(self)
+    while cls do
+        res[#res+1] = cls
+        self = cls
+        cls = getmetatable(self)
+    end
+    return res
 end
 local function sorted(t, func)
     local keys = {}
@@ -218,8 +207,8 @@ return {
     is_empty_value = is_empty_value, 
     dict_update = dict_update, 
     list_extend = list_extend, 
-    reversed_metatables = reversed_metatables, 
-    walk_metatables = walk_metatables, 
+    reversed_inherited_chain = reversed_inherited_chain, 
+    inherited_chain = inherited_chain, 
     sorted = sorted, 
     curry = curry, 
     serialize_basetype = serialize_basetype, 

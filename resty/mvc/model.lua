@@ -40,11 +40,11 @@ function Model.class(cls, attrs)
     local subclass = cls:new(attrs)
     assert(not subclass.table_name:find('__'), 
         'double underline `__` is not allowed in a table name')
-    if rawget(subclass, 'meta') == nil then
-        subclass.meta = {}
+    local meta = {}
+    for cls in utils.reversed_inherit_chain(subclass) do
+        utils.dict_update(meta, cls.meta)
     end
-    local parent_meta = getmetatable(subclass).meta
-    setmetatable(subclass.meta, {__index = parent_meta})
+    subclass.meta = meta
     subclass.foreignkeys = {}
     local all_fields = {} 
     if subclass.meta.auto_id then

@@ -6,7 +6,7 @@ import os
 targets = ['html','lua']
 exclude = [] #['base.lua', 'urls.lua', 'utils.lua', 'manage.lua', 'view.lua']
 repls = [
-(r'require"resty.mvc.apps"','NAMES'), 
+(r'\.table_name','.meta.table_name'), 
 # (r'\bURLS\b','NAMES'), 
 #(r'\bto_db\b','lua_to_db'), 
 # (r'\b\b',''), 
@@ -46,7 +46,7 @@ def replace(go=False):
             print(str(i+1).rjust(6), line.strip())
 
 
-replace()
+replace(1)
 
 
     

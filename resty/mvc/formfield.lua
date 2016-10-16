@@ -60,10 +60,10 @@ function Field.instance(cls, attrs)
     self.widget = widget
     -- walk parents
     local messages = {}
-    for parent in utils.reversed_metatables(self) do
-        utils.dict_update(messages, parent.default_error_messages)
+    for cls in utils.reversed_inherit_chain(self) do
+        utils.dict_update(messages, cls.default_error_messages)
     end
-    self.error_messages = utils.dict(messages, self.error_messages) 
+    self.error_messages = messages
     self.validators = utils.list(self.default_validators, self.validators)
     return self
 end

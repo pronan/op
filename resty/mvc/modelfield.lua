@@ -63,10 +63,10 @@ function Field.instance(cls, attrs)
     end
     self.unique = self.unique or false
     local messages = {}
-    for parent in utils.reversed_metatables(self) do
-        utils.dict_update(messages, parent.default_error_messages)
+    for cls in utils.reversed_inherit_chain(self) do
+        utils.dict_update(messages, cls.default_error_messages)
     end
-    self.error_messages = utils.dict_update(messages, self.error_messages)
+    self.error_messages = messages
     return self
 end
 function Field.check(self, kwargs)
