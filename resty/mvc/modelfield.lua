@@ -769,18 +769,22 @@ function BooleanField.formfield(self, kwargs)
     return Field.formfield(self, defaults)
 end
 
-
+local row_proxy_methods = {render=true,get_url=true,get_update_url=true,get_delete_url}
 local function fk_index(t, key)
-    local res, err = query(string_format(
-        'select * from `%s` where id = %s;', t.__ref.meta.table_name, t.id))
-    if not res or res[1] == nil then
-        return nil
+    local fk_model = t.__ref
+    if fk_model.fields[key] then
+        local res, err = query(string_format(
+            'select * from `%s` where id = %s;', t.__ref.meta.table_name, t.id))
+        if not res or res[1] == nil then
+            return nil
+        end
+        for k, v in pairs(res[1]) do
+            t[k] = v
+        end
+        fk_model.row_class:instance(t)
+        return t[key]
     end
-    for k, v in pairs(res[1]) do
-        t[k] = v
-    end
-    t.__ref.row_class:instance(t)
-    return t[key]
+    return fk_model.row_class[key]
 end
 local function fk_tostring(t)
     return t.__ref.render(t)

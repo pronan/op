@@ -18,9 +18,9 @@ local Profile = Model:class{
 }
 
 -- define your model methods here
--- function User.render(self)
---     return 
--- end
+function User.render(self)
+    return self.username
+end
 
 return {
   User = User, 
