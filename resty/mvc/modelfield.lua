@@ -769,7 +769,6 @@ function BooleanField.formfield(self, kwargs)
     return Field.formfield(self, defaults)
 end
 
-local row_proxy_methods = {render=true,get_url=true,get_update_url=true,get_delete_url}
 local function fk_index(t, key)
     local fk_model = t.__ref
     if fk_model.fields[key] then
