@@ -64,14 +64,15 @@ function View.get_template_name(self)
     return self.template_name
 end
 function View.get_object(self)
-    local id = tonumber(self.kwargs[self.key])
+    local kwargs = self.kwargs or ngx.req.get_uri_args(1)
+    local id = tonumber(kwargs[self.key])
     if not id then
         return nil, 'You must provid a argument for id'
     end
     if not self.model then
         return nil, '`model` must be provided'
     end
-    return self.model:get{[self.key]=id}
+    return self.model:get(kwargs)
 end
 function View.get_context_data(self, kwargs)
     local context = {view=self}
@@ -111,7 +112,7 @@ function DetailView.get(self, request)
     return TemplateView.get(self, request)
 end
 function DetailView.get_template_name(self)
-    return self.template_name or self.model.table_name..'/detail.html'
+    return self.template_name or self.model.meta.app_name..'/detail.html'
 end
 
 local FormView = View:new{
@@ -169,8 +170,8 @@ function FormView.get_form_class(self)
         return nil, '`model` must be provided when `form_class` is not'
     end
     -- no need to use `Form:class` because `fileds` is already resolved by model
-    return Form:new{table_name=model.table_name, fields=model.fields, 
-        field_order=self.fields or model.field_order}
+    return Form:new{table_name=model.meta.url_model_name, fields=model.fields, 
+        field_order=self.fields or model.meta.field_order}
 end
 function FormView.get_form_kwargs(self)
     local kwargs = {}
@@ -205,10 +206,10 @@ function CreateView.form_valid(self, form)
     return FormView.form_valid(self, form)
 end
 function CreateView.get_template_name(self)
-    return self.template_name or self.model.table_name..'/create.html'
+    return self.template_name or self.model.meta.app_name..'/create.html'
 end
 function CreateView.get_success_url(self)
-    return string.format('/%s/%s', self.model.table_name, self.object.id)
+    return self.object:get_url()
 end
 
 local UpdateView = FormView:new{}
@@ -237,10 +238,10 @@ function UpdateView.post(self, request)
     return FormView.post(self, request)
 end
 function UpdateView.get_template_name(self)
-    return self.template_name or self.model.table_name..'/update.html'
+    return self.template_name or self.model.meta.app_name..'/update.html'
 end
 function UpdateView.get_success_url(self)
-    return string.format('/%s/%s', self.model.table_name, self.object.id)
+    return self.object:get_url()
 end
 function UpdateView.form_valid(self, form)
     local object, errors = form:save()
@@ -264,30 +265,37 @@ function DeleteView.get(self, request)
     return Response.Redirect(self:get_success_url())
 end
 function DeleteView.get_success_url(self)
-    return string.format('/%s/list/1', self.model.table_name)
+    return string.format('/%s/%s/list', self.model.meta.app_name, self.model.meta.url_model_name)
 end
 
-local ListView = View:new{page_size=10, page_kwarg='page', order=false}
+local ListView = View:new{page_size=10, order=false}
 function ListView.get(self, request)
     local object_list, err = self:get_queryset()
     if not object_list then
         return nil, 'can not get object_list, '..err
     end
     self.object_list = object_list
-    local context = self:get_context_data(kwargs)
+    local context = self:get_context_data()
     return self:render_to_response(context)
 end
 function ListView.get_template_name(self)
-    return self.template_name or self.model.table_name..'/list.html'
+    return self.template_name or self.model.meta.app_name..'/list.html'
 end
 function ListView.get_queryset(self)
-    local page = tonumber(self.kwargs.page)
+    local kwargs = ngx.req.get_uri_args() or {}
+    local page = tonumber(kwargs.page)
     if page == nil then
         page = 1
     else
         page = math.floor(page)
     end
-    local limit_string = string.format('%s, %s', (page-1)*self.page_size, self.page_size)
+    local size = tonumber(kwargs.size)
+    if size == nil then
+        size = self.page_size
+    else
+        size = math.floor(size)
+    end    
+    local limit_string = string.format('%s, %s', (page-1)*size, size)
     local sql = self.model:page(limit_string)
     if self.order then
         sql = sql:order(self.order)

@@ -1,7 +1,6 @@
-{% layout = "admin/base.html" %}
+{% layout = "base.html" %}
 
 {-main-}
-{% local meta = view.model.meta %}
 <table class="table table-hover table-striped">
   {% if object_list[1] then %}
     <tr>
@@ -11,19 +10,20 @@
       <th>Actions</th>
     </tr>
     {% for i, object in ipairs(object_list) do%}
+    {% local url_model_name = object.__model.meta.url_model_name %}
     <tr>
       {%for k, v in pairs(object) do%}
         {% local fk = object.__model.foreignkeys[k] %}
         {% if fk then %}
-          <td><a href="/admin{{v:get_update_url()}}">{{v}}</a></td>
+          <td><a href="/{{fk.meta.app_name}}/{{fk.meta.url_model_name}}/update/{{v.id}}">{{v}}</a></td>
         {% else %}
           <td>{{v}}</td>
         {% end %}
       {% end %}
       <td>
-        <a href="/admin{{object:get_url()}}" class="btn btn-default">detail</a>
-        <a href="/admin{{object:get_update_url()}}" class="btn btn-default">update</a>
-        <a href="/admin{{object:get_delete_url()}}" class="btn btn-default">delete</a>
+        <a href="/accounts/{{url_model_name}}/{{object.id}}" class="btn btn-default">detail</a>
+        <a href="/accounts/{{url_model_name}}/update/{{object.id}}" class="btn btn-default">edit</a>
+        <a href="/accounts/{{url_model_name}}/delete/{{object.id}}" class="btn btn-default">delete</a>
       </td>
     </tr>
     {% end %}
@@ -31,5 +31,4 @@
     <p>No records</p>
   {% end %}
 </table>
-<a href="/admin/{{meta.app_name}}/{{meta.url_model_name}}/create" class="btn btn-default">create</a>
 {-main-}

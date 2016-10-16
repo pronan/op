@@ -118,7 +118,7 @@ local STRING_RELATIONS = {
 function Manager._parse_kv(self, key, value)
     local field, template, left_alias, right_alias, left_fk, right_name
     local current_model = self.__model
-    local prefix = current_model.table_name
+    local prefix = current_model.meta.table_name
     local operator = 'exact'
     local state = 'init'
     local first_join = true
@@ -152,12 +152,12 @@ function Manager._parse_kv(self, key, value)
                     left_alias = prefix -- record
                     left_fk = field -- buyer
                     right_alias = field --buyer
-                    right_name = current_model.table_name --user
+                    right_name = current_model.meta.table_name --user
                 else
                     left_alias = right_alias -- buyer
                     right_alias = right_alias..'__'..field -- buyer__detail
                     left_fk = field --detail 
-                    right_name = current_model.table_name -- detail
+                    right_name = current_model.meta.table_name -- detail
                 end
                 self:_add_to_join{
                     left_alias = left_alias, 
@@ -203,7 +203,7 @@ function Manager._parse_kv(self, key, value)
     return string_format(template, string_format('`%s`.`%s`', prefix, field), value)
 end 
 function Manager.parse_from(self)
-    local res = string_format('`%s`', self.__model.table_name)
+    local res = string_format('`%s`', self.__model.meta.table_name)
     if self._join then
         -- k : mom, v.left: pet, v.right: user
         for i, v in ipairs(self._join) do
@@ -232,11 +232,11 @@ function Manager.join(self, params)
     for i, fk_alias in ipairs(params) do
         -- order matters,  so used as a array
         self:_add_to_join{
-            left_alias = self.__model.table_name,  -- record
+            left_alias = self.__model.meta.table_name,  -- record
             left_fk = fk_alias, -- buyer
             right_alias = fk_alias, -- buyer
-            right_name = self.__model.foreignkeys[fk_alias].table_name} -- user
-        -- order doesn't matters and left join table is fixed(self.table_name), so used as a hash
+            right_name = self.__model.foreignkeys[fk_alias].meta.table_name} -- user
+        -- order doesn't matters and left join table is fixed(self.meta.table_name), so used as a hash
         self._select_join[fk_alias] = self.__model.foreignkeys[fk_alias]
     end
     return self
@@ -253,11 +253,11 @@ function Manager.parse_select(self)
                 -- don't use this with out a space or '(' or alias, e.g. Manager:select{'field_a+field_b'}
                 res[#res+1] = v
             else
-                res[#res+1] = string_format('`%s`.`%s`', self.table_name, v)
+                res[#res+1] = string_format('`%s`.`%s`', self.meta.table_name, v)
             end
         end
     else
-        res[#res+1] = self.__model.fields_string -- this is what '*' means
+        res[#res+1] = self.__model.meta.fields_string -- this is what '*' means
     end
     -- extra fields needed if Manager:join is used
     if self._select_join then
@@ -360,7 +360,7 @@ function Manager.parse_having(self)
 end
 function Manager.to_sql(self)
     -- note `parse_where` must be called before `parse_from` because foreignkeys stuff
-    local table_name = self.__model.table_name
+    local table_name = self.__model.meta.table_name
     if self._update then
         local where_clause = self:parse_where()
         local from_clause = self:parse_from()

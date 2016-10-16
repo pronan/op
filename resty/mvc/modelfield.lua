@@ -63,7 +63,7 @@ function Field.instance(cls, attrs)
     end
     self.unique = self.unique or false
     local messages = {}
-    for cls in utils.reversed_inherit_chain(self) do
+    for _, cls in ipairs(utils.reversed_inherited_chain(self)) do
         utils.dict_update(messages, cls.default_error_messages)
     end
     self.error_messages = messages
@@ -772,7 +772,7 @@ end
 
 local function fk_index(t, key)
     local res, err = query(string_format(
-        'select * from `%s` where id = %s;', t.__ref.table_name, t.id))
+        'select * from `%s` where id = %s;', t.__ref.meta.table_name, t.id))
     if not res or res[1] == nil then
         return nil
     end
@@ -812,7 +812,7 @@ function ForeignKey.instance(cls, attrs)
     local self = cls:new(attrs)
     self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
     local e = self.reference
-    assert(e.table_name and e.fields, 'It seems that you did not provide a model')
+    assert(e.fields, 'It seems that you did not provide a model')
     self.validators = self.validators or {}
     return self
 end

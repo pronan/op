@@ -3,7 +3,7 @@ local query = require"resty.mvc.query".single
 local response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
 local utils = require"resty.mvc.utils"
-local User = require"apps.user.models".User
+local User = require"apps.accounts.models".User
 local forms = require"main.forms"
 
 local function eval(s, context)

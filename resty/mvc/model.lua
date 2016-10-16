@@ -32,19 +32,34 @@ local RELATIONS = {
     ne = '%s <> %s', eq = '%s = %s', ['in'] = '%s IN %s', 
     exact = '%s = %s', iexact = '%s COLLATE UTF8_GENERAL_CI = %s',}
 
-function Model.render(self)
-    return string_format('[%s]', self.id)
+------ row proxy methods -----
+function Model.render(row)
+    return string_format('[%s]', row.id)
 end
-
+function Model.get_url(row)
+    local meta = row.__model.meta
+    return string_format('/%s/%s?id=%s', meta.app_name, meta.url_model_name, row.id)
+end
+function Model.get_update_url(row)
+    local meta = row.__model.meta
+    return string_format('/%s/%s/update?id=%s', meta.app_name, meta.url_model_name, row.id)
+end
+function Model.get_delete_url(row)
+    local meta = row.__model.meta
+    return string_format('/%s/%s/delete?id=%s', meta.app_name, meta.url_model_name, row.id)
+end
+------ row proxy methods -----
 function Model.class(cls, attrs)
     local subclass = cls:new(attrs)
-    assert(not subclass.table_name:find('__'), 
-        'double underline `__` is not allowed in a table name')
     local meta = {}
-    for cls in utils.reversed_inherit_chain(subclass) do
+    for _, cls in ipairs(utils.reversed_inherited_chain(subclass)) do
         utils.dict_update(meta, cls.meta)
     end
     subclass.meta = meta
+    local tn = subclass.meta.table_name
+    if tn then
+        assert(not tn:find('__'), 'double underline `__` is not allowed in a table name')
+    end
     subclass.foreignkeys = {}
     local all_fields = {} 
     if subclass.meta.auto_id then
@@ -58,17 +73,21 @@ function Model.class(cls, attrs)
         if field:get_internal_type() == 'ForeignKey' then
             subclass.foreignkeys[name] = field.reference
         end
-        all_fields[#all_fields+1] = string_format("`%s`.`%s`", subclass.table_name, name)
+        if tn then
+            all_fields[#all_fields+1] = string_format("`%s`.`%s`", tn, name)
+        end
     end
     -- to replace '*' in `Manager:select` clause
-    subclass.fields_string = table_concat(all_fields, ', ') 
+    if tn then
+        subclass.meta.fields_string = table_concat(all_fields, ', ') 
+    end
     -- field_order
-    if not subclass.field_order then
+    if not subclass.meta.field_order then
         local field_order = {}
         for k, v in utils.sorted(subclass.fields) do
             field_order[#field_order+1] = k
         end
-        subclass.field_order = field_order
+        subclass.meta.field_order = field_order
     end
     subclass.row_class = Row:new{__model=subclass}
     return subclass
@@ -109,7 +128,7 @@ function Model.get(cls, params)
 end
 function Model.all(cls)
     -- special process for `all`
-    local res, err = query(string_format('SELECT * FROM `%s`;', cls.table_name))
+    local res, err = query(string_format('SELECT * FROM `%s`;', cls.meta.table_name))
     if not res then
         return nil, err
     end

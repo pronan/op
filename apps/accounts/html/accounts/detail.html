@@ -1,20 +1,19 @@
-{% layout = "admin/base.html" %}
+{% layout = "base.html" %}
 
 {-main-}
-{% local meta = view.model.meta %}
 <table class="table table-hover table-striped">
 {% for k, v in pairs(object) do %}
   <tr>
     <th>{{k}}</th>
     {% local fk = object.__model.foreignkeys[k] %}
     {% if fk then %}
-      <td><a href="/admin{{v:get_update_url()}}">{{v}}</a></td>
+      <td><a href="/{{fk.meta.app_name}}/{{fk.meta.url_model_name}}/update/{{v.id}}">{{v}}</a></td>
     {% else %}
       <td>{{v}}</td>
     {% end %}
   </tr>
 {% end %}
 </table>
-<a href="/admin{{object:get_update_url()}}" class="btn btn-default">update</a>
+<a href="/accounts/{{object.__model.meta.url_model_name}}/update/{{object.id}}" class="btn btn-default">edit</a>
 
 {-main-}

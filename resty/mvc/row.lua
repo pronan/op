@@ -13,7 +13,7 @@ local ngx_localtime = ngx.localtime
 
 
 local function row_tostring(t)
-    return t.__model.render(t)
+    return t:render()
 end
 -- `Row` is the main api for create, update and delete a database record.
 -- the instance of `Row` should be a plain table, i.e. key should be a valid lua variable name, 
@@ -26,6 +26,18 @@ function Row.new(cls, attrs)
     cls.__index = cls
     cls.__tostring = row_tostring
     return setmetatable(attrs, cls)
+end
+function Row.render(self)
+    return self.__model.render(self)
+end
+function Row.get_url(self)
+    return self.__model.get_url(self)
+end
+function Row.get_update_url(self)
+    return self.__model.get_update_url(self)
+end
+function Row.get_delete_url(self)
+    return self.__model.get_delete_url(self)
 end
 function Row.instance(cls, attrs)
     -- make a row object from attrs from a db driver(lua-resty-mysql), 
@@ -80,7 +92,7 @@ function Row.create(self)
         return nil, all_errors
     end
     local res, err = query(string_format('INSERT INTO `%s` SET %s;', 
-        self.__model.table_name, utils.serialize_attrs(valid_attrs)))
+        self.__model.meta.table_name, utils.serialize_attrs(valid_attrs)))
     if res then
         self.id = res.insert_id
         return res
@@ -110,7 +122,7 @@ function Row.update(self)
         return nil, all_errors
     end
     local res, err = query(string_format('UPDATE `%s` SET %s WHERE id = %s;', 
-        self.__model.table_name, utils.serialize_attrs(valid_attrs), self.id))
+        self.__model.meta.table_name, utils.serialize_attrs(valid_attrs), self.id))
     if res then
         return res
     else
@@ -125,7 +137,7 @@ function Row.save(self, add)
 end
 function Row.direct_create(self)
     local res, err = query(string_format('INSERT INTO `%s` SET %s;', 
-        self.__model.table_name, utils.serialize_attrs(self)))
+        self.__model.meta.table_name, utils.serialize_attrs(self)))
     if not res then
         return nil, {err}
     end
@@ -134,7 +146,7 @@ function Row.direct_create(self)
 end
 function Row.direct_update(self)
     local res, err = query(string_format('UPDATE `%s` SET %s WHERE id = %s;', 
-        self.__model.table_name, utils.serialize_attrs(self), self.id)) 
+        self.__model.meta.table_name, utils.serialize_attrs(self), self.id)) 
     if not res then
         return nil, {err}
     end
@@ -149,7 +161,7 @@ end
 function Row.delete(self)
     assert(self.id, 'field `id` should not be nil')
     return query(string_format('DELETE FROM `%s` WHERE id = %s;', 
-        self.__model.table_name, self.id))
+        self.__model.meta.table_name, self.id))
 end
 
 return Row

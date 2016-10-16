@@ -195,8 +195,55 @@ local function cache_result(f)
     end
     return _cache
 end
+local dd = {s=1, m=60, h=3600, d=3600*24, w=3600*24*7, M=3600*24*30, y=3600*24*365}
+local function time_parser(t)
+    if type(t) == 'string' then
+        local unit = string.sub(t,-1,-1)
+        local secs = dd[unit]
+        if not secs then
+            assert(nil, 'invalid time unit: '..unit)
+        end
+        local ts = string.sub(t, 1, -2)
+        local num = tonumber(ts)
+        if not num then
+            assert(nil, "can't convert `"..ts.."` to a number")
+        end        
+        return num * secs
+    elseif type(t) == 'number' then
+        return t
+    else
+        assert(false, 'you should provide either a string or number as a time')
+    end
+end
+
+local get_dirs
+if is_windows then
+    function get_dirs(directory)
+        local t, popen = {}, io.popen
+        local pfile = popen('dir "'..directory..'" /b /ad')
+        for filename in pfile:lines() do
+            if not filename:find('__') then
+                t[#t+1] = filename
+            end
+        end
+        pfile:close()
+        return t
+    end
+else
+    function get_dirs(directory)
+        local t = {}
+        local pfile = io.popen('ls -l "'..directory..'" | grep ^d')
+        for filename in pfile:lines() do
+            t[#t+1] = filename:match('%d%d:%d%d (.+)$')
+        end
+        pfile:close()
+        return t
+    end
+end
 
 return {
+    map = map, 
+    filter = filter,
     dict = dict, 
     list = list, 
     dict_has = dict_has,
@@ -214,9 +261,10 @@ return {
     serialize_basetype = serialize_basetype, 
     serialize_andkwargs = serialize_andkwargs, 
     serialize_attrs = serialize_attrs, 
-    map = map, 
     split = split, 
     cache_result = cache_result,
+    time_parser = time_parser,
+    get_dirs = get_dirs,
 }
 
 -- mysql> select * from user;

@@ -40,7 +40,7 @@ function qq.get_login_redirect_uri(self, redi)
     return self.authorize_uri..'?'..encode_args{response_type='code', 
         client_id=self.client_id, redirect_uri=self.redirect_uri..redi}
 end
-qq.initialize(qq)
+qq.login_redirect_uri = qq:get_login_redirect_uri()
 -- {
 --   "body"    : "access_token=5A7E1A50ED8FF900A58BDBD283C0AE3D&expires_in=7776000&refresh_token=AA851E53744FA5CE43A24722B4FB78D1",
 --   "body_reader": "function: 0x40f92d60",

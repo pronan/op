@@ -60,7 +60,7 @@ function Field.instance(cls, attrs)
     self.widget = widget
     -- walk parents
     local messages = {}
-    for cls in utils.reversed_inherit_chain(self) do
+    for _, cls in ipairs(utils.reversed_inherited_chain(self)) do
         utils.dict_update(messages, cls.default_error_messages)
     end
     self.error_messages = messages
@@ -383,7 +383,7 @@ function ForeignKey.instance(cls, attrs)
     end
     self.reference = self.reference or self[1] or assert(nil, 'a model must be provided for ForeignKey')
     local model = self.reference
-    assert(model.table_name and model.fields, 'It seems that you did not provide a model')
+    assert(model.meta.table_name and model.fields, 'It seems that you did not provide a model')
     return self
 end
 function ForeignKey.client_to_lua(self, value)

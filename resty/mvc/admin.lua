@@ -13,59 +13,66 @@ local function form_factory(model, kwargs)
 end
 
 local function redirect_to_admin_detail(self)
-    return string.format('/admin/%s/%s', self.model.table_name, self.object.id)
+    return '/admin'..self.object:get_url()
 end
 local function redirect_to_admin_list(self)
-    return string.format('/admin/%s/list/1', self.model.table_name)
+    return '/admin'..self.object:get_list_url()
 end
-for name, model in pairs(apps.get_models()) do
-    urls[#urls + 1] = {
-        string.format('/admin/%s', name),
-        ClassView.TemplateView:as_view{
-            model = model,
-            template_name = '/admin/home.html',
-        },
-    }
-    urls[#urls + 1] = {
-        string.format('^/admin/%s/list/(?<id>\\d+?)$', name),
-        ClassView.ListView:as_view{
-            model = model,
-            template_name = '/admin/list.html',
-        },
-    }
-    urls[#urls + 1] = {
-        string.format('/admin/%s/create', name),
-        ClassView.CreateView:as_view{
-            model = model,
-            form_class = form_factory(model),
-            template_name = '/admin/create.html',
-            get_success_url = redirect_to_admin_detail,
-        },
-    }
-    urls[#urls + 1] = {
-        string.format('^/admin/%s/update/(?<id>\\d+?)$', name),
-        ClassView.UpdateView:as_view{
-            model = model,
-            form_class = form_factory(model),
-            template_name = '/admin/update.html',
-            get_success_url = redirect_to_admin_detail,
-        },
-    }
-    urls[#urls + 1] = {
-        string.format('^/admin/%s/(?<id>\\d+?)$', name),
-        ClassView.DetailView:as_view{
-            model = model,
-            template_name = '/admin/detail.html',
-        },
-    }
-    urls[#urls + 1] = {
-        string.format('^/admin/%s/delete/(?<id>\\d+?)$', name),
-        ClassView.DeleteView:as_view{
-            model = model,
-            get_success_url = redirect_to_admin_list,
-        },
-    }
+local function get_urls()
+    for i, model in ipairs(apps.get_models()) do
+        local url_model_name = model.meta.url_model_name
+        local app_name = model.meta.app_name
+        urls[#urls + 1] = {
+            string.format('/admin/%s/%s', app_name, url_model_name),
+            ClassView.TemplateView:as_view{
+                model = model,
+                template_name = '/admin/home.html',
+            },
+        }
+        urls[#urls + 1] = {
+            string.format('/admin/%s/%s/list', app_name, url_model_name),
+            ClassView.ListView:as_view{
+                model = model,
+                template_name = '/admin/list.html',
+            },
+        }
+        urls[#urls + 1] = {
+            string.format('/admin/%s/%s/create', app_name, url_model_name),
+            ClassView.CreateView:as_view{
+                model = model,
+                form_class = form_factory(model),
+                template_name = '/admin/create.html',
+                get_success_url = redirect_to_admin_detail,
+            },
+        }
+        urls[#urls + 1] = {
+            string.format('/admin/%s/%s/update', app_name, url_model_name),
+            ClassView.UpdateView:as_view{
+                model = model,
+                form_class = form_factory(model),
+                template_name = '/admin/update.html',
+                get_success_url = redirect_to_admin_detail,
+            },
+        }
+        urls[#urls + 1] = {
+            string.format('/admin/%s/%s', app_name, url_model_name),
+            ClassView.DetailView:as_view{
+                model = model,
+                template_name = '/admin/detail.html',
+            },
+        }
+        urls[#urls + 1] = {
+            string.format('/admin/%s/%s/delete', app_name, url_model_name),
+            ClassView.DeleteView:as_view{
+                model = model,
+                get_success_url = redirect_to_admin_list,
+            },
+        }
+    end
+    return urls
 end
+
+
 return {
-    urls = urls,
+    get_urls = get_urls,
 }

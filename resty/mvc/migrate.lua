@@ -60,7 +60,7 @@ local function make_table_defination(model)
             end
             table.insert(field_options.foreign_key, string.format(
                 'FOREIGN KEY (%s) REFERENCES %s(id) ON DELETE %s ON UPDATE %s', 
-                name, field.reference.table_name, field.on_delete or 'CASCADE', field.on_update or 'CASCADE'))
+                name, field.reference.meta.table_name, field.on_delete or 'CASCADE', field.on_update or 'CASCADE'))
             -- todo allow null
             field_string = string.format('%s INT UNSIGNED NOT NULL', name)
         elseif field_type == 'AutoField' then
@@ -114,7 +114,7 @@ local function make_table_defination(model)
     local table_options = table.concat(table_options, ' ')
 
     local table_create_defination = string.format([[CREATE TABLE %s(%s%s)%s;]], 
-        model.table_name, fields, field_options, table_options)
+        model.meta.table_name, fields, field_options, table_options)
 
     return table_create_defination
 end
@@ -128,7 +128,7 @@ local function get_table_defination(table_name)
 end
 
 local function write_model_to_db(model, drop_existed_table)
-    local res, err = query(string.format("SHOW TABLES LIKE '%s'", model.table_name))
+    local res, err = query(string.format("SHOW TABLES LIKE '%s'", model.meta.table_name))
     if not res then
         assert(nil, err)
     end
@@ -136,7 +136,7 @@ local function write_model_to_db(model, drop_existed_table)
         return
     end
     local table_create_defination = make_table_defination(model)
-    local res, err = query('DROP TABLE IF EXISTS '..model.table_name)
+    local res, err = query('DROP TABLE IF EXISTS '..model.meta.table_name)
     if not res then
         assert(nil, err)
     end
@@ -144,7 +144,7 @@ local function write_model_to_db(model, drop_existed_table)
     if not res then
         assert(nil, err)
     end
-    return get_table_defination(model.table_name)
+    return get_table_defination(model.meta.table_name)
 end
 local function get_models()
     return apps.get_models()
@@ -153,7 +153,7 @@ end
 local function migrate_models(models, drop_existed_table)
     local res = {}
     -- sort the models to an array for table creation in database
-    for name, model in pairs(models) do
+    for _, model in ipairs(models) do
         local insert_index = nil
         for i, e in ipairs(res) do
             if utils.dict_has(e.foreignkeys, model) then
@@ -167,7 +167,7 @@ local function migrate_models(models, drop_existed_table)
 
     if drop_existed_table then    
         for i = #res, 1, -1 do
-            local r, err = query('DROP TABLE IF EXISTS '..res[i].table_name)
+            local r, err = query('DROP TABLE IF EXISTS '..res[i].meta.table_name)
             if not r then
                 assert(nil, err)
             end

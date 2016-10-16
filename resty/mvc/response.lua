@@ -6,6 +6,7 @@ local open = io.open
 
 --@./resty/mvc/response.lua
 --@/usr/local/openresty/site/lualib/resty/response.lua
+--ADMIN_TEMPLATE_DIR = './resty/mvc/html/'
 local ADMIN_TEMPLATE_DIR = (debug.getinfo(1,"S").source:match'^@(.*)response.lua$')..'html/'
 
 local GLOBAL_CONTEXT = {
