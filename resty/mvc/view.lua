@@ -67,7 +67,7 @@ function View.get_object(self)
     local kwargs = self.kwargs or ngx.req.get_uri_args(1)
     local id = tonumber(kwargs[self.key])
     if not id then
-        return nil, 'You must provid a argument for id'
+        return nil, 'you must provid a argument for id'
     end
     if not self.model then
         return nil, '`model` must be provided'
@@ -98,7 +98,7 @@ end
 
 local TemplateView = View:new{}
 function TemplateView.get(self, request)
-    local context = self:get_context_data(kwargs)
+    local context = self:get_context_data(self.kwargs)
     return self:render_to_response(context)
 end
 
@@ -275,7 +275,7 @@ function ListView.get(self, request)
         return nil, 'can not get object_list, '..err
     end
     self.object_list = object_list
-    local context = self:get_context_data()
+    local context = self:get_context_data(self.kwargs)
     return self:render_to_response(context)
 end
 function ListView.get_template_name(self)

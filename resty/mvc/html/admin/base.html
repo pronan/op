@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang='zh'>
+<html>
 <head>
   {* blocks.page_css *}
   <title>{* blocks.title *}</title> 
@@ -11,15 +11,15 @@
     <div class="container-fluid">
       
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">LUA-RESTY-ADMIN</a>
+      <a class="navbar-brand" href="/admin">LUA ADMIN</a>
     </div>
       
       <ul class="nav navbar-nav navbar-right">
-        <li role="presentation"{% if navbar=='site' then%} class="active"{% end %}><a href="/">查看站点</a></li>
+        <li role="presentation"{% if navbar=='site' then%} class="active"{% end %}><a href="/">home</a></li>
         {%if user then%}
-          <li role="presentation"{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">退出</a></li>
+          <li role="presentation"{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">logout</a></li>
         {%else%}
-          <li role="presentation"{% if navbar=='login' then%} class="active"{% end %}><a href="/login">登陆</a></li>
+          <li role="presentation"{% if navbar=='login' then%} class="active"{% end %}><a href="/login">login</a></li>
         {%end%}
       </ul>
       
@@ -31,10 +31,17 @@
   <div  id="main">
     {* blocks.main *}
   </div>
-  <footer> 
-     lua-resty-mvc
-  </footer> 
 </div>
+
+<footer class="footer">
+  <div class="container">
+    <p class="text-muted">power by 
+      <a href="https://github.com/pronan/lua-resty-mvc">lua-resty-mvc</a>
+      and
+      <a href="https://github.com/openresty/lua-nginx-module">OpenResty</a>
+      </p>
+  </div>
+</footer>
 
 <script type="text/javascript" src="/static/js/default.js"></script> 
 {* blocks.page_js *}

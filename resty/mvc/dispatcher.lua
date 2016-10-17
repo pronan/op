@@ -10,6 +10,10 @@ return function()
     local uri = ngx.var.uri
     local func, kwargs = router:match(uri)
     if not func then
+        if settings.DEBUG then
+            ngx.header['Content-Type'] = "text/plain; charset=utf-8"
+            return ngx.print(repr(router))
+        end
         return ngx.print("<h1>404 Not Found</h1>")
     end
     local request = Request:new{kwargs=kwargs}
