@@ -25,6 +25,18 @@ function admin_get_context_data(self, kwargs)
     kwargs.apps = apps
     return ClassView.TemplateView.get_context_data(self, kwargs)
 end
+function admin_app_get_context_data(self, kwargs)
+    kwargs = kwargs or {}
+    local this_app = self.model.meta.app_name
+    local res = {}
+    for i, model in ipairs(models) do
+        if model.meta.app_name == this_app then
+            res[model.meta.model_name] = model
+        end
+    end
+    kwargs.apps = {[this_app] = res}
+    return ClassView.TemplateView.get_context_data(self, kwargs)
+end
 local function redirect_to_admin_detail(self)
     return '/admin'..self.object:get_url()
 end
@@ -36,7 +48,7 @@ local function get_urls()
     local urls = {}
     urls[#urls + 1] = {
         '/admin',
-         ClassView.TemplateView:as_view{
+        ClassView.TemplateView:as_view{
             template_name = '/admin/home.html',
             get_context_data = admin_get_context_data,
         },
@@ -44,6 +56,14 @@ local function get_urls()
     for i, model in ipairs(models) do
         local url_model_name = model.meta.url_model_name
         local app_name = model.meta.app_name
+        urls[#urls + 1] = {
+            string.format('/admin/%s', app_name),
+            ClassView.TemplateView:as_view{
+                model = model,
+                template_name = '/admin/home.html',
+                get_context_data = admin_app_get_context_data,
+            },
+        }
         urls[#urls + 1] = {
             string.format('/admin/%s/%s/list', app_name, url_model_name),
             ClassView.ListView:as_view{

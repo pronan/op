@@ -1,0 +1,19 @@
+{% layout = "base.html" %}
+
+{-main-}
+<table class="table table-hover table-striped">
+{% for k, v in pairs(object) do %}
+  <tr>
+    <th>{{k}}</th>
+    {% local fk = object.__model.foreignkeys[k] %}
+    {% if fk then %}
+      <td><a href="{{v:get_url()}}">{{v}}</a></td>
+    {% else %}
+      <td>{{v}}</td>
+    {% end %}
+  </tr>
+{% end %}
+</table>
+<a href="/company/{{object.__model.meta.url_model_name}}/update/{{object.id}}" class="btn btn-default">edit</a>
+
+{-main-}

@@ -1,7 +1,7 @@
--- luajit manage.lua user -app_name accounts -fields username password 
+-- luajit manage.lua user -app_name account -fields username password 
 -- luajit manage.lua profile -fields user::User age:int weight:float height:float money:float
 -- luajit manage.lua detail -fields sex:bool age:int info::Moreinfo
--- luajit manage.lua product -fields name price:float
+-- luajit manage.lua product -app_name company -fields name price:float
 -- luajit manage.lua record -fields buyer::User seller::User product::Product count:int time:datetime
 
 local default = {
