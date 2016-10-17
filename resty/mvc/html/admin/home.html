@@ -22,17 +22,19 @@
   </div>
   <div class="panel-body">
     <table class="table table-hover">
-    {% for name, model in pairs(models) do%}
-      <tr>
-        <td>
-          <a href="/admin/{{app_name}}/{{model.meta.url_model_name}}/list">{{name}}</a>
-        </td>
-        <td>
-          <a href="/admin/{{app_name}}/{{model.meta.url_model_name}}/create" class="btn btn-default">create</a>
-          <a href="/admin/{{app_name}}/{{model.meta.url_model_name}}/list" class="btn btn-default">list</a>
-        </td>
-      </tr>
-    {% end %}
+      <tbody>
+      {% for name, model in pairs(models) do%}
+        <tr>
+          <td>
+            <a href="/admin/{{app_name}}/{{model.meta.url_model_name}}/list">{{name}}</a>
+          </td>
+          <td>
+            <a href="/admin/{{app_name}}/{{model.meta.url_model_name}}/create" class="btn btn-default">create</a>
+            <a href="/admin/{{app_name}}/{{model.meta.url_model_name}}/list" class="btn btn-default">list</a>
+          </td>
+        </tr>
+      {% end %}
+      <tbody>
     </table>
   </div>
 </div>

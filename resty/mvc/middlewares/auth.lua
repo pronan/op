@@ -1,5 +1,5 @@
 local Row = require"resty.mvc.row"
-local User = require"apps.accounts.models".User
+local User = require"apps.account.models".User
 local row_class = Row:new{__model=User}
 
 local function before(request)

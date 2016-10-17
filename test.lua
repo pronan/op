@@ -1,26 +1,45 @@
-local function cache_result(f)
-    local result
-    local function _cache(...)
-        print('call _cahe')
-        if not result then
-            result = f(...)
-        end
-        return result
-    end
-    return _cache
-end
-
-local function f(a)
-    print('call f')
-    return {a, 'a','b'}
-end
-
-f = cache_result(f)
-
-for i,v in ipairs(f('xxx')) do
-   print(i,v)
-end
-
-for i,v in ipairs(f('xxx')) do
+s=[[{
+    account: [
+        {
+            model_name: User,
+            fields: [
+                {name:username, },
+                {name:password, },
+            ],
+        },
+        {
+            model_name: Profile,
+            fields: [
+                {name:user, },
+                {name:age, },
+                {name:weight, },
+                {name:height, },
+                {name:money, },
+            ],
+        },
+    ],
+    
+    company: [
+        {
+            model_name: product,
+            fields: [
+                {name:name, },
+                {name:price, },
+            ],
+        },
+        {
+            model_name: record,
+            fields: [
+                {name:buyer, },
+                {name:seller, },
+                {name:product, },
+                {name:count, },
+                {name:time, },
+            ],
+        },
+    ],
+}]]
+local json = require "cjson.safe"
+for i,v in pairs(json.decode(s)) do
    print(i,v)
 end

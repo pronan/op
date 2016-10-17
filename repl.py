@@ -6,7 +6,7 @@ import os
 targets = ['html','lua']
 exclude = [] #['base.lua', 'urls.lua', 'utils.lua', 'manage.lua', 'view.lua']
 repls = [
-(r'.field_order','NAMES_FROM_SCANNING_DIR'), 
+(r'apps.accounts.models','apps.account.models'), 
 # (r'auto_scan_apps','NAMES_FROM_SCANNING_DIR'.lower()), 
 # (r'\bURLS\b','NAMES'), 
 #(r'\bto_db\b','lua_to_db'), 
@@ -47,7 +47,7 @@ def replace(go=False):
             print(str(i+1).rjust(6), line.strip())
 
 
-replace(0)
+replace(1)
 
 
     
