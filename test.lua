@@ -1,45 +1,9 @@
-s=[[{
-    account: [
-        {
-            model_name: User,
-            fields: [
-                {name:username, },
-                {name:password, },
-            ],
-        },
-        {
-            model_name: Profile,
-            fields: [
-                {name:user, },
-                {name:age, },
-                {name:weight, },
-                {name:height, },
-                {name:money, },
-            ],
-        },
-    ],
-    
-    company: [
-        {
-            model_name: product,
-            fields: [
-                {name:name, },
-                {name:price, },
-            ],
-        },
-        {
-            model_name: record,
-            fields: [
-                {name:buyer, },
-                {name:seller, },
-                {name:product, },
-                {name:count, },
-                {name:time, },
-            ],
-        },
-    ],
-}]]
-local json = require "cjson.safe"
-for i,v in pairs(json.decode(s)) do
-   print(i,v)
+local function list(...)
+    local total = {}
+    for _, t in next, {...} do -- not `ipairs` in case of sparse {...}
+        print(_, t)
+    end
+    return total
 end
+
+list(10,'ab',nil,nil, 'c', nil, nil, 'dd',1,2,3,nil)

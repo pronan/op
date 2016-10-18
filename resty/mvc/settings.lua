@@ -24,9 +24,8 @@ local MIDDLEWARES = {
     "resty.mvc.middlewares.post", 
     "resty.mvc.middlewares.cookie", 
     "resty.mvc.middlewares.session", 
-    "resty.mvc.middlewares.message", 
-    --"resty.mvc.middlewares.messages", 
     "resty.mvc.middlewares.auth", 
+    "resty.mvc.middlewares.message", 
 }
 
 -- value will be normalized by init.lua

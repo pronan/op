@@ -37,7 +37,7 @@ local function decrypt_session(value)
         return {}
     end
     for i, de in ipairs(decrypt_callbacks) do
-        value= de(value)
+        value = de(value)
         if not value then 
             return {} 
         end
@@ -45,23 +45,36 @@ local function decrypt_session(value)
     return value
 end
 
-local function proxy_session(data)
-    local meta = {modified = false, __index = data}
-    meta.__newindex = function(t, k, v) 
-        data[k] = v  
-        meta.modified  = true
+local LazySession = {}
+LazySession.__index = function (t, k)
+    if not t.__data then
+        t.__data = t.__func()
     end
-    return setmetatable({}, meta)
+    return t.__data[k]
+end 
+LazySession.__newindex = function (t, k, v)
+    if not t.__data then
+        t.__data = t.__func()
+    end
+    t.__data[k] = v
+    t.__modified = true
+end 
+function LazySession.new(cls, func)
+    local self = {}
+    self.__func = func
+    self.__data = false
+    self.__modified = false
+    return setmetatable(self, cls)
 end
 
 local function before(request)
-    request.session = proxy_session(decrypt_session(request.cookies.session))
+    request.session = LazySession:new(
+        function() return decrypt_session(request.cookies.session) end)
 end
 
 local function after(request)
-    local meta = getmetatable(request.session)
-    if meta.modified then
-        local data = meta.__index
+    if request.session.__modified then
+        local data = request.session.__data
         if next(data) == nil then
             request.cookies.session = nil
         else

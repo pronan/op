@@ -22,7 +22,7 @@ if not ok then
     new_tab = function () return {} end
 end
 
-local function to_table(text_cookie)
+local function get_cookie_table(text_cookie)
     if text_cookie == nil then
         return {}
     end
@@ -82,20 +82,6 @@ local function to_table(text_cookie)
     end
 
     return cookie_table
-end
-
-local function __newindex(t, k, v)
-    if v == nil then
-        v = {key=k, value='', max_age=0} 
-    end
-    rawset(t, k, v)
-end
-
-local function new(cookie_str)
-    return setmetatable({}, {
-        __newindex = __newindex, 
-        __index    = to_table(cookie_str),
-    })
 end
 
 local function bake(cookie)
@@ -163,8 +149,7 @@ local function set(cookie)
 end
 
 return {
-    new = new,
     bake = bake, 
     set = set,
-    to_table = to_table,
+    get_cookie_table = get_cookie_table,
 }

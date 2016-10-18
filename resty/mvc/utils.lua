@@ -30,7 +30,8 @@ local function filter(tbl, func)
 end
 local function list(...)
     local total = {}
-    for _, t in next, {...}, nil do -- not `ipairs` in case of sparse {...}
+    -- t should not be a sparse table
+    for _, t in next, {...} do
         for i = 1, #t do
             total[#total+1] = t[i]
         end
@@ -38,7 +39,7 @@ local function list(...)
     return total
 end
 local function list_extend(t, ...)
-    for _, a in next, {...}, nil do 
+    for _, a in next, {...} do 
         for i = 1, #a do
             t[#t+1] = a[i]
         end
@@ -55,7 +56,7 @@ local function list_has(t, e)
 end
 local function dict(...)
     local total = {}
-    for i, t in next, {...}, nil do
+    for i, t in next, {...} do
         for k, v in pairs(t) do
             total[k] = v
         end
@@ -63,7 +64,7 @@ local function dict(...)
     return total
 end
 local function dict_update(t, ...)
-    for i, d in next, {...}, nil do
+    for i, d in next, {...} do
         for k, v in pairs(d) do
             t[k] = v
         end
@@ -240,7 +241,117 @@ else
         return t
     end
 end
-
+local Lazy = {}
+Lazy.__index = function (t, k)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object[k]
+end 
+Lazy.__newindex = function (t, k, v)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    t.__object[k] = v
+end 
+Lazy.__pairs = function (t)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return pairs(t.__object)
+end
+Lazy.__ipairs = function (t)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return ipairs(t.__object)
+end
+Lazy.__call = function (t, ...)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object(...)
+end
+Lazy.__tostring = function (t)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return tostring(t.__object)
+end
+Lazy.__eq = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object == o
+end
+Lazy.__lt = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object < o
+end
+Lazy.__le = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object <= o
+end
+Lazy.__unm = function (t)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return -t.__object
+end
+Lazy.__add = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object + o
+end
+Lazy.__sub = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object - o
+end
+Lazy.__mul = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object * o
+end
+Lazy.__div = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object / o
+end
+Lazy.__mod = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object % o
+end
+Lazy.__pow = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object ^ o
+end
+Lazy.__concat = function (t, o)
+    if not t.__object then
+        t.__object = t.__func()
+    end
+    return t.__object .. o
+end
+function Lazy.new(cls, func)
+    local self = {}
+    self.__func = func
+    self.__object = false
+    self.__pairs = cls.__pairs
+    self.__ipairs = cls.__ipairs
+    return setmetatable(self, cls)
+end
 return {
     map = map, 
     filter = filter,
@@ -265,6 +376,7 @@ return {
     cache_result = cache_result,
     time_parser = time_parser,
     get_dirs = get_dirs,
+    Lazy = Lazy,
 }
 
 -- mysql> select * from user;
