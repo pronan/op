@@ -1,3 +1,5 @@
+-- based on https://github.com/openresty/encrypted-session-nginx-module
+-- and https://github.com/openresty/set-misc-nginx-module
 local json = require "cjson.safe"
 local settings = require"resty.mvc.settings"
 local tonumber = tonumber

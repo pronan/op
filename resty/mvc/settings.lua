@@ -3,8 +3,8 @@ local utils = require"resty.mvc.utils"
 local DEBUG = true
 
 local APPS = { dir = 'apps/', 
-               package_prefix = 'apps.', 
                names_from_scanning_dir = true,
+               -- package_prefix = 'apps.', 
                -- names = {},
              }
 

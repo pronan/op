@@ -13,7 +13,10 @@ local function eval(s, context)
 end
 local m={}
 function m.q(request)
-    return response.Plain(repr(''))
+    v = '123456'
+    v = ndk.set_var.set_encrypt_session(v)
+    v = ndk.set_var.set_encode_base64
+    return response.Plain(repr(ndk))
 end
 local function login_user(request, user)
     request.session.user = {username=user.username, id=user.id}

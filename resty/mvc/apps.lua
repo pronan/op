@@ -8,14 +8,13 @@
 local utils = require"resty.mvc.utils"
 local settings = require"resty.mvc.settings"
 
-local is_windows = package.config:sub(1,1) == '\\'
 
 local NAMES, DIR, TEMPLATE_DIRS, NAMES_FROM_SCANNING_DIR, PACKAGE_PREFIX
 
 if settings.APPS then
     DIR = settings.APPS.dir or 'apps/' 
     NAMES_FROM_SCANNING_DIR = settings.APPS.names_from_scanning_dir or true 
-    PACKAGE_PREFIX = settings.APPS.package_prefix or 'apps.'    
+    PACKAGE_PREFIX = settings.APPS.package_prefix or DIR:gsub('/','.'):gsub('\\','.')     
 else
 -- directory where app lives, relative to nginx running path
 -- you need to end with `\` or `/`
@@ -23,7 +22,7 @@ else
 -- if true and APPS.names is not specified, get all app names 
 -- by scanning all directories whose name contains no '__' in DIR
     NAMES_FROM_SCANNING_DIR = true 
-    PACKAGE_PREFIX = 'apps.'
+    PACKAGE_PREFIX = DIR:gsub('/','.'):gsub('\\','.') 
 end
 
 local function get_names()

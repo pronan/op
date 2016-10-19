@@ -31,9 +31,9 @@
       <ul class="nav navbar-nav navbar-right">
         <li role="presentation"{% if navbar=='site' then%} class="active"{% end %}><a href="/">home</a></li>
         {%if user then%}
-          <li role="presentation"{% if navbar=='logout' then%} class="active"{% end %}><a href="/logout">logout</a></li>
+          <li role="presentation"{% if navbar=='logout' then%} class="active"{% end %}><a href="/admin/logout">logout</a></li>
         {%else%}
-          <li role="presentation"{% if navbar=='login' then%} class="active"{% end %}><a href="/login">login</a></li>
+          <li role="presentation"{% if navbar=='login' then%} class="active"{% end %}><a href="/admin/login">login</a></li>
         {%end%}
       </ul>
       

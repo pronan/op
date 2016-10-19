@@ -1,6 +1,7 @@
 local Form = require"resty.mvc.form"
 local apps = require"resty.mvc.apps"
 local ClassView = require"resty.mvc.view"
+local auth_view = require"resty.mvc.auth".views
 
 local models = apps.get_models()
 
@@ -45,13 +46,13 @@ local function redirect_to_admin_list(self)
 end
 
 local function get_urls()
-    local urls = {}
-    urls[#urls + 1] = {
-        '/admin',
-        ClassView.TemplateView:as_view{
+    local urls = {
+        {'/admin', ClassView.TemplateView:as_view{
             template_name = '/admin/home.html',
-            get_context_data = admin_get_context_data,
+            get_context_data = admin_get_context_data}
         },
+        {'/admin/login', auth_view.login},
+        {'/admin/logout', auth_view.logout},
     }
     for i, model in ipairs(models) do
         local url_model_name = model.meta.url_model_name
