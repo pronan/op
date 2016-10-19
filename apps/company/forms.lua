@@ -3,7 +3,9 @@ local Widget = require"resty.mvc.widget"
 local Field = require"resty.mvc.formfield"
 local Validator = require"resty.mvc.validator"
 local models = require"apps.company.models"
-local AccountUser = require"apps.account.models".User
+local auth = require"resty.mvc.auth"
+
+local User = auth.get_user_model()
 
 local ProductCreateForm = Form:class{
     model  = models.Product, 
@@ -23,8 +25,8 @@ local ProductUpdateForm = Form:class{
 local RecordCreateForm = Form:class{
     model  = models.Record, 
     fields = {
-        buyer = Field.ForeignKey{reference=AccountUser},
-        seller = Field.ForeignKey{reference=AccountUser},
+        buyer = Field.ForeignKey{reference=User},
+        seller = Field.ForeignKey{reference=User},
         product = Field.ForeignKey{reference=models.Product},
         count = Field.IntegerField{min=1},
         time = Field.DateTimeField{}
@@ -33,8 +35,8 @@ local RecordCreateForm = Form:class{
 local RecordUpdateForm = Form:class{
     model  = models.Record, 
     fields = {
-        buyer = Field.ForeignKey{reference=AccountUser},
-        seller = Field.ForeignKey{reference=AccountUser},
+        buyer = Field.ForeignKey{reference=User},
+        seller = Field.ForeignKey{reference=User},
         product = Field.ForeignKey{reference=models.Product},
         count = Field.IntegerField{min=1},
         time = Field.DateTimeField{}

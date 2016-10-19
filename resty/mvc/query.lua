@@ -3,7 +3,7 @@ local settings = require"resty.mvc.settings"
 local string_format = string.format
 
 local DATABASE = settings.DATABASE
-local CONNECT_TABLE, CONNECT_TIMEOUT, IDLE_TIMEOUT, POOL_SIZ
+local CONNECT_TABLE, CONNECT_TIMEOUT, IDLE_TIMEOUT, POOL_SIZE
 
 if DATABASE then
     CONNECT_TABLE = DATABASE.connect_table or { 

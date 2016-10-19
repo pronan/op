@@ -6,8 +6,8 @@ local open = io.open
 
 --@./resty/mvc/response.lua
 --@/usr/local/openresty/site/lualib/resty/response.lua
---ADMIN_TEMPLATE_DIR = './resty/mvc/html/'
-local ADMIN_TEMPLATE_DIR = (debug.getinfo(1,"S").source:match'^@(.*)response.lua$')..'html/'
+--ADMIN_DIR = './resty/mvc/html/'
+local ADMIN_DIR = (debug.getinfo(1,"S").source:match'^@(.*)response.lua$')..'html/'
 
 local GLOBAL_CONTEXT = {
     __domain='example.com',
@@ -25,8 +25,7 @@ end
 
 local default_loader = template.load
 local function admin_loader(path)
-    --loger('admin loaer path')
-    return readfile(table.concat{ADMIN_TEMPLATE_DIR, path})
+    return readfile(table.concat{ADMIN_DIR, path})
 end
 local function app_loader(path)
     for i, dir in ipairs(apps.TEMPLATE_DIRS) do

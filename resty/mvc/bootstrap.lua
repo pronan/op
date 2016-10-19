@@ -12,9 +12,9 @@ local router = Router:instance()
 --   0   : "/product/update/1",
 --   1   : "1",
 -- }
-for i, v in ipairs(require"main.urls") do
-    router:add(v)
-end
+-- for i, v in ipairs(require"main.urls") do
+--     router:add(v)
+-- end
 for i, v in ipairs(apps.get_urls()) do
     router:add(v)
 end

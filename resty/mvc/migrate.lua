@@ -127,7 +127,7 @@ local function get_table_defination(table_name)
     return res[1]["Create Table"]
 end
 
-local function write_model_to_db(model, drop_existed_table)
+local function save_model_to_db(model, drop_existed_table)
     local res, err = query(string.format("SHOW TABLES LIKE '%s'", model.meta.table_name))
     if not res then
         assert(nil, err)
@@ -150,7 +150,7 @@ local function get_models()
     return apps.get_models()
 end
 
-local function migrate_models(models, drop_existed_table)
+local function save_models_to_db(models, drop_existed_table)
     local res = {}
     -- sort the models to an array for table creation in database
     for _, model in ipairs(models) do
@@ -176,7 +176,7 @@ local function migrate_models(models, drop_existed_table)
 
     local defs = {}
     for i, model in ipairs(res) do
-        defs[#defs+1] = write_model_to_db(model, drop_existed_table)
+        defs[#defs+1] = save_model_to_db(model, drop_existed_table)
     end
     return defs
 end
@@ -188,8 +188,13 @@ local function main(models, drop_existed_table)
     elseif type(models) ~= 'table' then
         assert(nil, 'invalid argument, should be either a function or table.')
     end
-    return migrate_models(models, drop_existed_table)
+    return save_models_to_db(models, drop_existed_table)
 end
 
 
-return main
+return {
+    main = main,
+    save_model_to_db = save_model_to_db,
+    save_models_to_db = save_models_to_db,
+}
+    

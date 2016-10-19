@@ -1,8 +1,10 @@
 local Model = require"resty.mvc.model"
 local Field = require"resty.mvc.modelfield"
-local AccountUser = require"apps.account.models".User
+local auth = require"resty.mvc.auth"
 
-local Product = Model:class{
+local User = auth.get_user_model()
+
+local Product = Model:new{
     meta   = {
 
     },
@@ -15,13 +17,13 @@ local Product = Model:class{
 -- function Product.render(self)
 --     return 
 -- end
-local Record = Model:class{
+local Record = Model:new{
     meta   = {
 
     },
     fields = {
-        buyer = Field.ForeignKey{reference=AccountUser},
-        seller = Field.ForeignKey{reference=AccountUser},
+        buyer = Field.ForeignKey{reference=User},
+        seller = Field.ForeignKey{reference=User},
         product = Field.ForeignKey{reference=Product},
         count = Field.IntegerField{min=1},
         time = Field.DateTimeField{}

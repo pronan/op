@@ -1,9 +1,9 @@
+local Bootstrap = require"resty.mvc.bootstrap"
 local Request = require"resty.mvc.request"
 local Response = require"resty.mvc.response"
-local bootstrap = require"resty.mvc.bootstrap"
 local settings = require"resty.mvc.settings"
 
-local router = bootstrap.router
+local router = Bootstrap.router
 local MIDDLEWARES = settings.MIDDLEWARES
 
 return function()

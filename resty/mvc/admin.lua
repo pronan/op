@@ -1,7 +1,9 @@
+local utils = require"resty.mvc.utils"
 local Form = require"resty.mvc.form"
 local apps = require"resty.mvc.apps"
 local ClassView = require"resty.mvc.view"
-local auth_view = require"resty.mvc.auth".views
+local auth_view = require"resty.mvc.auth.views"
+local auth = require"resty.mvc.auth"
 
 local models = apps.get_models()
 
@@ -51,8 +53,6 @@ local function get_urls()
             template_name = '/admin/home.html',
             get_context_data = admin_get_context_data}
         },
-        {'/admin/login', auth_view.login},
-        {'/admin/logout', auth_view.logout},
     }
     for i, model in ipairs(models) do
         local url_model_name = model.meta.url_model_name
@@ -105,7 +105,9 @@ local function get_urls()
             },
         }
     end
-    return urls
+    return utils.list_extend(
+        utils.map(urls, function(url) return {url[1], auth.admin_user_require(url[2])} end),
+        {{'/admin/login', auth_view.login}, {'/admin/logout', auth_view.logout}})
 end
 
 

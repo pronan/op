@@ -813,7 +813,7 @@ function ForeignKey.lua_to_db(self, value)
 end
 function ForeignKey.instance(cls, attrs)
     local self = cls:new(attrs)
-    self.reference = self.reference or self[1] or assert(nil, 'a model name must be provided for ForeignKey')
+    self.reference = self.reference or self[1] or assert(nil, 'a model must be provided for ForeignKey')
     local e = self.reference
     assert(e.fields, 'It seems that you did not provide a model')
     self.validators = self.validators or {}

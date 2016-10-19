@@ -8,43 +8,71 @@
 local utils = require"resty.mvc.utils"
 local settings = require"resty.mvc.settings"
 
-
-local NAMES, DIR, TEMPLATE_DIRS, NAMES_FROM_SCANNING_DIR, PACKAGE_PREFIX
-
-if settings.APPS then
-    DIR = settings.APPS.dir or 'apps/' 
-    NAMES_FROM_SCANNING_DIR = settings.APPS.names_from_scanning_dir or true 
-    PACKAGE_PREFIX = settings.APPS.package_prefix or DIR:gsub('/','.'):gsub('\\','.')     
-else
--- directory where app lives, relative to nginx running path
+-- directory where a app lives, relative to nginx running path
 -- you need to end with `\` or `/`
-    DIR = 'apps/' 
--- if true and APPS.names is not specified, get all app names 
--- by scanning all directories whose name contains no '__' in DIR
-    NAMES_FROM_SCANNING_DIR = true 
-    PACKAGE_PREFIX = DIR:gsub('/','.'):gsub('\\','.') 
-end
+local DIR = 'apps/' 
+local PACKAGE_PREFIX = DIR:gsub('/','.'):gsub('\\','.') 
+local NAMES = settings.APPS or utils.filter(
+        utils.get_dirs(DIR), function(e) return not e:find('__') end)
+local TEMPLATE_DIRS = utils.map(NAMES, function(e) return string.format('%s%s/html/', DIR, e) end)
 
-local function get_names()
-    if settings.APPS and settings.APPS.names then
-        return settings.APPS.names
-    elseif NAMES_FROM_SCANNING_DIR then
-        return utils.filter(utils.get_dirs(DIR), 
-            function(e) return not e:find('__') end)
-    else
-        assert(nil, 'app name list should be specified, or enable NAMES_FROM_SCANNING_DIR flag.')
-    end    
-end
-NAMES = get_names()
-
-local function get_template_dirs()
-    local res = {}
-    for i, name in ipairs(NAMES) do
-        res[#res+1] = string.format('%s%s/html/', DIR, name)
+local function normalize_model(model, app_name, model_name)
+    local Field = require"resty.mvc.modelfield"
+    local Row = require"resty.mvc.row"
+    
+    local cls = getmetatable(model)
+    -- meta initialize
+    local meta = {}
+    for _, cls in ipairs(utils.reversed_inherited_chain(model)) do
+        utils.dict_update(meta, cls.meta)
     end
-    return res
+    -- always overwrite
+    meta.app_name = app_name
+    meta.model_name = model_name
+    -- table_name
+    local table_name = meta.table_name
+    if table_name then
+        assert(not table_name:find('__'), 'double underline `__` is not allowed in a table name')
+    else
+        meta.table_name = string.format('%s_%s', app_name, model_name:lower())
+    end
+    -- field_order
+    -- first set `id` field
+    if meta.auto_id then
+        model.fields.id = Field.AutoField{primary_key = true}
+    end
+    if not meta.field_order then
+        local field_order = {}
+        for k, v in utils.sorted(model.fields) do
+            field_order[#field_order+1] = k
+        end
+        meta.field_order = field_order
+    end
+    -- fields_string
+    meta.fields_string = table.concat(
+        utils.map(meta.field_order, 
+                  function(e) return string.format("`%s`.`%s`", meta.table_name, e) end), 
+        ', ')
+    -- url_model_name
+    if not meta.url_model_name then
+        meta.url_model_name = model_name:lower()
+    end
+    -- row class
+    model.row_class = Row:new{__model=model}
+    -- fields
+    model.foreignkeys = {}
+    for name, field in pairs(model.fields) do
+        assert(not Row[name], name.." can't be used as a column name")
+        field.name = name
+        local errors = field:check()
+        assert(not next(errors), name..' check fails: '..table.concat(errors, ', '))
+        if field:get_internal_type() == 'ForeignKey' then
+            model.foreignkeys[name] = field.reference
+        end
+    end
+    model.meta = meta
+    return model
 end
-TEMPLATE_DIRS = get_template_dirs()
 
 local function get_models()
     local res = {}
@@ -52,24 +80,12 @@ local function get_models()
         local models = require(PACKAGE_PREFIX..app_name..".models")
         for model_name, model in pairs(models) do
             -- app_name: accounts, model_name: User, table_name: accounts_user
-            local meta = model.meta
-            meta.app_name = app_name
-            meta.model_name = model_name
-            if not meta.url_model_name then
-                meta.url_model_name = model_name:lower()
-            end
-            if not meta.table_name then
-                meta.table_name = string.format('%s_%s', app_name, model_name:lower())
-            end
-            if not meta.fields_string then
-                meta.fields_string = table.concat(
-                    utils.map( 
-                        meta.field_order,
-                        function(e) return string.format("`%s`.`%s`", meta.table_name, e) end),
-                    ', ')
-            end        
-            res[#res + 1] = model
+            res[#res + 1] = normalize_model(model, app_name, model_name)
         end
+    end
+    if not settings.USER_MODEL then
+        -- no user model specified, add the built-in user model
+        res[#res + 1] = normalize_model(require'resty.mvc.auth.models'.User, 'auth', 'User')
     end
     return res
 end

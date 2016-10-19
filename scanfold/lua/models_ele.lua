@@ -1,4 +1,4 @@
-local ${model_name} = Model:class{
+local ${model_name} = Model:new{
     meta   = {
 
     },

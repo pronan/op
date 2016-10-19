@@ -5,42 +5,6 @@ local forms = require"apps.account.forms"
 
 return {
     {
-      '/account/user/create',              
-      ClassView.CreateView:as_view{
-        model      = models.User,
-        form_class = forms.UserCreateForm,
-      }
-    },
-  
-    {
-      '/account/user/update',              
-      ClassView.UpdateView:as_view{
-        model      = models.User,
-        form_class = forms.UserUpdateForm,
-      }
-    },
-
-    {
-      '/account/user/list',              
-      ClassView.ListView:as_view{
-        model = models.User,
-      }
-    },
-
-    {
-      '/account/user',              
-      ClassView.DetailView:as_view{
-        model = models.User,
-      }
-    },
-
-    {
-      '/account/user/delete',              
-      ClassView.DeleteView:as_view{
-        model = models.User,
-      }
-    },
-    {
       '/account/profile/create',              
       ClassView.CreateView:as_view{
         model      = models.Profile,

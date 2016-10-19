@@ -2,11 +2,9 @@ local utils = require"resty.mvc.utils"
 
 local DEBUG = true
 
-local APPS = { dir = 'apps/', 
-               names_from_scanning_dir = true,
-               -- package_prefix = 'apps.', 
-               -- names = {},
-             }
+local APPS = nil -- {'foo', 'bar'}
+
+local USER_MODEL = nil -- {'resty.mvc.auth.models', 'User'}
 
 local DATABASE ={
     connect_table = { host     = "127.0.0.1", 
@@ -48,21 +46,6 @@ local function normalize(settings)
         end
     end
     
-    local APPS = settings.APPS
-    if APPS then
-        if APPS.dir then
-            local e = APPS.dir:sub(-1, -1)
-            if e ~= '/' or e ~= '\\' then
-                APPS.dir = APPS.dir..'/'
-            end
-        end
-        if APPS.package_prefix then
-            if APPS.package_prefix:sub(-1, -1) ~= '.' then
-                APPS.package_prefix = APPS.package_prefix..'.'
-            end
-        end
-    end
-
 end
 
 
