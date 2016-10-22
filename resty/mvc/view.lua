@@ -140,14 +140,14 @@ function FormView.post(self, request)
     end
 end
 function FormView.form_valid(self, form)
-    if self.request.is_ajax then
+    if self.request:is_ajax() then
         local data = {valid=true, url=self:get_success_url()}
         return Response.Json(data)
     end
     return Response.Redirect(self:get_success_url())
 end
 function FormView.form_invalid(self, form)
-    if self.request.is_ajax then
+    if self.request:is_ajax() then
         local data = {valid=false, errors=form:errors()}
         return Response.Json(data)
     end

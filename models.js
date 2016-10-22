@@ -3,7 +3,7 @@
         {
             model_name: Profile,
             fields: [
-                {name:user, reference:auth__user},
+                {name:user, reference:*auth__user},
                 {name:age, type:int, min:18},
                 {name:weight, type:float, min:10},
                 {name:height, type:float, max:220, min:10},

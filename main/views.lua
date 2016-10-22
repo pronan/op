@@ -55,7 +55,7 @@ function m.login(request)
         if form:is_valid() then
             login_user(request, form.user)
             request.session.message = '您已成功登录'
-            if request.is_ajax then
+            if request:is_ajax() then
                 local data = {valid=true, url=redi or '/'}
                 return response.Json(data)
             else
@@ -70,7 +70,7 @@ function m.login(request)
     else
         redi = ''
     end
-    if request.is_ajax then
+    if request:is_ajax() then
         local data = {valid=false, errors=form:errors()}
         return response.Json(data)
     else

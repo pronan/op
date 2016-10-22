@@ -24,7 +24,7 @@ local function login(request)
         if form:is_valid() then
             auth.login_user(request, form.user)
             request.session.message = "welcome, "..form.user.username
-            if request.is_ajax then
+            if request:is_ajax() then
                 local data = {valid=true, url=redirect_url}
                 return Response.Json(data)
             else
@@ -34,7 +34,7 @@ local function login(request)
     else
         form = forms.LoginForm:instance{}
     end
-    if request.is_ajax then
+    if request:is_ajax() then
         local data = {valid=false, errors=form:errors()}
         return Response.Json(data)
     else
@@ -45,7 +45,9 @@ end
 local function logout(request)
     request.session.user = nil
     request.session.message = "goodbye"
-    return Response.Redirect(ngx.req.get_headers().referer or '/admin')
+    -- local r = ngx.req.get_headers().referer
+    local r = ngx.var.http_referer
+    return Response.Redirect(r or '/admin')
 end
 
 return {

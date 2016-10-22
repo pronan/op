@@ -49,44 +49,21 @@ end
 
 local process_request, process_response
 function process_request(request)
-    local LazySessionMeta = {}
-    local function __index(t, k)
-        local data = decrypt_session(request.cookies.session)
-        request._session = data
-        LazySessionMeta.__index = data
-        return data[k]     
-    end
-    local function __newindex(t, k, v)
-        local data = request._session
-        if not data then
-            data = decrypt_session(request.cookies.session)
-            request._session = data
-            LazySessionMeta.__index = data
-        end
-        request.session_has_changed = true
-        LazySessionMeta.__newindex = data
-        data[k] = v
-    end
-    LazySessionMeta.__index = __index
-    LazySessionMeta.__newindex = __newindex
-    request.session = setmetatable({}, LazySessionMeta)
+    request.session = decrypt_session(request.cookies.session)
 end
 
 function process_response(request, response)
-    if request.session_has_changed then
-        local data = request._session
-        if next(data) == nil then
-            response.cookies.session = nil
-        else
-            response.cookies.session = {
-                value = encrypt_session(data), 
-                path = SESSION_PATH, 
-                max_age = SESSION_EXPIRES, 
-                -- expires = ngx_http_time(ngx_time() + SESSION_EXPIRES),
-            }
-        end
+    local data = request.session
+    if next(data) == nil then
+        request.cookies.session = nil
+    else
+        request.cookies.session = {
+            value = encrypt_session(data), 
+            path = SESSION_PATH, 
+            max_age = SESSION_EXPIRES, 
+            -- expires = http_time(time()+SESSION_EXPIRES),
+        }
     end
-    return response
 end
 
 

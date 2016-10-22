@@ -45,7 +45,10 @@ http {
         }
 
         location = /exec {
-            content_by_lua_file exec.lua;
+            content_by_lua_block{
+                ngx.header['Set-Cookie'] = "session='ax'; Max-Age=10; Path=/"
+                ngx.print('yes')
+            }
         }
 
         location = /test {

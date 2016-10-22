@@ -13,49 +13,8 @@ else
     COOKIE_EXPIRES = 30*24*3600 -- 30 days
 end
 
-local function smart_set_cookie(t, k, v)
-    -- k can't be `__save`, `__index`, `__newindex`
-    if type(v) == 'string' then
-        v = { key = k, value = v, 
-              path = COOKIE_PATH, max_age = COOKIE_EXPIRES, 
-              -- expires = ngx_http_time(ngx_time() + COOKIE_EXPIRES),
-            }  
-    elseif v == nil then
-        v = {key = k, value = '', max_age = 0} 
-    elseif type(v) == 'table' then
-        if v.key == nil then
-            v.key = k
-        end
-    else
-        assert(nil, 'invalid cookie type, support types are string, table and nil.')
-    end
-    rawset(t, k, v)
+local function process_request(request)
+    request.cookies = get_cookie_table(ngx.var.http_cookie)
 end
 
-local Cookie = {}
-Cookie.__index = Cookie
-function Cookie.new(cls, cookie_str)
-    local ct = get_cookie_table(cookie_str)
-    ct.__newindex = smart_set_cookie
-    ct.__index = ct
-    return setmetatable({}, setmetatable(ct, cls))
-end
-function Cookie.__save(self)
-    -- to reduce name collisions, use `__save` instead of `save` 
-    local c = {}
-    for k, v in pairs(self) do
-        c[#c+1] = bake(v)
-    end
-    -- assume no cookie has been set before
-    ngx.header['Set-Cookie'] = c 
-end
-
-local function before(request)
-    request.cookies = Cookie:new(ngx.var.http_cookie)
-end
-
-local function after(request)
-    request.cookies:__save()
-end
-
-return { before = before, after = after}
+return { process_request = process_request }

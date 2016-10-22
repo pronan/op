@@ -18,6 +18,7 @@ local DATABASE ={
     pool_size       = 50,
 }
 
+local LAZY_SESSION = true
 local MIDDLEWARES = {
     "resty.mvc.middlewares.post", 
     "resty.mvc.middlewares.cookie", 

@@ -10,7 +10,7 @@ function Router.new(cls, self)
 end
 
 function Router.instance(cls)
-    self = cls:new()
+    local self = cls:new()
     self.plain_matchs = {} 
     self.regex_matchs = {}
     return self

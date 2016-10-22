@@ -105,7 +105,9 @@ local function get_urls()
             },
         }
     end
+
     return utils.list_extend(
+        --urls,
         utils.map(urls, function(url) return {url[1], auth.admin_user_require(url[2])} end),
         {{'/admin/login', auth_view.login}, {'/admin/logout', auth_view.logout}})
 end

@@ -38,7 +38,7 @@ local function test_user(test_func, login_url)
     local function user_require(view_func)
         local function wrap_view(request)
             if not test_func(request.user) then
-                request.session.message = 'please login before doing this'
+                request.session.message = 'admin permission required, please login before doing this'
                 return Response.Redirect(string.format('%s?redirect_url=%s', login_url, ngx.var.uri))
             else
                 return view_func(request)

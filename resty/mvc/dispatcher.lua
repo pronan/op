@@ -3,58 +3,81 @@ local Request = require"resty.mvc.request"
 local Response = require"resty.mvc.response"
 local settings = require"resty.mvc.settings"
 
-local router = Bootstrap.router
-local MIDDLEWARES = settings.MIDDLEWARES
-
-return function()
-    local uri = ngx.var.uri
-    local func, kwargs = router:match(uri)
-    if not func then
-        if settings.DEBUG then
-            ngx.header['Content-Type'] = "text/plain; charset=utf-8"
-            return ngx.print(repr(router))
+local Dispatcher = {}
+function Dispatcher.new(cls, attrs)
+    attrs = attrs or {}
+    cls.__index = cls
+    return setmetatable(attrs, cls)
+end
+function Dispatcher.instance(cls, attrs)
+    local self = cls:new(attrs)
+    assert(self.router and self.middlewares, 'router and middlewares must be set')
+    self.request_processors = {}
+    self.response_processors = {}
+    self.view_processors = {}
+    for i, ware in ipairs(self.middlewares) do
+        if ware.process_request then
+            table.insert(self.request_processors, ware.process_request)
         end
-        return ngx.print("<h1>404 Not Found</h1>")
+        if ware.process_view then
+            table.insert(self.view_processors, ware.process_view)
+        end
+        if ware.process_response then
+            table.insert(self.response_processors, 1, ware.process_response)
+        end
+    end
+    return self
+end
+function Dispatcher.match(self, uri)
+    local view_func, kwargs = self.router:match(uri)
+    if not view_func then
+        if self.debug then
+            ngx.header['Content-Type'] = "text/plain; charset=utf-8"
+            return ngx.print("can't find this uri, current router is:\n"..repr(router))
+        else
+            return ngx.print("404")
+        end
     end
     local request = Request:new{kwargs=kwargs}
-    
-    for i=1, #MIDDLEWARES do
-        local ware = MIDDLEWARES[i]
-        if ware.before then
-            local err, resp = ware.before(request)
-            if err then
-                ngx.log(ngx.ERR, err)
-                if ware.strict then 
-                    return ngx.exit(500)
-                end
-            elseif resp then
-                return resp:exec()
-            end
+    local response, err
+    for i, processor in ipairs(self.request_processors) do
+        response = processor(request)
+        if response then
+            break
         end
     end
-
-    local response, err = func(request)
-    
-    for i=#MIDDLEWARES, 1, -1 do
-        local ware = MIDDLEWARES[i]
-        if ware.after then
-            local err, resp = ware.after(request)
-            if err then
-                ngx.log(ngx.ERR, err)
-                if ware.strict then 
-                    return ngx.exit(500)
-                end
-            elseif resp then
-                return resp:exec()
-            end
-        end
-    end
-
     if not response then
-        ngx.log(ngx.ERR, err)
-        --return ngx.exit(500)
-        return Response.Error(err):exec()
-    else
-        return response:exec()
+        for i, processor in ipairs(self.view_processors) do
+            response = processor(request, view_func, kwargs)
+            if response then
+                break
+            end
+        end
     end
+    if not response then
+        response = view_func(request)
+        if not response then
+            return ngx.print("No response object returned.")
+        end
+    end
+    if response.render then
+        response.body = response:render()
+    end
+    for i, processor in ipairs(self.response_processors) do
+        response = processor(request, response)
+        if not response then
+            return ngx.print("No response object returned.")
+        end
+    end
+    return response:exec()
 end
+
+local dispatcher = Dispatcher:instance{
+    router = Bootstrap.router,
+    middlewares = settings.MIDDLEWARES,
+    debug = settings.debug,
+}
+
+return function() 
+    return dispatcher:match(ngx.var.uri) end
+    
