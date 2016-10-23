@@ -2,8 +2,8 @@ local utils = require"resty.mvc.utils"
 local Form = require"resty.mvc.form"
 local apps = require"resty.mvc.apps"
 local ClassView = require"resty.mvc.view"
-local auth_view = require"resty.mvc.auth.views"
-local auth = require"resty.mvc.auth"
+local auth_view = require"resty.mvc.apps.auth.views"
+local auth = require"resty.mvc.apps.auth"
 
 local models = apps.get_models()
 

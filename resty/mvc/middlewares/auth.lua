@@ -1,5 +1,5 @@
 local Row = require"resty.mvc.row"
-local auth = require"resty.mvc.auth"
+local auth = require"resty.mvc.apps.auth"
 
 local User = auth.get_user_model()
 local row_class = Row:new{__model=User}

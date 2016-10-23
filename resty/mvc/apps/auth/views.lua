@@ -3,8 +3,8 @@ local query = require"resty.mvc.query".single
 local Response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
 local utils = require"resty.mvc.utils"
-local forms = require"resty.mvc.auth.forms"
-local auth = require"resty.mvc.auth"
+local forms = require"resty.mvc.apps.auth.forms"
+local auth = require"resty.mvc.apps.auth"
 
 local User = auth.get_user_model()
 

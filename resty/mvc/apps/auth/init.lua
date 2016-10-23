@@ -59,7 +59,7 @@ local function get_user_model()
     elseif type(u) == 'table' then
         return require(u[1])[u[2]]
     elseif u == nil then
-        return require('resty.mvc.auth.models').User
+        return require('resty.mvc.apps.auth.models').User
     else
         assert(nil, 'invalid USER_MODEL value.')
     end

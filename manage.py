@@ -93,7 +93,30 @@ def app_factory(app_name, models, output_path, package_prefix):
             colt = field.pop('type', None) or 'string'
             formfield.pop('type', None)
             fk = field.get('reference')
-            if fk:
+            if not fk:
+                if colt == 'string' or colt == 'text':
+                    field['maxlen'] = field.get('maxlen') or 50
+                    formfield['maxlen'] = formfield.get('maxlen') or 50
+                model_fields.append('%s = Field.%s{%s}'%(name, field_map.get(colt) or 'CharField', to_model(field)))
+                form_fields.append('%s = Field.%s{%s}'%(name, field_map.get(colt) or 'CharField', to_form(formfield)))
+            elif fk.startswith('*'):
+                # built in apps
+                fks = fk[1:].split('__')
+                fk_app_name, fk_model_name = fks
+                fk_app_name = fk_app_name.lower()
+                fk_model_name = fk_model_name.capitalize()
+                fk_name = fk_app_name.capitalize() + fk_model_name
+                field['reference'] = fk_name
+                formfield['reference'] = fk_name
+                if '*'+fk_name not in foreignkeys:
+                    foreignkeys.add('*'+fk_name)
+                    require_hooks.append('local %s = require"%s%s.models".%s'%(
+                        fk_name, 'resty.mvc.apps.', 
+                        fk_app_name, 
+                        fk_model_name))                
+                model_fields.append('%s = Field.ForeignKey{%s}'%(name, to_model(field)))
+                form_fields.append('%s = Field.ForeignKey{%s}'%(name, to_form(formfield)))
+            elif fk.find('__'):
                 fks = fk.split('__')
                 if len(fks) == 2 and fks[0] != app_name:
                     fk_app_name, fk_model_name = fks
@@ -116,12 +139,7 @@ def app_factory(app_name, models, output_path, package_prefix):
                     assert False, 'foreign key format is wrong'
                 model_fields.append('%s = Field.ForeignKey{%s}'%(name, to_model(field)))
                 form_fields.append('%s = Field.ForeignKey{%s}'%(name, to_form(formfield)))
-            else:
-                if colt == 'string' or colt == 'text':
-                    field['maxlen'] = field.get('maxlen') or 50
-                    formfield['maxlen'] = formfield.get('maxlen') or 50
-                model_fields.append('%s = Field.%s{%s}'%(name, field_map.get(colt) or 'CharField', to_model(field)))
-                form_fields.append('%s = Field.%s{%s}'%(name, field_map.get(colt) or 'CharField', to_form(formfield)))
+
         model_fields = field_joiner.join(model_fields)
         form_fields = field_joiner.join(form_fields)
         all_models.append(models_ele.substitute(

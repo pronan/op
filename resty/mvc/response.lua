@@ -114,8 +114,8 @@ end
 local JsonResponse = HttpResponse:new()
 JsonResponse.__call = HttpResponseCaller
 function JsonResponse.instance(cls, jsondict)
-    local self = HttpResponse.instance(cls, {
-        body = encode(jsondict),
+    local self = HttpResponse.instance(cls, 
+        {body = encode(jsondict),
         content_type = 'application/json; charset=utf-8'})
     return self
 end

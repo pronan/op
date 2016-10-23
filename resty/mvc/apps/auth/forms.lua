@@ -1,7 +1,7 @@
 local Form = require"resty.mvc.form"
 local Field = require"resty.mvc.formfield"
 local Validator = require"resty.mvc.validator"
-local auth = require"resty.mvc.auth"
+local auth = require"resty.mvc.apps.auth"
 
 local User = auth.get_user_model()
 

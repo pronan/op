@@ -85,7 +85,7 @@ local function get_models()
     end
     if not settings.USER_MODEL then
         -- no user model specified, add the built-in user model
-        res[#res + 1] = normalize_model(require'resty.mvc.auth.models'.User, 'auth', 'User')
+        res[#res + 1] = normalize_model(require'resty.mvc.apps.auth.models'.User, 'auth', 'User')
     end
     return res
 end
