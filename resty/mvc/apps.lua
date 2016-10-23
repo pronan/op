@@ -108,6 +108,7 @@ return {
     TEMPLATE_DIRS = TEMPLATE_DIRS,
     DIR = DIR,
     PACKAGE_PREFIX = PACKAGE_PREFIX,
+    normalize_model = normalize_model,
     get_models = get_models, -- function to avoid loop require
     get_urls = get_urls, -- function to avoid loop require
 }
