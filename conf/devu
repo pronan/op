@@ -1,63 +1,55 @@
 worker_processes  1;
 error_log  logs/error.log;
 pid logs/nginx.pid;
-user root;
 
-events {worker_connections  10240;}
+events {worker_connections  1024;}
 
 http {
-    #access_log  off;
-    #lua_code_cache off;
-
     default_type  "text/html; charset=utf-8";
     sendfile        on;
-    keepalive_timeout  75; 
-    lua_package_path './?.lua;./?/init.lua;./lualib/?.lua;./lualib/?/init.lua;;';
-    init_by_lua_file app/init.lua;
-
+    keepalive_timeout  65;
+    lua_package_path './?.lua;./?/init.lua;;';    
+    init_by_lua_file init.lua;
+    init_worker_by_lua_file init_worker.lua;
+    
+    lua_code_cache on;
+    access_log  off;
+    
     client_body_temp_path temp/client_body_temp;
     fastcgi_temp_path temp/fastcgi_temp;
     proxy_temp_path temp/proxy_temp;
     scgi_temp_path temp/scgi_temp;
     uwsgi_temp_path temp/uwsgi_temp;
 
-    encrypted_session_key "abcdefghijalmnopqrstuvwxyz123456";
+    encrypted_session_key "abcdefghijklmnopqrstuvwxyz123456";
     encrypted_session_iv "1234567812345678";
     encrypted_session_expires 30d;
 
     server {
         listen       80;
-        server_name  wdksw.com *.wdksw.com;
         root html;
         include mime.types;
 
         location / {
             resolver 223.5.5.5;
             content_by_lua_block {
-                local ok, err = xpcall(require"app.main", require"utils.base".debugger)
-                if not ok then
-                    ngx.header['Content-Type'] = "text/plain; charset=utf-8"
-                    ngx.say(err)
-                end
+                local main = require"resty.mvc.dispatcher"
+                main()
             }
         }
 
         location = /test {
-            content_by_lua_block{require"test"()}
+            content_by_lua_file test.lua;
         }
-
-        location = /ok {
-            content_by_lua_block{ngx.print'Hello, smarter!x123xxy'}
-        }
-
         location = /favicon.ico {
-            alias static/images/favicon.ico;
+            root static/images;
         }
-
         location /static { 
             alias static;
         }
-
+        location /loaderio-933b610b316e7b9c7bf409839db1d611.txt { 
+            alias loaderio-933b610b316e7b9c7bf409839db1d611.txt;
+        }
         location = /gitpush {
             content_by_lua_block{
                 ngx.req.read_body()
@@ -65,7 +57,7 @@ http {
                 local data = ngx.req.get_post_args()
                 local payload = decode(data.payload)
                 if payload.commits[1].message=='production' then
-                    os.execute('git --git-dir=/root/wdksw/.git --work-tree=/root/wdksw pull')
+                    os.execute('git --git-dir=/root/op/.git --work-tree=/root/op pull')
                 end
             }
         }
