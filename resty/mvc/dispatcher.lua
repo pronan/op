@@ -48,34 +48,35 @@ function Dispatcher.match(self, uri)
             break
         end
     end
+    -- if not response and not err then
+    --     for i, processor in ipairs(self.view_processors) do
+    --         response, err = processor(request, view_func, kwargs)
+    --         if err or response then
+    --             break
+    --         end
+    --     end
+    -- end
     if not response and not err then
-        for i, processor in ipairs(self.view_processors) do
-            response, err = processor(request, view_func, kwargs)
-            if err or response then
+        response, err = view_func(request)
+    end
+    if not err and response and response.render then
+        response.body = response:render()
+    end
+    if not err and response then
+        for i, processor in ipairs(self.response_processors) do
+            response, err = processor(request, response)
+            if err or not response then
                 break
             end
         end
-    end
-    if not response and not err then
-        response, err = view_func(request)
     end
     if err then
         return ngx.print(err)
     elseif not response then
         return ngx.print("No response object returned.")
+    else
+        return response:exec()
     end
-    if response.render then
-        response.body = response:render()
-    end
-    for i, processor in ipairs(self.response_processors) do
-        response, err = processor(request, response)
-        if err then
-            return ngx.print(err)
-        elseif not response then
-            return ngx.print("No response object returned.")
-        end
-    end
-    return response:exec()
 end
 
 
