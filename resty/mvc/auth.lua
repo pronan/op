@@ -105,7 +105,7 @@ local function login(request)
     if request.get_method() == 'POST' then
         form = LoginForm:instance{data=request.POST}
         if form:is_valid() then
-            auth.login_user(request, form.user)
+            login_user(request, form.user)
             request.session.message = "welcome, "..form.user.username
             if request:is_ajax() then
                 local data = {valid=true, url=redirect_url}
