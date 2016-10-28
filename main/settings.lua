@@ -1,4 +1,3 @@
-local utils = require"resty.mvc.utils"
 
 local DEBUG = true
 
@@ -32,19 +31,7 @@ local COOKIE  = {expires = '30d', path = '/'}
 local SESSION = {expires = '30d', path = '/'}
  
 
-local function normalize(settings)
-    -- some setting's value need to be normalized, such as MIDDLEWARES
-    -- COOKIE.expires or SESSION.expires.
-    -- this function should be called in bootstrap.lua.
-    
-    settings.COOKIE.expires = utils.time_parser(settings.COOKIE.expires)
-    settings.SESSION.expires = utils.time_parser(settings.SESSION.expires)
-    
-end
-
-
 return {
-    normalize = normalize,
     DEBUG = DEBUG,
     DATABASE = DATABASE,
     MIDDLEWARES = MIDDLEWARES,

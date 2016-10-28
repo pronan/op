@@ -16,7 +16,7 @@ local Profile = Model:new{
 }
 -- define your model methods here
 function Profile.render(self)
-    return self.user.username
+    return self.id
 end
 
 return {
