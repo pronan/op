@@ -3,8 +3,6 @@ local DEBUG = true
 
 local APPS = nil -- {'foo', 'bar'}
 
-local USER_MODEL = nil -- {'resty.mvc.auth.models', 'User'}
-
 local DATABASE ={
     connect_table = { host     = "127.0.0.1", 
                       port     = 3306, 

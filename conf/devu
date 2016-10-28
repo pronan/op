@@ -33,8 +33,8 @@ http {
         location / {
             resolver 223.5.5.5;
             content_by_lua_block {
-                local main = require"resty.mvc.dispatcher"
-                main()
+                local handler = require"main.init".handler
+                handler()
             }
         }
 

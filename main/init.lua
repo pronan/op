@@ -28,12 +28,6 @@ for i, app_name in ipairs(settings.APPS) do
     end
 end
 
-if not settings.USER_MODEL then
-    -- no user model specified, add the built-in user model
-    local User = require'resty.mvc.apps.auth.models'.User
-    apps:register(User:normalize('auth', 'User'))
-end
-
 -- '^/product/update/(?<id>\\d+?)$'
 -- {
 --   "id": "1",

@@ -49,8 +49,7 @@ function Apps.get_admin_urls(self)
     local utils = require"resty.mvc.utils"
     local Form = require"resty.mvc.form"
     local ClassView = require"resty.mvc.view"
-    local auth_view = require"resty.mvc.apps.auth.views"
-    local auth = require"resty.mvc.apps.auth"
+    local auth = require"resty.mvc.auth"
 
     local models = self:get_models()
 
@@ -141,7 +140,7 @@ function Apps.get_admin_urls(self)
     return utils.list_extend(
         --urls,
         utils.map(urls, function(url) return {url[1], auth.admin_user_require(url[2])} end),
-        {{'/admin/login', auth_view.login}, {'/admin/logout', auth_view.logout}})
+        auth.urls)
 end
 
 return Apps
