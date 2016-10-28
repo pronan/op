@@ -5,11 +5,12 @@ local forms = require"apps.account.forms"
 
 return {
     {
-      '/account/user/create',              
-      ClassView.CreateView:as_view{
-        model      = models.User,
-        form_class = forms.UserCreateForm,
-      }
+      '/account/user/create',     
+      views.user_create,
+      -- ClassView.CreateView:as_view{
+      --   model      = models.User,
+      --   form_class = forms.UserCreateForm,
+      -- }
     },
   
     {
