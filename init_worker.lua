@@ -1,6 +1,6 @@
 local migrate = require "resty.mvc.migrate"
 local apps = require"main.init".apps
-local drop_table = true
+local drop_table = false
 
 local function _migrate()
     return migrate.main(apps:get_models(), drop_table)
