@@ -1,7 +1,7 @@
 
 local DEBUG = true
 
-local APPS = nil -- {'foo', 'bar'}
+local APPS = {'account', 'company'}
 
 local DATABASE ={
     connect_table = { host     = "127.0.0.1", 

@@ -7,14 +7,14 @@ local User = Model:new{
 
     },
     fields = {
-        username = Field.CharField{minlen=3, unique=true, maxlen=50},
-        password = Field.CharField{minlen=3, maxlen=28},
-        permission = Field.CharField{minlen=1, maxlen=10}
+        username = Field.CharField{maxlen=50, unique=true, minlen=3},
+        password = Field.CharField{maxlen=28, minlen=3},
+        permission = Field.CharField{maxlen=10, minlen=1}
     }
 }
 -- define your model methods here
 function User.render(self)
-    return self.username 
+    return self.username
 end
 local Profile = Model:new{
     meta   = {
@@ -24,7 +24,7 @@ local Profile = Model:new{
         user = Field.ForeignKey{reference=User},
         age = Field.IntegerField{min=18},
         weight = Field.FloatField{min=10},
-        height = Field.FloatField{min=10, max=220},
+        height = Field.FloatField{max=220, min=10},
         money = Field.FloatField{}
     }
 }

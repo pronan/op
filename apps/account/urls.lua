@@ -4,77 +4,14 @@ local models = require"apps.account.models"
 local forms = require"apps.account.forms"
 
 return {
-    {
-      '/account/user/create',     
-      views.user_create,
-      -- ClassView.CreateView:as_view{
-      --   model      = models.User,
-      --   form_class = forms.UserCreateForm,
-      -- }
-    },
-  
-    {
-      '/account/user/update',              
-      ClassView.UpdateView:as_view{
-        model      = models.User,
-        form_class = forms.UserUpdateForm,
-      }
-    },
-
-    {
-      '/account/user/list',              
-      ClassView.ListView:as_view{
-        model = models.User,
-      }
-    },
-
-    {
-      '/account/user',              
-      ClassView.DetailView:as_view{
-        model = models.User,
-      }
-    },
-
-    {
-      '/account/user/delete',              
-      ClassView.DeleteView:as_view{
-        model = models.User,
-      }
-    },
-    {
-      '/account/profile/create',              
-      ClassView.CreateView:as_view{
-        model      = models.Profile,
-        form_class = forms.ProfileCreateForm,
-      }
-    },
-  
-    {
-      '/account/profile/update',              
-      ClassView.UpdateView:as_view{
-        model      = models.Profile,
-        form_class = forms.ProfileUpdateForm,
-      }
-    },
-
-    {
-      '/account/profile/list',              
-      ClassView.ListView:as_view{
-        model = models.Profile,
-      }
-    },
-
-    {
-      '/account/profile',              
-      ClassView.DetailView:as_view{
-        model = models.Profile,
-      }
-    },
-
-    {
-      '/account/profile/delete',              
-      ClassView.DeleteView:as_view{
-        model = models.Profile,
-      }
-    },
+    {'/account/user/create', views.user_create},
+    {'/account/user/update', views.user_update},
+    {'/account/user/list', views.user_list},
+    {'/account/user', views.user_detail},
+    {'/account/user/delete', views.user_delete},
+    {'/account/profile/create', views.profile_create},
+    {'/account/profile/update', views.profile_update},
+    {'/account/profile/list', views.profile_list},
+    {'/account/profile', views.profile_detail},
+    {'/account/profile/delete', views.profile_delete},
 }

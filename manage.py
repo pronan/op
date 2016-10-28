@@ -64,6 +64,7 @@ def app_factory(app_name, models, output_path, package_prefix):
     
     field_joiner = ',\n'+chr(32)*8
     export_joiner = ',\n'+chr(32)*4
+    all_views = []
     all_urls = []
     all_models = []
     all_forms = []
@@ -71,17 +72,27 @@ def app_factory(app_name, models, output_path, package_prefix):
     urls_all = Template(open('scanfold/lua/urls.lua').read())
     models_all = Template(open('scanfold/lua/models.lua').read())
     forms_all = Template(open('scanfold/lua/forms.lua').read())
+    views_ele = Template(open('scanfold/lua/views_ele.lua').read())
     urls_ele = Template(open('scanfold/lua/urls_ele.lua').read())
     models_ele = Template(open('scanfold/lua/models_ele.lua').read())
     forms_ele = Template(open('scanfold/lua/forms_ele.lua').read())
     require_hooks = []
     all_model_exports = []
     all_form_exports = []
+    all_view_exports = []
     foreignkeys = set()
     for model in models:
         model_fields = []
         form_fields = []
         model_name = model['model_name'].capitalize()
+        url_model_name = model_name.lower()
+        all_view_exports.extend([
+            '%s_detail = %s_detail'%(url_model_name,url_model_name,),
+            '%s_create = %s_create'%(url_model_name,url_model_name,),
+            '%s_update = %s_update'%(url_model_name,url_model_name,),
+            '%s_list   = %s_list'%(url_model_name,url_model_name,),
+            '%s_delete = %s_delete'%(url_model_name,url_model_name,),
+        ])
         all_model_exports.append('%s = %s'%(model_name, model_name))
         all_form_exports.append('%sCreateForm = %sCreateForm'%(model_name, model_name))
         all_form_exports.append('%sUpdateForm = %sUpdateForm'%(model_name, model_name))
@@ -132,14 +143,19 @@ def app_factory(app_name, models, output_path, package_prefix):
             model_name=model_name, fields=form_fields
         ))                    
         all_urls.append(urls_ele.substitute(
-            model_name=model_name, url_model_name=model_name.lower(), app_name=app_name
+            model_name=model_name, url_model_name=url_model_name, app_name=app_name
+        ))  
+        all_views.append(views_ele.substitute(
+            model_name=model_name, url_model_name=url_model_name, app_name=app_name
         ))  
     all_models = '\n'.join(all_models)
     all_forms = '\n'.join(all_forms)
     all_urls = '\n'.join(all_urls)
+    all_views = '\n'.join(all_views)
     require_hooks = '\n'.join(require_hooks)
     all_model_exports = export_joiner.join(all_model_exports)
     all_form_exports = export_joiner.join(all_form_exports)
+    all_view_exports = export_joiner.join(all_view_exports)
     open(join(app_dir, 'models.lua'),'w').write(models_all.substitute(
         require_hooks=require_hooks, all_models=all_models, all_model_exports=all_model_exports,
     ))
@@ -151,7 +167,8 @@ def app_factory(app_name, models, output_path, package_prefix):
         all_form_exports=all_form_exports, all_forms=all_forms,require_hooks=require_hooks,
     ))              
     open(join(app_dir, 'views.lua'),'w').write(views_all.substitute(
-        package_prefix=package_prefix, app_name=app_name,
+        package_prefix=package_prefix, app_name=app_name, all_views=all_views, 
+        all_view_exports=all_view_exports,
     )) 
     
 def main():
