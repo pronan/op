@@ -28,7 +28,7 @@ else
 end
 
 local function single(statement, rows)
-    loger(statement)
+    --loger(statement)
     local db, err = client:new()
     if not db then
         return nil, err
