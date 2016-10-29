@@ -38,7 +38,7 @@ end
 local Router = require"resty.mvc.router"
 
 local router = Router:instance()
-for i, v in ipairs(apps:get_urls()) do
+for i, v in ipairs(apps:get_public_urls()) do
     router:add(v)
 end
 for i, v in ipairs(apps:get_admin_urls()) do

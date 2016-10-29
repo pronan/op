@@ -1,2 +1,1 @@
-t=require"test.t.a"
-print(t)
+print(string.format('%q','\n'))

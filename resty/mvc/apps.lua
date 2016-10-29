@@ -1,14 +1,16 @@
--- All models and urls should be registered here and referenced by
--- calling functions `get_models` and `get_urls`.
--- Currently this module is required by:
---   resty.mvc.migrate
---   resty.mvc.response
--- which means you can't require these modules during this module(resty.mvc.apps)
--- is required. Or a loop error will raise.
--- local utils = require"resty.mvc.utils"
-local settings = require"resty.mvc.settings"
--- directory where a app lives, relative to nginx running path
--- you need to end with `\` or `/`
+-- class to register apps and their models
+-- an example for what its instance would look like (two apps registered):
+-- {
+--     account = {
+--         User = {...},
+--         Profile = {...},
+--     },
+
+--     company = {
+--         Product = {...},
+--     },
+-- }
+
 local Apps = {
     dir = 'apps/' ,
     package_prefix = 'apps.',
@@ -18,7 +20,7 @@ function Apps.new(cls, attrs)
     return setmetatable(attrs or {}, cls)
 end
 function Apps.register(self, model)
-    assert(model.meta and model.meta.is_normalized, 'model should be normalized first.')
+    assert(model and model.meta and model.meta.is_normalized, 'model should be normalized first.')
     local app_name = model.meta.app_name
     assert(not Apps[app_name], app_name..' is a invalid name.')
     if not self[app_name] then
@@ -35,7 +37,9 @@ function Apps.get_models(self)
     end
     return res
 end
-function Apps.get_urls(self)
+function Apps.get_public_urls(self)
+    local settings = require"resty.mvc.settings"
+
     local res = {}
     for i, name in ipairs(settings.APPS) do
         local urls = require(self.package_prefix..name..".urls")
@@ -50,8 +54,6 @@ function Apps.get_admin_urls(self)
     local Form = require"resty.mvc.form"
     local ClassView = require"resty.mvc.view"
     local auth = require"resty.mvc.auth"
-
-    local models = self:get_models()
 
     local function form_factory(model, kwargs)
         local fields = {}
@@ -77,7 +79,6 @@ function Apps.get_admin_urls(self)
     local function redirect_to_admin_list(view)
         return '/admin'..view.object:get_list_url()
     end
-    
 
     local urls = {
         {'/admin', ClassView.TemplateView:as_view{
@@ -85,7 +86,6 @@ function Apps.get_admin_urls(self)
             get_context_data = admin_get_context_data}
         },
     }
-
     for app_name, models in pairs(self) do
         urls[#urls + 1] = {
             string.format('/admin/%s', app_name),

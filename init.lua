@@ -1,5 +1,5 @@
 require"resty.core"
-local utils = require"resty.utils"
+local utils = require"resty.mvc.utils"
 loger = utils.loger
 repr = utils.repr
 -- local _r = require
