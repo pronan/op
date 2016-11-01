@@ -44,7 +44,7 @@ function View.as_view(cls, init)
             return nil, 'Only accept arguments that class can find'
         end
     end
-    function _view(request)
+    local function _view(request)
         -- making a fresh copy for each request
         local init_copy = {}
         for k,v in pairs(init) do

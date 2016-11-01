@@ -67,7 +67,7 @@ function Apps.get_admin_urls(self)
         kwargs.apps = self
         return ClassView.TemplateView.get_context_data(view, kwargs)
     end
-    function admin_app_get_context_data(view, kwargs)
+    local function admin_app_get_context_data(view, kwargs)
         kwargs = kwargs or {}
         local app_name = ngx.var.uri:match('^/admin/(%w+)$')
         kwargs.apps = {[app_name] = self[app_name]}

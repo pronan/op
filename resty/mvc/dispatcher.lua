@@ -33,12 +33,7 @@ end
 function Dispatcher.match(self, uri)
     local view_func, kwargs = self.router:match(uri)
     if not view_func then
-        if self.debug then
-            ngx.header['Content-Type'] = "text/plain; charset=utf-8"
-            return ngx.print("can't find this uri, current router is:\n"..repr(router))
-        else
-            return ngx.print("404")
-        end
+        return Response.Error"404":exec()
     end
     local request = Request:new{kwargs=kwargs}
     local response, err

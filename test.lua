@@ -1,1 +1,3 @@
-print(string.format('%q','\n'))
+x=require"cjson.safe".decode
+print(x([[{\\aaaa
+	"a":1}]]))

@@ -70,7 +70,7 @@ function Field.instance(cls, attrs)
     return self
 end
 function Field.check(self, kwargs)
-    errors = {}
+    local errors = {}
     errors[#errors+1] = self:_check_field_name()
     errors[#errors+1] = self:_check_choices()
     errors[#errors+1] = self:_check_db_index()

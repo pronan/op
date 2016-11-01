@@ -393,7 +393,7 @@ local function zfill(s, n, c)
 end
 local ngx_log = ngx.log
 local ngx_ERR = ngx.ERR
-local MAX_DEEPTH = 2
+local MAX_DEPTH = 2
 local MAX_LENGTH = 10
 local function add_right_space(num)
     local res = ''
@@ -416,7 +416,7 @@ local function simple(k)
     end
 end   
 
-local function _repr(obj, ind, deep, already)
+local function _repr(obj, max_depth, ind, deep, already)
     local label = type(obj)
     if label == 'table' then
         local res = {}
@@ -445,10 +445,10 @@ local function _repr(obj, ind, deep, already)
                     v = '{}'
                 elseif already[key] then
                     v = simple(key)
-                elseif deep > MAX_DEEPTH then
+                elseif deep > max_depth then
                     v = simple('*exceed max deepth*')
                 else
-                    v = '{\\\\'..(tostring(v) or '').._repr(v, indent..add_right_space(max_key_len+3), deep+1, already)
+                    v = '{\\\\'..(tostring(v) or '').._repr(v, max_depth, indent..add_right_space(max_key_len+3), deep+1, already)
                 end
             else
                 v = simple(v)
@@ -464,9 +464,10 @@ local function _repr(obj, ind, deep, already)
     end
 end
 
-local function repr(obj)
+local function repr(obj, max_depth)
+    max_depth = max_depth or MAX_DEPTH
     if type(obj)  == 'table' then
-        return '{\\\\'..tostring(obj).._repr(obj, '', 1, {})
+        return '{\\\\'..tostring(obj).._repr(obj, max_depth, '', 1, {})
     else
         return simple(obj)
     end

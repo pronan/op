@@ -6,7 +6,7 @@ import os
 targets = ['html','lua']
 exclude = [] #['base.lua', 'urls.lua', 'utils.lua', 'manage.lua', 'view.lua']
 repls = [
-(r'loger',':is_ajax()'), 
+(r' admin_app_get_context_data',':is_ajax()'), 
 #(r'after\s*=\s*after','process_response = process_response'), 
 # (r'\bURLS\b','NAMES'), 
 #(r'\bto_db\b','lua_to_db'), 

@@ -23,7 +23,7 @@ end
 for i, app_name in ipairs(settings.APPS) do
     local models = require(apps.package_prefix..app_name..".models")
     for model_name, model in pairs(models) do
-        -- app_name: accounts, model_name: User, table_name: accounts_user
+        -- app_name: account, model_name: User, table_name: account_user
         apps:register(model:normalize(app_name, model_name))
     end
 end
@@ -50,7 +50,7 @@ local Dispatcher = require"resty.mvc.dispatcher"
 local dispatcher = Dispatcher:instance{
     router = router,
     middlewares = settings.MIDDLEWARES,
-    debug = settings.debug,
+    debug = settings.DEBUG,
 }
 
 return {
