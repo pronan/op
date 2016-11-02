@@ -1,3 +1,14 @@
 #!/bin/bash
-sudo service mysql start
-nginx -p . -c conf/dev
+case $1 in
+    -r) 
+nginx -p . -c conf/dev.conf -s reload
+;;
+    -s) 
+service mysql start
+nginx -p . -c conf/dev.conf
+;;
+    -x) 
+nginx -p . -c conf/dev.conf -s stop
+;;
+    *) echo "unknow options";;
+esac
