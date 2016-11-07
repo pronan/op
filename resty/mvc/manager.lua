@@ -123,7 +123,7 @@ function Manager._parse_kv(self, key, value)
     local state = 'init'
     local first_join = true
 
-    for e in utils.split(key, '__') do
+    for i, e in ipairs(utils.split(key, '__')) do
         if state == 'init' then
             local f = current_model.fields[e]
             if not f then

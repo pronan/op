@@ -1,4 +1,4 @@
--- Copyright (C) 2012 Yichun Zhang (agentzh)
+-- Copyright (C) Yichun Zhang (agentzh)
 
 
 local bit = require "bit"
@@ -38,7 +38,7 @@ if not ok then
 end
 
 
-local _M = { _VERSION = '0.15' }
+local _M = { _VERSION = '0.17' }
 
 
 -- constants
@@ -46,6 +46,7 @@ local _M = { _VERSION = '0.15' }
 local STATE_CONNECTED = 1
 local STATE_COMMAND_SENT = 2
 
+local COM_QUIT = 0x01
 local COM_QUERY = 0x03
 local CLIENT_SSL = 0x0800
 
@@ -285,14 +286,14 @@ local function _from_length_coded_bin(data, pos)
         return _get_byte8(data, pos)
     end
 
-    return false, pos + 1
+    return nil, pos + 1
 end
 
 
 local function _from_length_coded_str(data, pos)
     local len
     len, pos = _from_length_coded_bin(data, pos)
-    if len == nil or len == null then
+    if not len or len == null then
         return null, pos
     end
 
@@ -723,6 +724,11 @@ function _M.close(self)
 
     self.state = nil
 
+    local bytes, err = _send_packet(self, strchar(COM_QUIT), 1)
+    if not bytes then
+        return nil, err
+    end
+
     return sock:close()
 end
 
@@ -764,7 +770,8 @@ _M.send_query = send_query
 
 local function read_result(self, est_nrows)
     if self.state ~= STATE_COMMAND_SENT then
-        return nil, "cannot read result in the current context: " .. self.state
+        return nil, "cannot read result in the current context: "
+                    .. (self.state or "nil")
     end
 
     local sock = self.sock

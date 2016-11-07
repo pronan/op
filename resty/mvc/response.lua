@@ -1,4 +1,4 @@
-local template = require"resty.mvc.template"
+local template = require"resty.template"
 local settings = require"resty.mvc.settings"
 local encode = require "cjson.safe".encode
 local utils = require"resty.mvc.utils"
@@ -126,9 +126,10 @@ end
 
 local PlainResponse = HttpResponse:new()
 PlainResponse.__call = HttpResponseCaller
-function PlainResponse.instance(cls, attrs)
+function PlainResponse.instance(cls, message, attrs)
     attrs = attrs or {}
     attrs.content_type = 'text/plain; charset=utf-8'
+    attrs.body = message or ''
     local self = HttpResponse.instance(cls, attrs)
     return self
 end

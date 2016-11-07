@@ -6,19 +6,27 @@ local type    = type
 local find    = string.find
 local open    = io.open
 local sub     = string.sub
+local sep     = sub(package.config, 1, 1) or "/"
 local ngx     = ngx
 local req     = ngx.req
 local var     = ngx.var
 local body    = req.read_body
+local file    = ngx.req.get_body_file
 local data    = req.get_body_data
 local pargs   = req.get_post_args
 local uargs   = req.get_uri_args
-local prefix = ngx.config.prefix()
--- local function tmpname()
---     return './files'..os.tmpname()
--- end
 
-local function rightmost(s, sep)
+local function read(f)
+    local f, e = open(f, "rb")
+    if not f then
+        return nil, e
+    end
+    local c = f:read "*a"
+    f:close()
+    return c
+end
+
+local function basename(s)
     local p = 1
     local i = find(s, sep, 1, true)
     while i do
@@ -29,10 +37,6 @@ local function rightmost(s, sep)
         s = sub(s, p)
     end
     return s
-end
-
-local function basename(s)
-    return rightmost(rightmost(s, "\\"), "/")
 end
 
 local function kv(r, s)
@@ -62,16 +66,23 @@ local function parse(s)
 end
 
 return function(options)
-    local get = uargs()
+    local get = uargs(options.max_get_args or 100)
     local post = {}
     local files = {}
     local ct = var.content_type
     if ct == nil then return get, post, files end
     if sub(ct, 1, 19) == "multipart/form-data" then
-        local chunk   = options.chunk_size or 8192
-        local form, e = upload:new(chunk)
+        local tmpdr = options.tmp_dir
+        if tmpdr and sub(tmpdr, -1) ~= sep then
+            tmpdr = tmpdr .. sep
+        end
+        local maxfz = options.max_file_size
+        local maxfs = options.max_file_uploads
+        local chunk = options.chunk_size or 4096
+        local form, e = upload:new(chunk, options.max_line_size)
         if not form then return nil, e end
-        local h, p, f, o
+        local h, p, f, o, s
+        local u = 0
         form:set_timeout(options.timeout or 1000)
         while true do
             local t, r, e = form:read()
@@ -87,13 +98,16 @@ return function(options)
                     local d = h["Content-Disposition"]
                     if d then
                         if d.filename then
+                            if maxfz then
+                                s = 0
+                            end
                             f = {
                                 name = d.name,
                                 type = h["Content-Type"] and h["Content-Type"][1],
                                 file = basename(d.filename),
-                                temp = tmpname()
+                                temp = tmpdr and (tmpdr .. basename(tmpname())) or tmpname()
                             }
-                            o, e = open(f.temp, "w+")
+                            o, e = open(f.temp, "w+b")
                             if not o then return nil, e end
                             o:setvbuf("full", chunk)
                         else
@@ -103,8 +117,22 @@ return function(options)
                     h = nil
                 end
                 if o then
+                    if maxfz then
+                        s = s + #r
+                        if maxfz < s then
+                            o:close()
+                            return nil, "The maximum size of an uploaded file exceeded."
+                        end
+                    end
+                    if maxfs and maxfs < u + 1 then
+                        o:close()
+                        return nil, "The maximum number of files allowed to be uploaded simultaneously exceeded."
+                    end
                     local ok, e = o:write(r)
-                    if not ok then return nil, e end
+                    if not ok then
+                        o:close()
+                        return nil, e
+                    end
                 elseif p then
                     local n = p.data.n
                     p.data[n] = r
@@ -115,6 +143,9 @@ return function(options)
                     f.size = o:seek()
                     o:close()
                     o = nil
+                    if maxfs and f.size > 0 then
+                        u = u + 1
+                    end
                 end
                 local c, d
                 if f then
@@ -152,10 +183,21 @@ return function(options)
         if not t then return nil, e end
     elseif sub(ct, 1, 16) == "application/json" then
         body()
-        post = decode(data()) or {}
+        local j = data()
+        if j == nil then
+            local f = file()
+            if f ~= nil then
+                j = read(f)
+                if j then
+                    post = decode(j) or {}
+                end
+            end
+        else
+            post = decode(j) or {}
+        end
     else
         body()
-        post = pargs()
+        post = pargs(options.max_post_args or 100)
     end
     return get, post, files
 end

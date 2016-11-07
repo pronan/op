@@ -13,7 +13,6 @@ return {
     request = require"resty.mvc.request",
     response = require"resty.mvc.response",
     row = require"resty.mvc.row",
-    template = require"resty.mvc.template",
     utils = require"resty.mvc.utils",
     validator = require"resty.mvc.validator",
     view = require"resty.mvc.view",

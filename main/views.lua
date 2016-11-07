@@ -4,7 +4,7 @@ local response = require"resty.mvc.response"
 local ClassView = require"resty.mvc.view"
 local utils = require"resty.mvc.utils"
 local User = require"apps.account.models".User
-local forms = require"main.forms"
+-- local forms = require"main.forms"
 
 local function eval(s, context)
     local f = loadstring('return '..s)
@@ -17,6 +17,22 @@ function m.q(request)
     v = ndk.set_var.set_encrypt_session(v)
     v = ndk.set_var.set_encode_base64
     return response.Plain(repr(ndk))
+end
+function m.check_global(request)
+    local new_global_warn_list = {}
+    for k,v in pairs(_G) do
+        if not old_global[k] then
+            new_global_warn_list[k] = v
+        end
+    end
+    if next(new_global_warn_list) then
+        local res = {}
+        for k,v in pairs(new_global_warn_list) do
+            res[#res+1] = string.format('%s, %s, %s', k, type(v), repr(v))
+        end
+        return response.Plain('  '..table.concat(res,'\n  '))
+    end
+    return response.Plain('Good, no new globals')
 end
 local function login_user(request, user)
     request.session.user = {username=user.username, id=user.id}
@@ -121,29 +137,6 @@ end
 function m.home(request, kw)
     return response.Template(request, 'home.html', {navbar='home'})
 end
-function m.user_update(request)
-    local form;
-    if request.get_method()=='POST' then
-        form = forms.UserEditForm:instance{data=request.POST, request=request}
-        if form:is_valid() then
-            local user = request.user
-            for k,v in pairs(form.cleaned_data) do
-                user[k] = v
-            end
-            local ret, err = user:save()
-            if not ret then
-                return response.Error(err)
-            end
-            request.session.user = user
-            return response.Redirect('/profile')
-        else
-            loger(form.errors)
-        end
-    else
-        form = forms.UserUpdateForm:instance{model_instance=request.user}
-    end
-    return response.Template(request, "form.html", {form=form})
-end
 function m.global(request)
     return response.Plain(repr(_G))
 end
@@ -199,8 +192,8 @@ function m.github(request)
     return response.Redirect(request.GET.redirect_url or '/')
     --return response.Plain(string.format('url:%s, \ncode:%s,\n token:%s,\n user:%s', repr(qq), code, token, repr(user)))
 end
-function m.log(request, kw)
-    local n = tonumber(kw.n) or 50
+function m.log(request)
+    local n = tonumber(request.kwargs.n) or 50
     local f, err  = io.lines("logs/error.log", "*l") 
     if not f then
         return nil, err

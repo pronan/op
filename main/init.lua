@@ -45,6 +45,10 @@ for i, v in ipairs(apps:get_admin_urls()) do
     router:add(v)
 end
 
+for i, v in ipairs(require"main.urls") do
+    router:add(v)
+end
+
 local Dispatcher = require"resty.mvc.dispatcher"
 
 local dispatcher = Dispatcher:instance{

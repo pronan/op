@@ -168,23 +168,19 @@ local function serialize_attrs(attrs, table_name)
 end
 local function split(s, sep)
     local i = 1
-    local over = false
-    local function _get()
-        if over then
-            return
-        end
-        local a, b = s:find(sep, i, true)
+    local res = {}
+    local a, b
+    while true do
+        a, b = s:find(sep, i, true)
         if a then
-            local e = s:sub(i, a-1)
+            res[#res+1] = s:sub(i, a-1)
             i = b + 1
-            return e
         else
-            e = s:sub(i)
-            over = true
-            return e
+            res[#res+1] = s:sub(i)
+            break
         end
     end
-    return _get
+    return res
 end
 local function cache_result(f)
     local result

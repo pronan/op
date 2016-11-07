@@ -138,8 +138,8 @@ function Apps.get_admin_urls(self)
         end
     end
     return utils.list_extend(
-        urls,
-        --utils.map(urls, function(url) return {url[1], auth.admin_user_require(url[2])} end),
+        -- urls,
+        utils.map(urls, function(url) return {url[1], auth.admin_user_require(url[2])} end),
         auth.urls)
 end
 

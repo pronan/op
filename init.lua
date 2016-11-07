@@ -9,11 +9,13 @@ repr = utils.repr
 --     end
 --     return _r(s)
 -- end
-local old_global = {}
+old_global = {}
 for k,v in pairs(_G) do
 	old_global[k] = true
 end
+
 require"main.init" -- get ready, modules!
+
 local new_global_warn_list = {}
 for k,v in pairs(_G) do
 	if not old_global[k] then

@@ -27,4 +27,5 @@ return {
     {'/guide', views.guide}, 
     {'^/log/(?<n>\\d*?)', views.log}, 
     {'/global', views.global}, 
+    {'/cg', views.check_global}
 }
